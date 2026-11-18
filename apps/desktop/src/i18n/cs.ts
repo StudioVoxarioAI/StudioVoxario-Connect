@@ -20,6 +20,8 @@ export const cs = {
     pending: "Produkty, ceny a obrázky se berou z webu StudioVoxario (zdroj pravdy) – napojení katalogu je Fáze 1.",
   },
   library: {
+    extendUpdates: "Prodloužit aktualizace (Upgrade pass)", buyHint: "Platba proběhne na webu StudioVoxario. Po zaplacení se vraťte do Connectu – knihovna se obnoví sama.", 
+    reinstall: "Přeinstalovat", installHost: "Nainstalovat {{name}}", moduleOf: "Součást {{name}}", launchHost: "Otevřít v {{name}}", 
     title: "Knihovna", signedOutTitle: "Přihlaste se ke své knihovně", signedOutText: "Knihovna ukazuje hry a software vašeho účtu StudioVoxario.",
     emptyCat: "V této kategorii nic není", favorite: "Oblíbené", install: "Instalovat", installSoon: "Instalace přijde ve Fázi 3.",
     appSoon: "Instalace aplikací a enginu přijde v další fázi.", running: "Běží", update: "Aktualizovat", play: "Hrát", launch: "Spustit",
@@ -101,11 +103,12 @@ export const cs = {
     mode_install: "Instalace", mode_update: "Aktualizace", mode_repair: "Oprava souborů",
   },
   install: {
+    textApp: "Connect stáhne instalátor {{name}}, ověří ho a spustí. Dokončete instalaci v jeho okně – Connect ji pak sám rozpozná.", textSilent: "Connect stáhne instalátor, ověří ho a nainstaluje {{name}} na pozadí.", elevation: "Windows si vyžádá oprávnění správce (instalace pro všechny uživatele).", textWin: "Instalace aplikací probíhá ve Windows.", 
     title: "Instalovat {{name}}", text: "Hra se stáhne a ověří (SHA-256). Stahování můžete kdykoli pozastavit – po restartu Connect naváže.",
     target: "Umístění", defaultLibrary: "Výchozí knihovna", size: "Velikost", free: "Volné místo", noSpace: "Na disku není dost místa.",
   },
-  uninstall: { title: "Odinstalovat {{name}}?", text: "Soubory hry se smažou. Hru můžete kdykoli znovu nainstalovat z knihovny.", keep: "Ponechat uložené pozice a nastavení" },
-  notify: { verified: "{{name}}: soubory ověřeny a opraveny.",  purchase: "Nákup dokončen – knihovna je aktualizovaná.",  done: "{{name}} je připraveno ke hraní.", rollback: "Nová verze {{name}} se nespustila – vrátila se předchozí verze.", crash: "{{name}} se neočekávaně ukončilo. Zkuste Ověřit soubory." },
+  uninstall: { textApp: "Spustí se odinstalátor aplikace. Vaše data a nastavení zůstanou zachované.",  title: "Odinstalovat {{name}}?", text: "Soubory hry se smažou. Hru můžete kdykoli znovu nainstalovat z knihovny.", keep: "Ponechat uložené pozice a nastavení" },
+  notify: { installed: "{{name}} je nainstalováno.",  verified: "{{name}}: soubory ověřeny a opraveny.",  purchase: "Nákup dokončen – knihovna je aktualizovaná.",  done: "{{name}} je připraveno ke hraní.", rollback: "Nová verze {{name}} se nespustila – vrátila se předchozí verze.", crash: "{{name}} se neočekávaně ukončilo. Zkuste Ověřit soubory." },
   time: { hm: "{{h}} h {{m}} min", ms: "{{m}} min {{s}} s", s: "{{s}} s" },
   search: { placeholder: "Hledat v obchodě a knihovně…", hint: "Ctrl+K", inLibrary: "Ve vaší knihovně", inStore: "V obchodě", games: "Hry", software: "Software",
     hintText: "Hledejte podle názvu, žánru nebo štítku – funguje i bez diakritiky a s překlepy.", none: "Pro „{{q}}“ nic nenalezeno.",

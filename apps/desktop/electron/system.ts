@@ -83,6 +83,7 @@ export function setDefaultLibrary(dir: string): LibraryFolder[] {
 export async function moveInstall(id: string, toLibrary: string, onProgress: (done: number, total: number) => void): Promise<void> {
   const rec = installsRaw()[id];
   if (!rec) throw new Error("Hra není nainstalovaná.");
+  if (rec.external) throw new Error("Aplikace se přesouvá jejím vlastním instalátorem (odinstalovat a nainstalovat jinam).");
   if (isRunning(id)) throw new Error("Hra běží – nejdřív ji ukončete.");
   if (installsState().jobs.some((j) => j.productId === id)) throw new Error("Hra se právě stahuje.");
   const target = path.join(toLibrary, id);
@@ -121,17 +122,22 @@ export async function moveInstall(id: string, toLibrary: string, onProgress: (do
 /** Ověřit všechny hry (oprava souborů) a vyčistit rozpracovaná stahování. */
 export function verifyAll(): number {
   let n = 0;
-  for (const id of Object.keys(installsRaw())) { try { enqueue(id, "repair"); n++; } catch { /* hra běží / nepatří */ } }
+  for (const [id, r] of Object.entries(installsRaw())) { if (r.external) continue; try { enqueue(id, "repair"); n++; } catch { /* hra běží / nepatří */ } }
   return n;
 }
 export function clearDownloadCache(): number {
   let freed = 0;
   const busy = new Set(installsState().jobs.map((j) => j.productId));
   for (const [id, r] of Object.entries(installsRaw())) {
-    if (busy.has(id)) continue;
+    if (busy.has(id) || r.external) continue;
     const st = path.join(r.dir, ".staging");
     if (fs.existsSync(st)) { freed += dirSize(st); fs.rmSync(st, { recursive: true, force: true }); }
   }
+  // stažené instalátory aplikací, které se nečekají
+  const setups = path.join(app.getPath("userData"), "setups");
+  try {
+    for (const d of fs.readdirSync(setups)) { if (busy.has(d)) continue; const x = path.join(setups, d); freed += dirSize(x); fs.rmSync(x, { recursive: true, force: true }); }
+  } catch { /* nic */ }
   return freed;
 }
 

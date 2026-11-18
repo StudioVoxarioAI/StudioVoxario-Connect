@@ -26,6 +26,8 @@ export const BuildSource = z.object({
   silentArgs: z.array(z.string()).optional(),
   installDir: z.string().optional(),                   // kam instalátor instaluje (%LOCALAPPDATA%\…) – detekce instalace
   executable: z.string().optional(),
+  /** klíče Uninstall v registru Windows (HKCU\… / HKLM\…) – zdroj verze, složky a odinstalace */
+  registryKeys: z.array(z.string()).optional(),
   selfUpdates: z.boolean().optional(),
   requiresElevation: z.boolean().optional(),
   /** module: produkt je součást jiné aplikace (VoxarioProtect v Voxar.app) */

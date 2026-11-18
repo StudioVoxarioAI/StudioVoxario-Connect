@@ -27,7 +27,7 @@ export function ProductAction({ p, size = "lg" }: { p: Product; size?: "md" | "l
     );
   }
   const state = item?.state;
-  if (state === "owned" && p.build?.kind === "voxario-manifest") return <div className="flex"><InstallPanel p={p} /></div>;
+  if (state === "owned" && ["voxario-manifest", "installer", "shop-file", "module"].includes(p.build?.kind ?? "")) return <div className="flex"><InstallPanel p={p} /></div>;
   if (state === "owned") return <Button size={size} className={cls} variant="secondary" onClick={() => nav(`/library?select=${p.id}`)}><Check size={17} />{t("detail.inLibrary")}</Button>;
   if (state === "claimable") {
     return (
@@ -44,7 +44,12 @@ export function ProductAction({ p, size = "lg" }: { p: Product; size?: "md" | "l
   }
   if (state === "needs_license") {
     const url = item?.license?.buyUrl ?? p.storeUrl;
-    return <Button size={size} className={cls} onClick={() => url && bridge.openExternal(url)}><ShoppingCart size={17} />{t("detail.buy")}</Button>;
+    return (
+      <div className="w-full">
+        <Button size={size} className={cls} onClick={() => url && bridge.openExternal(url)}><ShoppingCart size={17} />{t("detail.buy")}</Button>
+        {size === "lg" && <p className="mt-2 text-xs text-subtle">{t("library.buyHint")}</p>}
+      </div>
+    );
   }
   if (state === "no_access") return <Button size={size} className={cls} variant="secondary" disabled><Lock size={17} />{t("detail.noAccess")}</Button>;
   return <Button size={size} className={cls} disabled><Loader2 size={17} className="animate-spin" /></Button>;

@@ -19,14 +19,30 @@
         "icon": "ashes-of-eryon/icon.webp",
         "cover": "ashes-of-eryon/cover.webp",
         "hero": "ashes-of-eryon/hero.webp",
-        "screenshots": ["ashes-of-eryon/shot-1.webp", "ashes-of-eryon/shot-2.webp", "ashes-of-eryon/shot-3.webp"]
+        "screenshots": [
+          "ashes-of-eryon/shot-1.webp",
+          "ashes-of-eryon/shot-2.webp",
+          "ashes-of-eryon/shot-3.webp"
+        ]
       },
-      "tags": ["RPG", "Temné fantasy", "Příběh", "Singleplayer"],
-      "genres": ["RPG", "Akční"],
-      "pricing": { "model": "free" },
+      "tags": [
+        "RPG",
+        "Temné fantasy",
+        "Příběh",
+        "Singleplayer"
+      ],
+      "genres": [
+        "RPG",
+        "Akční"
+      ],
+      "pricing": {
+        "model": "free"
+      },
       "access": "account_permission",
       "status": "early_access",
-      "platforms": ["windows"],
+      "platforms": [
+        "windows"
+      ],
       "systemRequirements": {
         "min": "Windows 10 64-bit · 4jádrový procesor · 8 GB RAM · grafika s Vulkan 1.2 (GTX 1050 / RX 560) · 6 GB místa",
         "recommended": "Windows 11 64-bit · 6jádrový procesor · 16 GB RAM · RTX 3060 / RX 6600 · SSD"
@@ -37,8 +53,13 @@
       "build": {
         "kind": "voxario-manifest",
         "manifestUrl": "https://rioexuvgvmdwvidfakxy.supabase.co/storage/v1/object/public/game-updates/unity/latest.json",
-        "channels": { "beta": "https://rioexuvgvmdwvidfakxy.supabase.co/storage/v1/object/public/game-updates/unity/latest-beta.json" },
-        "legacyPaths": ["%LOCALAPPDATA%\\StudioVoxario\\AshesOfEryon", "%LOCALAPPDATA%\\Programs\\Ashes of Eryon Launcher\\..\\Game"]
+        "channels": {
+          "beta": "https://rioexuvgvmdwvidfakxy.supabase.co/storage/v1/object/public/game-updates/unity/latest-beta.json"
+        },
+        "legacyPaths": [
+          "%LOCALAPPDATA%\\StudioVoxario\\AshesOfEryon",
+          "%LOCALAPPDATA%\\Programs\\Ashes of Eryon Launcher\\..\\Game"
+        ]
       }
     },
     {
@@ -51,14 +72,33 @@
         "icon": "fantasy/icon.webp",
         "cover": "fantasy/cover.webp",
         "hero": "fantasy/hero.webp",
-        "screenshots": ["fantasy/shot-1.webp", "fantasy/shot-2.webp", "fantasy/shot-3.webp", "fantasy/shot-4.webp", "fantasy/shot-5.webp", "fantasy/shot-6.webp"]
+        "screenshots": [
+          "fantasy/shot-1.webp",
+          "fantasy/shot-2.webp",
+          "fantasy/shot-3.webp",
+          "fantasy/shot-4.webp",
+          "fantasy/shot-5.webp",
+          "fantasy/shot-6.webp"
+        ]
       },
-      "tags": ["Otevřený svět", "Fantasy", "RPG", "Průzkum"],
-      "genres": ["RPG", "Otevřený svět"],
-      "pricing": { "model": "free" },
+      "tags": [
+        "Otevřený svět",
+        "Fantasy",
+        "RPG",
+        "Průzkum"
+      ],
+      "genres": [
+        "RPG",
+        "Otevřený svět"
+      ],
+      "pricing": {
+        "model": "free"
+      },
       "access": "none",
       "status": "early_access",
-      "platforms": ["windows"],
+      "platforms": [
+        "windows"
+      ],
       "systemRequirements": {
         "min": "Windows 10 64-bit · 4jádrový procesor · 8 GB RAM · grafika s Vulkan 1.2 · 2 GB místa",
         "recommended": "Windows 11 64-bit · 8jádrový procesor · 16 GB RAM · RTX 3060 a novější (DLSS, ray tracing) · SSD"
@@ -68,7 +108,9 @@
       "build": {
         "kind": "voxario-manifest",
         "manifestUrl": "https://rioexuvgvmdwvidfakxy.supabase.co/storage/v1/object/public/game-updates/unity/latest-fantasy.json",
-        "legacyPaths": ["%LOCALAPPDATA%\\StudioVoxario\\AshesOfEryon-fantasy"]
+        "legacyPaths": [
+          "%LOCALAPPDATA%\\StudioVoxario\\AshesOfEryon-fantasy"
+        ]
       }
     },
     {
@@ -82,14 +124,30 @@
         "icon": "voxario-studio-engine/icon.webp",
         "cover": "voxario-studio-engine/cover.webp",
         "hero": "voxario-studio-engine/hero.webp",
-        "screenshots": ["voxario-studio-engine/shot-1.webp", "voxario-studio-engine/shot-2.webp", "voxario-studio-engine/shot-3.webp", "voxario-studio-engine/shot-4.webp"]
+        "screenshots": [
+          "voxario-studio-engine/shot-1.webp",
+          "voxario-studio-engine/shot-2.webp",
+          "voxario-studio-engine/shot-3.webp",
+          "voxario-studio-engine/shot-4.webp"
+        ]
       },
-      "tags": ["Engine", "Vývoj her", "Vulkan", "Editor"],
-      "pricing": { "model": "paid", "price": 720, "currency": "CZK" },
+      "tags": [
+        "Engine",
+        "Vývoj her",
+        "Vulkan",
+        "Editor"
+      ],
+      "pricing": {
+        "model": "paid",
+        "price": 720,
+        "currency": "CZK"
+      },
       "shopKey": "voxario-studio-engine",
       "access": "license",
       "status": "released",
-      "platforms": ["windows"],
+      "platforms": [
+        "windows"
+      ],
       "systemRequirements": {
         "min": "Windows 10 64-bit · grafika s Vulkan 1.2 · 8 GB RAM",
         "recommended": "Windows 11 · RTX 2060 a novější (DLSS, ray tracing) · 16 GB RAM"
@@ -97,7 +155,18 @@
       "developer": "StudioVoxario",
       "featured": 3,
       "storeUrl": "https://studiovoxario.com/obchod",
-      "build": { "kind": "shop-file" }
+      "build": {
+        "kind": "shop-file",
+        "registryKeys": [
+          "HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\VoxarioStudio"
+        ],
+        "installDir": "%ProgramFiles%\\Voxario Studio",
+        "executable": "VoxarioEditor.exe",
+        "silentArgs": [
+          "/S"
+        ],
+        "requiresElevation": true
+      }
     },
     {
       "id": "voxar-app",
@@ -110,13 +179,23 @@
         "icon": "voxar-app/icon.webp",
         "cover": "voxar-app/cover.webp",
         "hero": "voxar-app/hero.webp",
-        "screenshots": ["voxar-app/shot-1.webp"]
+        "screenshots": [
+          "voxar-app/shot-1.webp"
+        ]
       },
-      "tags": ["Komunita", "Chat", "Hlas"],
-      "pricing": { "model": "free" },
+      "tags": [
+        "Komunita",
+        "Chat",
+        "Hlas"
+      ],
+      "pricing": {
+        "model": "free"
+      },
       "access": "access_key",
       "status": "released",
-      "platforms": ["windows"],
+      "platforms": [
+        "windows"
+      ],
       "developer": "StudioVoxario",
       "featured": 4,
       "storeUrl": "https://studiovoxario.com/app",
@@ -126,7 +205,10 @@
         "versionUrl": "https://studiovoxario.com/desktop-version.json",
         "installDir": "%LOCALAPPDATA%\\Voxar.app",
         "executable": "Voxar.app.exe",
-        "selfUpdates": true
+        "selfUpdates": true,
+        "registryKeys": [
+          "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\StudioVoxario.app"
+        ]
       }
     },
     {
@@ -140,16 +222,29 @@
         "icon": "voxario-protect/icon.webp",
         "cover": "voxario-protect/cover.webp",
         "hero": "voxario-protect/hero.webp",
-        "screenshots": ["voxario-protect/shot-1.webp"]
+        "screenshots": [
+          "voxario-protect/shot-1.webp"
+        ]
       },
-      "tags": ["Bezpečnost", "Windows Defender", "Ochrana"],
-      "pricing": { "model": "free" },
+      "tags": [
+        "Bezpečnost",
+        "Windows Defender",
+        "Ochrana"
+      ],
+      "pricing": {
+        "model": "free"
+      },
       "access": "access_key",
       "status": "released",
-      "platforms": ["windows"],
+      "platforms": [
+        "windows"
+      ],
       "developer": "StudioVoxario",
       "storeUrl": "https://studiovoxario.com/desktop",
-      "build": { "kind": "module", "moduleOf": "voxar-app" }
+      "build": {
+        "kind": "module",
+        "moduleOf": "voxar-app"
+      }
     },
     {
       "id": "voxario-browser",
@@ -162,13 +257,23 @@
         "icon": "voxario-browser/icon.webp",
         "cover": "voxario-browser/cover.webp",
         "hero": "voxario-browser/hero.webp",
-        "screenshots": ["voxario-browser/shot-1.webp"]
+        "screenshots": [
+          "voxario-browser/shot-1.webp"
+        ]
       },
-      "tags": ["Prohlížeč", "Soukromí", "Blokace reklam"],
-      "pricing": { "model": "free" },
+      "tags": [
+        "Prohlížeč",
+        "Soukromí",
+        "Blokace reklam"
+      ],
+      "pricing": {
+        "model": "free"
+      },
       "access": "none",
       "status": "released",
-      "platforms": ["windows"],
+      "platforms": [
+        "windows"
+      ],
       "developer": "StudioVoxario",
       "featured": 5,
       "storeUrl": "https://studiovoxario.com/browser",
@@ -178,7 +283,10 @@
         "versionUrl": "https://studiovoxario.com/desktop-version.json",
         "installDir": "%LOCALAPPDATA%\\VoxarioBrowser",
         "executable": "VoxarioBrowser.exe",
-        "selfUpdates": true
+        "selfUpdates": true,
+        "registryKeys": [
+          "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\StudioVoxario.browser"
+        ]
       }
     }
   ]

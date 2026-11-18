@@ -58,7 +58,7 @@ const api = {
     launch: (id: string, after: "minimize" | "close" | "keep"): Promise<{ ok: boolean; error?: string }> => ipcRenderer.invoke("connect:launch", id, after),
     openFolder: (id: string): Promise<void> => ipcRenderer.invoke("connect:open-folder", id),
     onChange: (cb: (s: InstallsState) => void): Unsub => on("connect:installs", cb),
-    onNotify: (cb: (n: { kind: "done" | "verified" | "rollback" | "crash"; name: string }) => void): Unsub => on("connect:notify", cb),
+    onNotify: (cb: (n: { kind: "done" | "installed" | "verified" | "rollback" | "crash"; name: string }) => void): Unsub => on("connect:notify", cb),
   },
   settings: {
     get: (): Promise<Settings> => ipcRenderer.invoke("connect:settings-get"),

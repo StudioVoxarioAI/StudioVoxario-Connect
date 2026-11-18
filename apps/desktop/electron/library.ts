@@ -18,7 +18,7 @@ export interface LibraryItem {
   state: AccessState;
   acquiredAt?: string;
   favorite: boolean;
-  license?: { type: "perpetual" | "subscription" | "trial"; validUntil?: string; updatesActive?: boolean; buyUrl?: string; latestAllowed?: boolean };
+  license?: { type: "perpetual" | "subscription" | "trial"; validUntil?: string; updatesActive?: boolean; buyUrl?: string; passUrl?: string; latestAllowed?: boolean };
 }
 export interface LibraryState { signedIn: boolean; items: LibraryItem[]; checkedAt?: string; offline: boolean; error?: string }
 
@@ -82,7 +82,7 @@ export async function refreshLibrary(): Promise<LibraryState> {
         d.remote[id] = {
           owned: s.owned === true, at: now,
           license: { type: "perpetual", validUntil: (s.updates_until as string) ?? undefined, updatesActive: s.updates_active === true,
-                     buyUrl: (s.buy_url as string) ?? undefined, latestAllowed: s.latest_allowed === true },
+                     buyUrl: (s.buy_url as string) ?? undefined, passUrl: (s.pass_url as string) ?? undefined, latestAllowed: s.latest_allowed === true },
         };
       }
     } else offline = true;

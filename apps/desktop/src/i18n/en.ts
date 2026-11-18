@@ -22,6 +22,8 @@ export const en: Dict = {
     pending: "Products, prices and images come from the StudioVoxario website (source of truth) – catalog integration is Phase 1.",
   },
   library: {
+    extendUpdates: "Extend updates (Upgrade pass)", buyHint: "Payment happens on the StudioVoxario website. Come back to Connect afterwards – your library refreshes automatically.", 
+    reinstall: "Reinstall", installHost: "Install {{name}}", moduleOf: "Part of {{name}}", launchHost: "Open in {{name}}", 
     title: "Library", signedOutTitle: "Sign in to see your library", signedOutText: "The library shows the games and software of your StudioVoxario account.",
     emptyCat: "Nothing in this category", favorite: "Favorite", install: "Install", installSoon: "Installing arrives in Phase 3.",
     appSoon: "Installing apps and the engine arrives in the next phase.", running: "Running", update: "Update", play: "Play", launch: "Launch",
@@ -103,11 +105,12 @@ export const en: Dict = {
     mode_install: "Install", mode_update: "Update", mode_repair: "Repair files",
   },
   install: {
+    textApp: "Connect downloads the {{name}} installer, verifies it and runs it. Finish the setup in its window – Connect then detects the app.", textSilent: "Connect downloads the installer, verifies it and installs {{name}} in the background.", elevation: "Windows will ask for administrator permission (install for all users).", textWin: "Apps are installed on Windows.", 
     title: "Install {{name}}", text: "The game is downloaded and verified (SHA-256). You can pause any time – Connect resumes after a restart.",
     target: "Location", defaultLibrary: "Default library", size: "Size", free: "Free space", noSpace: "Not enough disk space.",
   },
-  uninstall: { title: "Uninstall {{name}}?", text: "The game files will be deleted. You can reinstall any time from your library.", keep: "Keep saved games and settings" },
-  notify: { verified: "{{name}}: files verified and repaired.",  purchase: "Purchase complete – your library is up to date.",  done: "{{name}} is ready to play.", rollback: "The new version of {{name}} did not start – the previous version was restored.", crash: "{{name}} closed unexpectedly. Try Verify files." },
+  uninstall: { textApp: "The app uninstaller will run. Your data and settings are kept.",  title: "Uninstall {{name}}?", text: "The game files will be deleted. You can reinstall any time from your library.", keep: "Keep saved games and settings" },
+  notify: { installed: "{{name}} is installed.",  verified: "{{name}}: files verified and repaired.",  purchase: "Purchase complete – your library is up to date.",  done: "{{name}} is ready to play.", rollback: "The new version of {{name}} did not start – the previous version was restored.", crash: "{{name}} closed unexpectedly. Try Verify files." },
   time: { hm: "{{h}} h {{m}} min", ms: "{{m}} min {{s}} s", s: "{{s}} s" },
   search: { placeholder: "Search the store and your library…", hint: "Ctrl+K", inLibrary: "In your library", inStore: "In the store", games: "Games", software: "Software",
     hintText: "Search by name, genre or tag – works without diacritics and with typos.", none: "Nothing found for “{{q}}”.",

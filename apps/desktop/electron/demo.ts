@@ -6,3 +6,5 @@ export const demoStates: Record<string, "owned" | "claimable" | "needs_key" | "n
   "ashes-of-eryon": "owned", fantasy: "owned", "voxario-studio-engine": "needs_license", "voxar-app": "needs_key",
   "voxario-protect": "needs_key", "voxario-browser": "owned",
 };
+// náhledy a E2E: přepsání stavů ukázkové knihovny (JSON { productId: stav })
+if (isDemo && process.env.CONNECT_DEMO_STATES) { try { Object.assign(demoStates, JSON.parse(process.env.CONNECT_DEMO_STATES)); } catch { /* nic */ } }

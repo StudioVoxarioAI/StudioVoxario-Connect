@@ -5,7 +5,7 @@ import { app, BrowserWindow, ipcMain, shell } from "electron";
 import path from "node:path";
 import { cancelSignIn, restore, signIn, signOut, status as authStatus } from "./auth";
 import { catalogNow, refresh as refreshCatalog } from "./catalog";
-import { applyLimits, cancel, enqueue, hooks, kick, launch, move, openFolder, pause, resume, state as installsState, uninstall } from "./installer";
+import { applyLimits, cancel, enqueue, hooks, kick, syncApps, launch, move, openFolder, pause, resume, state as installsState, uninstall } from "./installer";
 import { claim, libraryNow, licenses, redeemKey, refreshLibrary, setFavorite } from "./library";
 import { settings, updateSettings, type Settings } from "./settings";
 import {
@@ -55,6 +55,14 @@ function createWindow() {
   // zavření okna s lištou = schovat (stahování pokračuje); Ukončit v liště aplikaci opravdu ukončí
   win.on("close", (e) => {
     if (!quitting && settings().minimizeToTray && process.env.CONNECT_NO_TRAY !== "1") { e.preventDefault(); win?.hide(); }
+  });
+  // návrat z prohlížeče (nákup, klíč, účet na webu): obnovit knihovnu, nejvýš jednou za 20 s
+  let lastFocusRefresh = 0;
+  win.on("focus", () => {
+    if (Date.now() - lastFocusRefresh < 20_000) return;
+    lastFocusRefresh = Date.now();
+    void refreshLibrary().catch(() => undefined);
+    void syncApps();
   });
   win.on("maximize", () => win?.webContents.send("connect:window-state", { maximized: true }));
   win.on("unmaximize", () => win?.webContents.send("connect:window-state", { maximized: false }));
@@ -110,13 +118,14 @@ if (!app.requestSingleInstanceLock()) {
     ipcMain.handle("connect:library-licenses", () => licenses());
     // instalace a stahování
     const wrap = <T>(fn: () => T) => { try { return { ok: true as const, value: fn() }; } catch (e) { return { ok: false as const, error: (e as Error).message }; } };
-    ipcMain.handle("connect:installs-get", () => installsState());
+    const wrapA = async <T>(fn: () => Promise<T>) => { try { return { ok: true as const, value: await fn() }; } catch (e) { return { ok: false as const, error: (e as Error).message }; } };
+    ipcMain.handle("connect:installs-get", () => { void syncApps(); return installsState(); });
     ipcMain.handle("connect:install", (_e, id: string, mode: "install" | "update" | "repair", dir?: string) => wrap(() => enqueue(String(id), mode, dir)));
     ipcMain.handle("connect:download-pause", (_e, id: string) => pause(String(id)));
     ipcMain.handle("connect:download-resume", (_e, id: string) => resume(String(id)));
     ipcMain.handle("connect:download-cancel", (_e, id: string) => cancel(String(id)));
     ipcMain.handle("connect:download-move", (_e, id: string, i: number) => move(String(id), Number(i)));
-    ipcMain.handle("connect:uninstall", (_e, id: string, keep: boolean) => wrap(() => uninstall(String(id), !!keep)));
+    ipcMain.handle("connect:uninstall", (_e, id: string, keep: boolean) => wrapA(() => uninstall(String(id), !!keep)));
     ipcMain.handle("connect:launch", (_e, id: string, after: "minimize" | "close" | "keep") => launch(String(id), after));
     ipcMain.handle("connect:open-folder", (_e, id: string) => openFolder(String(id)));
     ipcMain.handle("connect:settings-get", () => settings());
@@ -128,7 +137,6 @@ if (!app.requestSingleInstanceLock()) {
       return s;
     });
     // Fáze 4: knihovní složky, přesun instalace, diagnostika
-    const wrapA = async <T>(fn: () => Promise<T>) => { try { return { ok: true as const, value: await fn() }; } catch (e) { return { ok: false as const, error: (e as Error).message }; } };
     ipcMain.handle("connect:libraries-get", () => libraryFolders());
     ipcMain.handle("connect:libraries-add", () => addLibraryFolder(win));
     ipcMain.handle("connect:libraries-remove", (_e, dir: string) => wrap(() => removeLibraryFolder(String(dir))));
@@ -150,6 +158,7 @@ if (!app.requestSingleInstanceLock()) {
     hooks.onNotify = (kind, name) => {
       const n = settings().notifications;
       if (kind === "done" && n.done) notify("Stahování dokončeno", `${name} je připraveno ke hraní.`);
+      if (kind === "installed" && n.done) notify("Instalace dokončena", `${name} je nainstalováno.`);
       if (kind === "rollback") notify("Aktualizace vrácena", `${name} po aktualizaci spadl – vrátili jsme předchozí verzi.`);
     };
     log(`Start ${app.getVersion()} ${process.platform}`);
@@ -165,6 +174,7 @@ if (!app.requestSingleInstanceLock()) {
       await refreshCatalog().catch(() => undefined);
       await restore();
       await refreshLibrary().catch(() => undefined);
+      await syncApps();
       autoUpdate();
     })();
   });

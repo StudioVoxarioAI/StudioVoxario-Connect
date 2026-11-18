@@ -8,6 +8,8 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { app, BrowserWindow, net, shell } from "electron";
+import { compareVersions } from "@connect/installer-core";
+import { detectApp, downloadSetup, runSetup, uninstallApp } from "./apps";
 import { gameTicket } from "./auth";
 import { currentCatalog } from "./catalog";
 import { libraryNow } from "./library";
@@ -22,6 +24,8 @@ export interface Job {
 }
 export interface InstallRecord {
   dir: string; version: string; installedAt: string; sizeOnDisk: number; lastPlayedAt?: string; playtimeSeconds: number;
+  /** aplikace s vlastním instalátorem (Voxar.app, VoxarioBrowser, engine): spravuje ji její instalátor/registr */
+  external?: boolean; exe?: string; uninstall?: string; machine?: boolean;
 }
 export interface InstallsState {
   installs: Record<string, InstallRecord & { updateAvailable: boolean; running: boolean }>;
@@ -49,7 +53,7 @@ let windowBytes = 0;
 // Fáze 4: plánovač (smí se teď stahovat?) a systémová oznámení – nastavuje system.ts (bez kruhového importu)
 export const hooks = {
   allowed: (): boolean => true,
-  onNotify: (_kind: "done" | "verified" | "rollback" | "crash", _name: string): void => undefined,
+  onNotify: (_kind: "done" | "installed" | "verified" | "rollback" | "crash", _name: string): void => undefined,
   log: (_line: string): void => undefined,
 };
 /** Nastavení se změnilo: omezení rychlosti platí hned, i pro běžící stahování. */
@@ -71,7 +75,10 @@ export function state(): InstallsState {
   const out: InstallsState["installs"] = {};
   for (const [id, r] of Object.entries(installs.get())) {
     const p = product(id);
-    out[id] = { ...r, updateAvailable: !!p?.latestVersion && p.latestVersion !== r.version, running: running.has(id) };
+    const update = r.external
+      ? !p?.build?.selfUpdates && !!p?.latestVersion && !!r.version && compareVersions(p.latestVersion, r.version) > 0
+      : !!p?.latestVersion && p.latestVersion !== r.version;
+    out[id] = { ...r, updateAvailable: update, running: running.has(id) };
   }
   let diskFree: number | undefined;
   try { const dir = settings().libraries[0] || defaultLibraryDir(); fs.mkdirSync(dir, { recursive: true }); const s = fs.statfsSync(dir); diskFree = s.bavail * s.bsize; } catch { /* nic */ }
@@ -116,13 +123,18 @@ function ensureWritable(dir: string) {
 
 /** Zařadí instalaci / aktualizaci / opravu do fronty. */
 export function enqueue(productId: string, mode: Job["mode"], libraryDir?: string): InstallsState {
-  const p = product(productId);
-  if (!p || p.build?.kind !== "voxario-manifest" || !p.build.manifestUrl) throw new Error("Tento produkt zatím nejde instalovat přes Connect.");
+  let p = product(productId);
   const item = libraryNow().items.find((i) => i.productId === productId);
   if (!item?.owned) throw new Error("Produkt není ve vaší knihovně (nebo k němu nemáte přístup).");
-  if (running.has(productId)) throw new Error("Hra běží – aktualizace proběhne po jejím ukončení.");
+  // modul (VoxarioProtect) = instalace hostitelské aplikace (Voxar.app), přístup je společný (stejný klíč)
+  if (p?.build?.kind === "module" && p.build.moduleOf) { productId = p.build.moduleOf; p = product(productId); }
+  const kind = p?.build?.kind;
+  const external = kind === "installer" || kind === "shop-file";
+  if (!p || !(external || (kind === "voxario-manifest" && p.build?.manifestUrl))) throw new Error("Tento produkt zatím nejde instalovat přes Connect.");
+  if (running.has(productId)) throw new Error("Aplikace běží – nejdřív ji ukončete.");
   const rec = installs.get()[productId];
-  const dir = rec?.dir ?? path.join(libraryDir || settings().libraries[0] || defaultLibraryDir(), productId);
+  const dir = external ? path.join(app.getPath("userData"), "setups", productId)
+    : rec?.dir ?? path.join(libraryDir || settings().libraries[0] || defaultLibraryDir(), productId);
   ensureWritable(dir);
   queueStore.update((q) => {
     const existing = q.jobs.find((j) => j.productId === productId);
@@ -146,6 +158,10 @@ async function pump() {
   active = { productId: job.productId, ctrl };
   limiter.bytesPerSecond = settings().speedLimitKBps * 1024;
   try {
+    if (p && (p.build?.kind === "installer" || p.build?.kind === "shop-file")) {
+      await runExternalJob(job, p, ctrl);
+      return;
+    }
     if (!p?.build?.manifestUrl) throw new Error("Produkt už v katalogu není.");
     const manifestUrl = settings().channels[job.productId] === "beta" && p.build.channels?.beta ? p.build.channels.beta : p.build.manifestUrl;
     const m = await fetchManifest(manifestUrl);
@@ -184,6 +200,51 @@ async function pump() {
   }
 }
 
+/** Aplikace s instalátorem: stáhnout Setup, spustit, rozpoznat instalaci. */
+async function runExternalJob(job: Job, p: Product, ctrl: AbortController) {
+  let done = 0;
+  const setup = await downloadSetup(p, { signal: ctrl.signal, limiter }, {
+    onPlan: (total) => setJob(job.productId, (j) => { j.totalBytes = total; j.doneBytes = 0; j.phase = "downloading"; }),
+    onPhase: (ph) => setJob(job.productId, (j) => { j.phase = ph; }),
+    onBytes: (n) => {
+      done += n; if (n > 0) windowBytes += n;
+      const q = queueStore.get().jobs.find((x) => x.productId === job.productId);
+      if (q) { q.doneBytes = Math.max(0, done); emit(); }
+    },
+  });
+  setJob(job.productId, (j) => { j.phase = "installing"; if (setup.version) j.version = setup.version; });
+  const d = await runSetup(p, setup.file);
+  recordExternal(job.productId, d, setup.version);
+  queueStore.update((q) => { q.jobs = q.jobs.filter((x) => x.productId !== job.productId); });
+  notify("installed", p.name);
+  hooks.log(`${job.mode} ${job.productId} ${d.version ?? setup.version ?? "?"} OK (instalátor)`);
+}
+
+function recordExternal(id: string, d: { dir: string; exe: string; version?: string; uninstall?: string; machine: boolean }, fallbackVersion?: string) {
+  const prev = installs.get()[id];
+  let size = prev?.sizeOnDisk ?? 0;
+  if (!prev || prev.dir !== d.dir || prev.version !== (d.version ?? fallbackVersion ?? prev.version)) { try { size = dirSize(d.dir); } catch { /* nic */ } }
+  installs.update((all) => {
+    all[id] = { dir: d.dir, version: d.version ?? fallbackVersion ?? prev?.version ?? "", installedAt: prev?.installedAt ?? new Date().toISOString(), sizeOnDisk: size,
+      lastPlayedAt: prev?.lastPlayedAt, playtimeSeconds: prev?.playtimeSeconds ?? 0, external: true, exe: d.exe, uninstall: d.uninstall, machine: d.machine };
+  });
+}
+
+/** Zjistí aplikace nainstalované mimo Connect (nebo odinstalované ve Windows) a srovná záznamy. */
+export async function syncApps() {
+  let changed = false;
+  for (const p of products()) {
+    if (p.build?.kind !== "installer" && p.build?.kind !== "shop-file") continue;
+    const rec = installs.get()[p.id];
+    if (rec && !rec.external) continue;
+    const d = await detectApp(p).catch(() => null);
+    if (d) {
+      if (!rec || rec.dir !== d.dir || (d.version && rec.version !== d.version) || rec.uninstall !== d.uninstall) { recordExternal(p.id, d); changed = true; }
+    } else if (rec && !running.has(p.id)) { installs.update((all) => { delete all[p.id]; }); changed = true; }
+  }
+  if (changed) emit(true);
+}
+
 export function pause(id: string) {
   if (active?.productId === id) { setJob(id, (j) => { j.phase = "paused"; }); active.ctrl.abort(); }
   else setJob(id, (j) => { if (j.phase === "queued") j.phase = "paused"; });
@@ -215,10 +276,18 @@ export function move(id: string, toIndex: number) {
   return state();
 }
 
-export function uninstall(id: string, keepUserData: boolean) {
+export async function uninstall(id: string, keepUserData: boolean): Promise<InstallsState> {
   if (running.has(id)) throw new Error("Hra běží – nejdřív ji ukončete.");
   const rec = installs.get()[id];
   if (!rec) return state();
+  if (rec.external) {
+    const p = product(id);
+    if (!p) throw new Error("Produkt už v katalogu není.");
+    const gone = await uninstallApp(p, { uninstall: rec.uninstall, machine: !!rec.machine });
+    if (gone) installs.update((all) => { delete all[id]; });
+    emit(true);
+    return state();
+  }
   cancel(id);
   removeInstall(rec.dir, keepUserData);
   installs.update((all) => { delete all[id]; });
@@ -233,9 +302,12 @@ export function openFolder(id: string) {
 
 /** Spuštění hry: lístek přihlášení (ASHES_LAUNCHER_TICKET), doba hraní, návrat verze při pádu do 20 s. */
 export async function launch(id: string, after: "minimize" | "close" | "keep"): Promise<{ ok: boolean; error?: string }> {
+  const mod = product(id)?.build;
+  if (mod?.kind === "module" && mod.moduleOf) id = mod.moduleOf;   // VoxarioProtect -> spustit Voxar.app
   const rec = installs.get()[id];
   if (!rec) return { ok: false, error: "Hra není nainstalovaná." };
   if (running.has(id)) return { ok: true };
+  if (rec.external) return launchExternal(id, rec, after);
   const st = readState(rec.dir);
   if (!st) return { ok: false, error: "Instalace je poškozená – použijte Ověřit soubory." };
   const exe = path.join(rec.dir, st.exe);
@@ -277,13 +349,33 @@ export async function launch(id: string, after: "minimize" | "close" | "keep"): 
   return { ok: true };
 }
 
+function launchExternal(id: string, rec: InstallRecord, after: "minimize" | "close" | "keep"): { ok: boolean; error?: string } {
+  const exe = path.join(rec.dir, rec.exe ?? "");
+  if (!rec.exe || !fs.existsSync(exe)) { void syncApps(); return { ok: false, error: "Aplikace se nenašla – nainstalujte ji znovu." }; }
+  let child: ChildProcess;
+  try { child = spawn(exe, [], { cwd: rec.dir, detached: true, stdio: "ignore" }); } catch (e) { return { ok: false, error: (e as Error).message }; }
+  const startedAt = Date.now();
+  running.set(id, child);
+  installs.update((all) => { all[id]!.lastPlayedAt = new Date().toISOString(); });
+  child.on("exit", () => {
+    running.delete(id);
+    installs.update((all) => { if (all[id]) all[id]!.playtimeSeconds += Math.round((Date.now() - startedAt) / 1000); });
+    emit(true);
+  });
+  child.on("error", () => { running.delete(id); emit(true); });
+  child.unref();
+  emit(true);
+  for (const w of BrowserWindow.getAllWindows()) { if (after === "minimize") w.minimize(); else if (after === "close") w.hide(); }
+  return { ok: true };
+}
+
 function refreshRecord(id: string) {
   const rec = installs.get()[id];
   const st = rec && readState(rec.dir);
   if (rec && st) installs.update((all) => { all[id] = { ...rec, version: st.version, sizeOnDisk: dirSize(rec.dir) }; });
 }
 
-function notify(kind: "done" | "verified" | "rollback" | "crash", name: string) {
+function notify(kind: "done" | "installed" | "verified" | "rollback" | "crash", name: string) {
   for (const w of BrowserWindow.getAllWindows()) w.webContents.send("connect:notify", { kind, name });
   hooks.onNotify(kind, name);
 }

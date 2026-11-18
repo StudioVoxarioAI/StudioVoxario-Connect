@@ -89,3 +89,22 @@ spouštění se systémem (`setLoginItemSettings`, `--hidden`), ikona v oznamova
 stahování běží dál), systémová oznámení (dokončení, aktualizace, návrat verze vždy), log `userData/logs/connect.log`
 bez tokenů a klíčů, export pro podporu. Telemetrie výchozí vypnutá a zatím nic neodesílá. Deep linky
 `studiovoxario://product|library|purchase-complete|downloads|settings|account` (bílá listina, `parseDeepLink`, testy).
+
+## D16 – Nákup a aplikace s vlastním instalátorem (Fáze 5–6)
+**Nákup** zůstává na webu (Stripe / QR, faktury, DPH – jedno místo pravdy): Connect otevře `buy_url` / `pass_url`
+z `shop_license_status` v systémovém prohlížeči. Po návratu do okna (focus, nejvýš 1× za 20 s) se knihovna obnoví;
+deep link `studiovoxario://purchase-complete?product=<id>` je připravený pro web (návrh v `WEB_PROPOSAL.md`).
+**Aplikace** (Voxar.app, VoxarioBrowser, Voxario Studio Engine) se nepřebalují – Connect stáhne jejich oficiální
+instalátor, ověří ho a spustí: `installer` = veřejná URL (GitHub Releases), velikost a SHA-256 z `versionUrl`, jen když
+popisuje stejný soubor; `shop-file` = soubor z obchodu (soukromé úložiště, části do 45 MB) stahovaný jménem uživatele,
+web ověří licenci (`shop_can_download`, RLS). Instalaci Connect pozná z **registru Windows** (`Uninstall\StudioVoxario.app`,
+`StudioVoxario.browser`, HKLM `VoxarioStudio`: verze, složka, odinstalátor) nebo ze složky aplikace – i když byla
+nainstalovaná dřív mimo Connect. Engine (NSIS, pro všechny uživatele) se instaluje tiše `/S` s UAC (PowerShell
+`Start-Process -Verb RunAs`), Voxar.app a VoxarioBrowser mají vlastní okenní instalátor (bez tichého režimu).
+Aplikace se dál aktualizují samy (electron-updater) – Connect u nich nenabízí aktualizaci, jen přeinstalaci.
+**Voxar.app jen s klíčem:** instalace (i VoxarioProtect) jde až po odemčení klíčem (stav knihovny `owned`), jinak
+Connect instalátor vůbec nestáhne. **VoxarioProtect** je modul Voxar.app: „Otevřít ve Voxar.app“, případně
+„Nainstalovat Voxar.app“. Ověřeno E2E na Linuxu: rozpoznání instalace, modul, skutečné stažení VoxarioBrowserSetup.exe
+(173 MB, PE) z GitHub Releases; samotné spuštění instalátoru a registr ověří Windows (CI build + ruční test).
+**Zjištění na webu:** politika úložiště `shop_files_buyer_read` pouští jen předplatitele (`shop_entitlements`), ne
+držitele licence (`shop_licenses`) – návrh opravy v `WEB_PROPOSAL.md` (Connect i web pak stáhnou engine s licencí).

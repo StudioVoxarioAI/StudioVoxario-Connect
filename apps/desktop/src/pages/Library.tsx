@@ -78,6 +78,9 @@ export function Library() {
                     {sel.p.latestVersion && <span>{t("detail.version")} {sel.p.latestVersion}</span>}
                     {sel.p.sizeBytes ? <span>{formatSize(sel.p.sizeBytes, i18n.language)}</span> : null}
                     {sel.item.license?.validUntil && <span>{t("account.updatesUntil", { d: new Date(sel.item.license.validUntil).toLocaleDateString("cs-CZ") })}</span>}
+                    {sel.item.license && !sel.item.license.updatesActive && sel.item.license.passUrl && (
+                      <button onClick={() => bridge.openExternal(sel.item.license!.passUrl!)} className="font-semibold text-primary hover:underline">{t("library.extendUpdates")}</button>
+                    )}
                   </div>
                 </div>
               </div>

@@ -61,7 +61,7 @@ export function parseCatalog(input: unknown, source: CatalogSource, baseUrl: str
   };
 }
 
-interface ShopRow { product_key: string | null; price_czk: number | null; price_year_czk: number | null; sale_mode: string | null; file_version: string | null; active: boolean }
+interface ShopRow { product_key: string | null; price_czk: number | null; price_year_czk: number | null; sale_mode: string | null; file_version: string | null; file_size?: number | null; active: boolean }
 interface VoxManifest { version?: string; files?: Array<{ size?: number }> }
 
 /** Živé doplnění: ceny z obchodu (veřejné REST shop_items) a verze / velikosti z manifestů her. */
@@ -73,7 +73,7 @@ export async function enrichCatalog(cat: Catalog, fetcher: FetchLike, timeoutMs 
   const keys = out.map((p) => p.shopKey).filter((k): k is string => !!k);
   if (api?.supabaseUrl && api.publishableKey && keys.length) {
     tasks.push((async () => {
-      const url = `${api.supabaseUrl}/rest/v1/shop_items?select=product_key,price_czk,price_year_czk,sale_mode,file_version,active&product_key=in.(${keys.map(encodeURIComponent).join(",")})`;
+      const url = `${api.supabaseUrl}/rest/v1/shop_items?select=product_key,price_czk,price_year_czk,sale_mode,file_version,file_size,active&product_key=in.(${keys.map(encodeURIComponent).join(",")})`;
       const rows = (await fetchJson(fetcher, url, timeoutMs, { apikey: api.publishableKey! })) as ShopRow[];
       for (const p of out) {
         const r = rows.find((x) => x.product_key === p.shopKey && x.active);
@@ -82,6 +82,7 @@ export async function enrichCatalog(cat: Catalog, fetcher: FetchLike, timeoutMs 
           p.pricing = { ...p.pricing, model: r.sale_mode === "subscription" ? "subscription" : r.price_czk > 0 ? "paid" : "free", price: r.price_czk, currency: "CZK" };
         }
         if (r.file_version) p.latestVersion = r.file_version;
+        if (p.build?.kind === "shop-file" && r.file_size) p.sizeBytes = r.file_size;
       }
       live.prices = true;
     })());
@@ -94,6 +95,18 @@ export async function enrichCatalog(cat: Catalog, fetcher: FetchLike, timeoutMs 
       if (m.version) p.latestVersion = m.version;
       if (Array.isArray(m.files)) p.sizeBytes = m.files.reduce((s, f) => s + (Number(f.size) || 0), 0);
       live.versions = true;
+    })());
+  }
+  // aplikace s instalátorem: {version, size, filename} – platí jen když popisuje právě tento instalátor
+  for (const p of out) {
+    const b = p.build;
+    if (b?.kind !== "installer" || !b.versionUrl || !b.installerUrl) continue;
+    const file = b.installerUrl.split("/").pop();
+    tasks.push((async () => {
+      const v = (await fetchJson(fetcher, b.versionUrl!, timeoutMs)) as { version?: string; size?: number; filename?: string };
+      if (v.filename && v.filename !== file) return;
+      if (v.version) p.latestVersion = v.version;
+      if (typeof v.size === "number") p.sizeBytes = v.size;
     })());
   }
   await Promise.allSettled(tasks);
