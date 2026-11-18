@@ -1,5 +1,18 @@
 [
   {
+    "version": "0.6.1",
+    "date": "2026-11-19",
+    "title": "Křížek okna vždy viditelný",
+    "titleEn": "Window close button always visible",
+    "changes": [
+      {
+        "type": "fix",
+        "text": "Po zmenšení okna už nezmizí křížek ani tlačítka minimalizovat a maximalizovat: horní lišta se na užším okně zhustí (hledání jako ikona, užší záložky, jen avatar účtu).",
+        "textEn": "Shrinking the window no longer hides the close, minimize and maximize buttons: the top bar compacts on narrow windows (search as an icon, tighter tabs, avatar only)."
+      }
+    ]
+  },
+  {
     "version": "0.6.0",
     "date": "2026-11-19",
     "title": "Živá vysílání z YouTube s chatem",
