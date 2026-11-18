@@ -1,5 +1,28 @@
 [
   {
+    "version": "0.5.0",
+    "date": "2026-11-18",
+    "title": "Hry ze soukromého úložiště",
+    "titleEn": "Games from private storage",
+    "changes": [
+      {
+        "type": "security",
+        "text": "Ashes of Eryon a Fantasy se stahují ze soukromého úložiště jménem přihlášeného účtu – soubory hry dostane jen ten, kdo má ke hře přístup (dřív byly veřejně dostupné).",
+        "textEn": "Ashes of Eryon and Fantasy download from private storage on behalf of the signed-in account – only players with access receive the game files (previously they were publicly available)."
+      },
+      {
+        "type": "improvement",
+        "text": "Přihlášení se během dlouhého stahování samo obnovuje; bez přístupu Connect jasně řekne proč.",
+        "textEn": "The sign-in renews itself during long downloads; without access Connect explains why."
+      },
+      {
+        "type": "improvement",
+        "text": "Verze a velikost her se po přihlášení načtou z úložiště znovu.",
+        "textEn": "Game versions and sizes reload from storage after you sign in."
+      }
+    ]
+  },
+  {
     "version": "0.4.0",
     "date": "2026-11-18",
     "title": "Fantasy jako samostatná hra, přístupy a role",

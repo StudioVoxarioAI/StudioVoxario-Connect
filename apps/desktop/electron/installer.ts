@@ -7,10 +7,11 @@ import { spawn, type ChildProcess } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { app, BrowserWindow, net, shell } from "electron";
+import { app, BrowserWindow, shell } from "electron";
 import { compareVersions } from "@connect/installer-core";
 import { detectApp, downloadSetup, runSetup, uninstallApp } from "./apps";
 import { gameTicket } from "./auth";
+import { storageFetch } from "./storage";
 import { currentCatalog } from "./catalog";
 import { libraryNow } from "./library";
 import { settings } from "./settings";
@@ -107,7 +108,8 @@ function setJob(id: string, fn: (j: Job) => void) {
 }
 
 async function fetchManifest(url: string): Promise<VoxManifest> {
-  const res = await net.fetch(url, { headers: { "cache-control": "no-cache" } });
+  const res = await storageFetch(url, { headers: { "cache-control": "no-cache" } });
+  if (res.status === 403) throw new Error("Ke stažení této hry nemáte přístup (nebo vypršelo přihlášení).");
   if (!res.ok) throw new Error(`Manifest nedostupný (HTTP ${res.status})`);
   const m = (await res.json()) as VoxManifest;
   if (!m?.version || !Array.isArray(m.files) || !m.exe) throw new Error("Neplatný manifest buildu");
@@ -168,7 +170,7 @@ async function pump() {
     setJob(job.productId, (j) => { j.version = m.version; j.doneBytes = 0; j.phase = "downloading"; });
     let done = 0;
     const st = await runInstall({
-      fetch: (url, init) => net.fetch(url, init as RequestInit) as never,
+      fetch: (url, init) => storageFetch(url, init as RequestInit) as never,
       productId: job.productId, dir: job.dir, manifestUrl, manifest: m, mode: job.mode, signal: ctrl.signal, limiter,
       concurrency: settings().connections,
       onPlan: (total) => setJob(job.productId, (j) => { j.totalBytes = total; }),

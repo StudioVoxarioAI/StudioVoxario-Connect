@@ -7,7 +7,7 @@
 import type { Product } from "@connect/catalog-client";
 import { BrowserWindow } from "electron";
 import { edge, rest, status as authStatus } from "./auth";
-import { currentCatalog } from "./catalog";
+import { currentCatalog, refresh as refreshCatalog } from "./catalog";
 import { demoStates, isDemo } from "./demo";
 import { JsonStore } from "./store";
 
@@ -54,6 +54,7 @@ function emit(s: LibraryState) {
 }
 
 export function libraryNow(): LibraryState { return last; }
+let lastCatalogRetry = 0;
 
 const notFound = (e: unknown) => /HTTP 404/.test(String((e as Error)?.message ?? e));
 
@@ -150,6 +151,11 @@ export async function refreshLibrary(): Promise<LibraryState> {
     }
   });
   emit({ signedIn: true, items, checkedAt: now, offline, role: d.role?.role ?? "player", manages: d.role?.manages ?? [] });
+  // verze a velikosti her jsou v soukromém úložišti – po přihlášení je katalog načte znovu (jménem uživatele)
+  if (!currentCatalog()?.live?.versions && Date.now() - lastCatalogRetry > 5 * 60_000) {
+    lastCatalogRetry = Date.now();
+    void refreshCatalog().catch(() => undefined);
+  }
   return last;
 }
 

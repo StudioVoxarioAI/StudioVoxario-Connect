@@ -184,3 +184,10 @@ Fantasy i editor) a `my_platform_role()` (správce / editor / hráč + hry, kter
 webu (Administrace → Přístupy ke hrám) i v Connectu (Správa – jen pro oprávněné). Do nasazení migrace Connect
 používá `ashes_can_play` a role z `user_roles` (Fantasy pak jen správce a editor). Pozn.: soubory her jsou ve
 veřejném úložišti `game-updates` – přístup hlídá Connect (stejně jako u Ashes ve starém launcheru).
+
+## D25 – Soukromé úložiště her (0.5.0)
+Buildy her (`game-updates/unity/…`) už nejsou veřejné: migrace webu přepne bucket na soukromý a pravidla RLS pustí
+`unity/fantasy/…` jen s `game_can_play('fantasy')` a ostatní `unity/…` jen s `game_can_play('ashes-of-eryon')`;
+`launcher/` zůstává čitelné. Connect stahuje přes `/storage/v1/object/authenticated/…` s tokenem uživatele
+(`electron/storage.ts`, token se obnovuje za běhu); dokud je bucket veřejný, záložně veřejná adresa. Pořadí nasazení:
+nejdřív Connect 0.5.0 (automatická aktualizace do 15 min), potom migrace webu. Starý launcher Ashes hry nestáhne.

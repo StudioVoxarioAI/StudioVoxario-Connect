@@ -1,7 +1,8 @@
 // Katalog v hlavním procesu: okamžitě vrátí poslední cache (nebo přibalený snapshot), na pozadí ho obnoví
 // z webu (stale-while-revalidate) a poslední dobrý výsledek uloží do userData – Obchod a hledání fungují i offline.
 import { loadCatalog, parseCatalog, type Catalog } from "@connect/catalog-client";
-import { app, BrowserWindow, net } from "electron";
+import { app, BrowserWindow } from "electron";
+import { storageFetch } from "./storage";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -53,7 +54,8 @@ export function refresh(): Promise<Catalog> {
   if (refreshing) return refreshing;
   refreshing = (async () => {
     const cat = await loadCatalog({
-      fetcher: (url, init) => net.fetch(url, init as RequestInit),   // síť Chromia: systémové proxy a certifikáty
+      // síť Chromia (systémové proxy a certifikáty); manifesty her v soukromém úložišti jménem přihlášeného
+      fetcher: (url, init) => storageFetch(url, init as RequestInit),
       remoteUrl: REMOTE_CATALOG_URL,
       cached: current ?? readJson(cacheFile()),
       bundled: bundled(),
