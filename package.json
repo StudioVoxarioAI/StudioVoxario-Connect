@@ -2,7 +2,7 @@
   "name": "studiovoxario-connect",
   "private": true,
   "version": "0.1.0",
-  "description": "StudioVoxario Connect – launcher, obchod a knihovna her a softwaru StudioVoxario",
+  "description": "StudioVoxario Connect \u2013 launcher, obchod a knihovna her a softwaru StudioVoxario",
   "type": "module",
   "packageManager": "pnpm@10.28.0",
   "engines": {
@@ -23,12 +23,20 @@
     "globals": "^15.14.0",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.18.2",
-    "vitest": "^2.1.8"
+    "vitest": "^4.1.12"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
       "electron",
       "esbuild"
-    ]
+    ],
+    "overrides": {
+      "tar": "^7.5.21",
+      "electron-builder-squirrel-windows": "26.18.0",
+      "glob@<14": "^14.0.2",
+      "app-builder-lib": "26.18.0",
+      "builder-util-runtime": "^9.7.0",
+      "@electron/universal>minimatch": "^11.0.1"
+    }
   }
 }

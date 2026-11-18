@@ -19,7 +19,7 @@ export const BuildSource = z.object({
   kind: z.enum(["voxario-manifest", "installer", "shop-file", "module"]),
   /** voxario-manifest: URL manifestu kanálu stable ({version, exe, files[{path,url,size,sha256,parts}]}), url souborů relativně k němu */
   manifestUrl: z.string().optional(),
-  channels: z.record(z.string()).optional(),          // kanál -> URL manifestu (beta…)
+  channels: z.record(z.string(), z.string()).optional(),          // kanál -> URL manifestu (beta…)
   /** installer: instalátor aplikace (Setup.exe), verze z JSON {version}, aplikace se aktualizuje sama */
   installerUrl: z.string().optional(),
   versionUrl: z.string().optional(),

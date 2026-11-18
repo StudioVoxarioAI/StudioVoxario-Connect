@@ -1,7 +1,7 @@
 # DECISIONS – rozhodnutí a odchylky od SPEC
 
 ## D1 – Electron místo Tauri 2 (odchylka od doporučení SPEC sekce 3)
-**Rozhodnutí:** Shell aplikace = **Electron** (33), UI = React + TypeScript + Vite + Tailwind (podle doporučení).
+**Rozhodnutí:** Shell aplikace = **Electron** (45; původně 33), UI = React + TypeScript + Vite + Tailwind (podle doporučení).
 **Proč:** SPEC: „pokud stávající launcher už používá konkrétní stack a funguje, preferuj jeho znovupoužití“.
 Stávající launcher Ashes of Eryon (`Voxar.app/game/launcher/app`) i Voxar.app jsou Electron a mají ověřenou
 logiku, kterou Connect převezme: PKCE přihlášení s předáním z webu a šifrováním tokenu přes `safeStorage` (DPAPI),
@@ -127,3 +127,10 @@ pracovní kopie webu zůstala netknutá): 0001 Ke stažení jen Connect + `app=c
 linkem, 0003 oprava RLS úložiště pro držitele licence, 0004 `/connect/catalog.json`, 0005 zrušení rozcestníku.
 Inventář a co musí zůstat: `WEB_CLEANUP.md`; pořadí a rizika: `WEB_PROPOSAL.md`. Workflow vydání nahrává i
 `StudioVoxarioConnectSetup.exe` bez čísla verze – stabilní odkaz pro stránku Ke stažení.
+
+## D19 – Bezpečnostní aktualizace závislostí (0.1.1)
+Electron 33 (bez podpory, známé zranitelnosti) → **45.3.4**, electron-builder 26.18, electron-updater 6.8,
+react-router-dom 7.18 (open redirect), zod 4.6 (vyčerpání paměti), vitest 4.1, esbuild 0.28; `pnpm.overrides` pro
+`tar` a staré `app-builder-lib` ze `electron-builder-squirrel-windows` (nepoužívá se). `pnpm audit --prod`: bez nálezů;
+zbývají jen nástroje pro sestavení/lint. Po aktualizaci znovu prošly E2E testy (instalace, přesun, limit, plánovač,
+aplikace, převzetí) proti produkčním datům webu.
