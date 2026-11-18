@@ -120,3 +120,10 @@ Všechny závislosti jsou sbalené (Vite + esbuild), v instalátoru nejsou `node
 a záložní `%LOCALAPPDATA%\StudioVoxario\AshesOfEryon{-fantasy}` – a převezme je bez stahování (formát
 `install.json` je stejný). Ruční převzetí: Nastavení → Diagnostika. Ověřeno E2E (`e2e-migrate.mjs`): převzatá hra se
 spustí a ověření souborů nic nestáhne. Beta kanál starého launcheru (`-beta`) se nepřebírá (Connect má kanál jinak).
+
+## D18 – Fáze 8 jen jako návrh (web se nemění bez schválení)
+Úpravy webu jsou připravené jako `git am` patche v `docs/web-patches/` (vyrobené z exportu webu v dočasné složce,
+pracovní kopie webu zůstala netknutá): 0001 Ke stažení jen Connect + `app=connect`, 0002 návrat z platby deep
+linkem, 0003 oprava RLS úložiště pro držitele licence, 0004 `/connect/catalog.json`, 0005 zrušení rozcestníku.
+Inventář a co musí zůstat: `WEB_CLEANUP.md`; pořadí a rizika: `WEB_PROPOSAL.md`. Workflow vydání nahrává i
+`StudioVoxarioConnectSetup.exe` bez čísla verze – stabilní odkaz pro stránku Ke stažení.

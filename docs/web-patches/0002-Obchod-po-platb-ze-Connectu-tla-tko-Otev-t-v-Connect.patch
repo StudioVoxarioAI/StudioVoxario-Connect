@@ -1,0 +1,44 @@
+From cad2ab8f9389d3d87f49079652969735dff7a761 Mon Sep 17 00:00:00 2001
+From: StudioVoxario-Connect <connect@studiovoxario.invalid>
+Date: Wed, 18 Nov 2026 02:01:49 +0000
+Subject: [PATCH 2/5] =?UTF-8?q?Obchod:=20po=20platb=C4=9B=20ze=20Connectu?=
+ =?UTF-8?q?=20tla=C4=8D=C3=ADtko=20Otev=C5=99=C3=ADt=20v=20Connectu=20(stu?=
+ =?UTF-8?q?diovoxario://purchase-complete)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ src/pages/Shop.tsx | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/src/pages/Shop.tsx b/src/pages/Shop.tsx
+index c9f3e1c..9911ffa 100644
+--- a/src/pages/Shop.tsx
++++ b/src/pages/Shop.tsx
+@@ -41,7 +41,12 @@ const ShopPage = () => {
+     const result = params.get("platba");
+     if (!result) return;
+     if (result === "ok") {
+-      toast.success("Platba proběhla – děkujeme! Objednávka se potvrdí během chvilky, upozornění najdeš v oznámeních.", { duration: 8000 });
++      // nákup spuštěný ze StudioVoxario Connect (?licence= / ?pass=): nabídnout návrat do aplikace (deep link)
++      const product = appLink?.key && /^[a-z0-9-]{1,64}$/.test(appLink.key) ? appLink.key : null;
++      toast.success("Platba proběhla – děkujeme! Objednávka se potvrdí během chvilky, upozornění najdeš v oznámeních.", {
++        duration: 12000,
++        ...(product ? { action: { label: "Otevřít v Connectu", onClick: () => { window.location.href = `studiovoxario://purchase-complete?product=${product}`; } } } : {}),
++      });
+       setTimeout(() => void refresh(), 4000);
+     } else if (result === "zrusena") {
+       toast("Platba byla zrušena – nic se nestrhlo. Můžeš to zkusit znovu nebo zaplatit převodem.");
+@@ -49,7 +54,7 @@ const ShopPage = () => {
+     const next = new URLSearchParams(params);
+     next.delete("platba");
+     setParams(next, { replace: true });
+-  }, [params, setParams, refresh]);
++  }, [params, setParams, refresh, appLink]);
+   const [donation, setDonation] = useState(100);
+   const [checkout, setCheckout] = useState<{
+     title: string;
+-- 
+2.43.0
+

@@ -1,0 +1,101 @@
+From 0158dae729d77094399d2e3fd14d95798ef4cbac Mon Sep 17 00:00:00 2001
+From: StudioVoxario-Connect <connect@studiovoxario.invalid>
+Date: Wed, 18 Nov 2026 02:02:17 +0000
+Subject: [PATCH 5/5] =?UTF-8?q?Rozcestn=C3=ADk=20(SPEC=2011b):=20navigace,?=
+ =?UTF-8?q?=20pati=C4=8Dka=20a=20=C3=BAvodn=C3=AD=20str=C3=A1nka=20vedou?=
+ =?UTF-8?q?=20na=20StudioVoxario=20Connect;=20str=C3=A1nky=20aplikac=C3=AD?=
+ =?UTF-8?q?=20a=20jejich=20k=C3=B3d=20z=C5=AFst=C3=A1vaj=C3=AD?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ src/components/Navbar.tsx          |  7 +++----
+ src/components/holo/SiteFooter.tsx |  4 +---
+ src/pages/Index.tsx                | 12 ++++++------
+ 3 files changed, 10 insertions(+), 13 deletions(-)
+
+diff --git a/src/components/Navbar.tsx b/src/components/Navbar.tsx
+index ddabd3f..777336c 100644
+--- a/src/components/Navbar.tsx
++++ b/src/components/Navbar.tsx
+@@ -34,7 +34,7 @@ import {
+   ShoppingBag,
+   Eraser,
+   Sparkles,
+-  Globe,
++
+   ShieldCheck,
+   Swords,
+   Users,
+@@ -151,11 +151,10 @@ export function Navbar() {
+     {
+       label: "Platforma",
+       items: [
++        { to: "/desktop", label: "StudioVoxario Connect", desc: "Obchod, knihovna a instalace všech her a aplikací", icon: Download },
+         { to: "/app", label: "Voxar.app", desc: "Komunita, hlas, události a obchod v jednom okně", icon: Sparkles },
+-        { to: "/browser", label: "VoxarioBrowser", desc: "Herní prohlížeč s ochranou soukromí", icon: Globe },
+-        { to: "/desktop", label: "VoxarioProtect", desc: "Posílení Windows Defenderu a hlídání systému", icon: ShieldCheck },
+         { to: "/ashes", label: "Ashes of Eryon", desc: "Temné fantasy RPG – roadmapa a první test", icon: Swords },
+-        { to: "/desktop", label: "Ke stažení", desc: "Ověřené instalátory pro Windows", icon: Download },
++        { to: "/desktop#connect", label: "VoxarioBrowser a VoxarioProtect", desc: "Instalace přes StudioVoxario Connect", icon: ShieldCheck },
+       ],
+     },
+     {
+diff --git a/src/components/holo/SiteFooter.tsx b/src/components/holo/SiteFooter.tsx
+index 9c875a3..a40ae5d 100644
+--- a/src/components/holo/SiteFooter.tsx
++++ b/src/components/holo/SiteFooter.tsx
+@@ -8,11 +8,9 @@ const columns = [
+   {
+     title: "Platforma",
+     links: [
++      { to: "/desktop", label: "StudioVoxario Connect" },
+       { to: "/app", label: "Voxar.app" },
+-      { to: "/browser", label: "VoxarioBrowser" },
+-      { to: "/desktop", label: "VoxarioProtect" },
+       { to: "/ashes", label: "Ashes of Eryon" },
+-      { to: "/desktop", label: "Ke stažení" },
+     ],
+   },
+   {
+diff --git a/src/pages/Index.tsx b/src/pages/Index.tsx
+index 7663d42..c32d1d4 100644
+--- a/src/pages/Index.tsx
++++ b/src/pages/Index.tsx
+@@ -48,10 +48,10 @@ const products: { to: string; name: string; tag: string; desc: string; image: st
+     icon: Sparkles,
+   },
+   {
+-    to: "/browser",
+-    name: "VoxarioBrowser",
+-    tag: "Prohlížeč",
+-    desc: "Herní prohlížeč s pracovními prostory, ochranou soukromí, blokací reklam a vlastními aktualizacemi.",
++    to: "/desktop",
++    name: "StudioVoxario Connect",
++    tag: "Ke stažení",
++    desc: "Jedna aplikace pro všechny hry a software studia: obchod, knihovna, instalace a aktualizace – Ashes of Eryon, Voxar.app, VoxarioBrowser, VoxarioProtect i Voxario Studio Engine.",
+     image: "/web/shot-browser.webp",
+     icon: Globe,
+   },
+@@ -67,7 +67,7 @@ const products: { to: string; name: string; tag: string; desc: string; image: st
+ ];
+ 
+ const services: { to: string; name: string; desc: string; icon: LucideIcon }[] = [
+-  { to: "/desktop", name: "VoxarioProtect", desc: "Posílí Windows Defender, hlídá autostart a vrátí změny jedním klikem.", icon: ShieldCheck },
++  { to: "/desktop#connect", name: "VoxarioProtect", desc: "Součást Voxar.app – instalace přes StudioVoxario Connect s přístupovým klíčem.", icon: ShieldCheck },
+   { to: "/forum", name: "Fórum", desc: "Diskuze, návody a nápady komunity.", icon: MessageCircle },
+   { to: "/live", name: "Live", desc: "Kdo z komunity právě streamuje.", icon: Radio },
+   { to: "/obchod", name: "Obchod", desc: "Kosmetika, odznaky a výhody pro podporovatele.", icon: ShoppingBag },
+@@ -80,7 +80,7 @@ const services: { to: string; name: string; desc: string; icon: LucideIcon }[] =
+ const trust: { title: string; desc: string; icon: LucideIcon; to?: string }[] = [
+   { title: "Bezpečné přihlášení", desc: "Přihlášení e-mailem nebo účtem Google. Hesla se nikdy neukládají v čitelné podobě.", icon: Lock },
+   { title: "Práva hlídá databáze", desc: "Každý vidí jen to, co smí. Pravidla přístupu platí přímo v databázi, ne jen v aplikaci.", icon: Database },
+-  { title: "Ověřené instalátory", desc: "Ke každé verzi zveřejňujeme kontrolní součet SHA-256. Aktualizace se ověřují před instalací.", icon: FileCheck2, to: "/desktop" },
++  { title: "Ověřené instalace", desc: "StudioVoxario Connect ověřuje každý soubor (SHA-256) a vrátí verzi, když se aktualizace nepovede.", icon: FileCheck2, to: "/desktop" },
+   { title: "Ochrana počítače", desc: "VoxarioProtect spolupracuje s Windows Defenderem – nic nemění bez tvého potvrzení.", icon: ShieldCheck, to: "/desktop" },
+   { title: "Otevřený vývoj", desc: "Každá změna aplikací je zapsaná ve veřejné historii verzí.", icon: History, to: "/verze" },
+   { title: "Jasná pravidla", desc: "Srozumitelné obchodní podmínky, ochrana soukromí a moderace, kterou dělají lidé i AI.", icon: Scale, to: "/obchodni-podminky" },
+-- 
+2.43.0
+

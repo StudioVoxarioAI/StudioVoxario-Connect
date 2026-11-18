@@ -1,0 +1,35 @@
+From b7ee97e676f0a26454edee3ddcae20e641ee19db Mon Sep 17 00:00:00 2001
+From: StudioVoxario-Connect <connect@studiovoxario.invalid>
+Date: Wed, 18 Nov 2026 02:01:49 +0000
+Subject: [PATCH 3/5] =?UTF-8?q?=C3=9Alo=C5=BEi=C5=A1t=C4=9B=20shop-files:?=
+ =?UTF-8?q?=20sta=C5=BEen=C3=AD=20i=20pro=20dr=C5=BEitele=20licence=20(sho?=
+ =?UTF-8?q?p=5Fcan=5Fdownload)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ .../20261118030000_shop_files_license_read.sql        | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+ create mode 100644 supabase/migrations/20261118030000_shop_files_license_read.sql
+
+diff --git a/supabase/migrations/20261118030000_shop_files_license_read.sql b/supabase/migrations/20261118030000_shop_files_license_read.sql
+new file mode 100644
+index 0000000..f651d9b
+--- /dev/null
++++ b/supabase/migrations/20261118030000_shop_files_license_read.sql
+@@ -0,0 +1,11 @@
++-- StudioVoxario Connect / obchod: soubor softwaru smí stáhnout i držitel licence (shop_licenses), ne jen předplatitel.
++-- Dosavadní politika shop_files_buyer_read kontrolovala jen shop_entitlements, takže kupující trvalé licence
++-- (Voxario Studio Engine) dostal při stahování chybu. Pravidlo je teď stejné jako shop_can_download().
++drop policy if exists shop_files_buyer_read on storage.objects;
++create policy shop_files_buyer_read on storage.objects for select to authenticated
++  using (
++    bucket_id = 'shop-files' and exists (
++      select 1 from public.shop_items i
++      where storage.objects.name = any (i.file_parts) and public.shop_can_download(i.id)
++    )
++  );
+-- 
+2.43.0
+
