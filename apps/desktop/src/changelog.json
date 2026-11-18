@@ -1,5 +1,28 @@
 [
   {
+    "version": "0.3.1",
+    "date": "2026-11-18",
+    "title": "Přihlášení ve stylu webu StudioVoxario",
+    "titleEn": "Sign-in in the StudioVoxario website style",
+    "changes": [
+      {
+        "type": "improvement",
+        "text": "Nová obrazovka přihlášení (Účet, Knihovna): obrázek her s logem a panel s přihlášením přes studiovoxario.com a založením účtu.",
+        "textEn": "New sign-in screen (Account, Library): game artwork with the logo and a panel to sign in via studiovoxario.com or create an account."
+      },
+      {
+        "type": "improvement",
+        "text": "Tlačítko Přihlásit se a hlavní tlačítka mají stejný vzhled jako na webu (přechod azurová → fialová); přihlašovací tlačítko se už neláme na dva řádky.",
+        "textEn": "The Sign in button and primary buttons now match the website (cyan → violet gradient); the sign-in button no longer wraps onto two lines."
+      },
+      {
+        "type": "fix",
+        "text": "Pokračovat ve hře ukazuje jen hry a aplikace přihlášeného účtu – dřív se bez přihlášení objevil i engine nainstalovaný v počítači.",
+        "textEn": "Continue playing only shows games and apps of the signed-in account – previously the engine installed on the PC appeared even when signed out."
+      }
+    ]
+  },
+  {
     "version": "0.3.0",
     "date": "2026-11-18",
     "title": "Vlastní instalátor StudioVoxario Connect",

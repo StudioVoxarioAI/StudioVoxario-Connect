@@ -1,7 +1,7 @@
 {
   "name": "@connect/desktop",
   "productName": "StudioVoxario Connect",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "description": "StudioVoxario Connect – launcher, obchod a knihovna",
   "author": "StudioVoxario",

@@ -1,4 +1,4 @@
-import { Loader2, Minus, RefreshCw, Search, Settings, Square, X } from "lucide-react";
+import { Loader2, LogIn, Minus, RefreshCw, Search, Settings, Square, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../lib/account";
@@ -64,8 +64,8 @@ export function CommandBar({ onSearch }: { onSearch: () => void }) {
           </Link>
         ) : (
           <button onClick={() => bridge.auth.signIn()} disabled={auth?.pending}
-            className="no-drag hud-btn flex h-9 items-center gap-2 bg-primary px-4 text-xs font-bold uppercase tracking-[0.16em] text-primary-foreground hover:bg-primary-glow">
-            {auth?.pending ? <Loader2 size={14} className="animate-spin" /> : null}{auth?.pending ? t("account.pendingShort") : t("top.signIn")}
+            className="no-drag hud-btn holo-primary flex h-9 shrink-0 items-center gap-2 whitespace-nowrap px-4 font-ui text-[14px] tracking-wide">
+            {auth?.pending ? <Loader2 size={15} className="animate-spin" /> : <LogIn size={15} />}{auth?.pending ? t("account.pendingShort") : t("top.signIn")}
           </button>
         )}
         <NavLink to="/settings" aria-label={t("nav.settings")} className={({ isActive }) => `no-drag grid h-9 w-9 place-items-center transition ${isActive ? "text-primary" : "text-muted hover:text-foreground"}`}>

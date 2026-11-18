@@ -1,9 +1,10 @@
-import { Badge, Button, EmptyState, SectionTitle } from "@connect/ui";
+import { Badge, Button, SectionTitle } from "@connect/ui";
 import { useQuery } from "@tanstack/react-query";
-import { ExternalLink, Loader2, LogIn, LogOut, ShieldCheck, ShieldAlert, X } from "lucide-react";
+import { ExternalLink, Loader2, LogOut, ShieldAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "../components/Avatar";
 import { Page } from "../components/Page";
+import { SignInPanel } from "../components/SignInPanel";
 import { useAuth } from "../lib/account";
 import { bridge } from "../lib/bridge";
 
@@ -14,28 +15,7 @@ export function Account() {
   const { data: auth } = useAuth();
   const lic = useQuery({ queryKey: ["licenses", auth?.user?.id], queryFn: () => bridge.library.licenses(), enabled: !!auth?.signedIn, retry: 0 });
   const date = (s?: string) => (s ? new Date(s).toLocaleDateString(i18n.language === "cs" ? "cs-CZ" : "en-US") : "—");
-  if (!auth?.signedIn) {
-    return (
-      <Page eyebrow={t("eyebrow.account")} title={t("account.title")}>
-        <EmptyState icon={<ShieldCheck size={38} />} title={auth?.pending ? t("account.pendingTitle") : t("account.guestTitle")}
-          text={auth?.pending ? t("account.pendingText") : t("account.guestText")}
-          action={
-            <div className="mt-2 flex flex-col items-center gap-3">
-              {auth?.error && <p role="alert" className="text-sm text-danger">{auth.error}</p>}
-              <div className="flex gap-3">
-                {auth?.pending ? (<>
-                  <Button size="lg" onClick={() => bridge.auth.signIn()}><Loader2 size={18} className="animate-spin" />{t("account.reopen")}</Button>
-                  <Button size="lg" variant="secondary" onClick={() => bridge.auth.cancel()}><X size={16} />{t("key.cancel")}</Button>
-                </>) : (<>
-                  <Button size="lg" onClick={() => bridge.auth.signIn()}><LogIn size={18} />{t("top.signIn")}</Button>
-                  <Button variant="secondary" size="lg" onClick={() => bridge.openExternal(`${WEB}/auth`)}><ExternalLink size={16} />{t("account.register")}</Button>
-                </>)}
-              </div>
-            </div>
-          } />
-      </Page>
-    );
-  }
+  if (!auth?.signedIn) return <SignInPanel />;
   const u = auth.user!;
   return (
     <Page title={t("account.title")}>

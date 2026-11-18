@@ -87,6 +87,12 @@ export const en: Dict = {
     doneText: "Connect is installed. Sign in with your StudioVoxario account after launch.", uninstalled: "Connect was uninstalled. You can close this window.",
     keepData: "Keep sign-in and settings",
   },
+  signin: {
+    title: "Sign in", text: "Sign in with your StudioVoxario account – the same as on the website. A secure page opens in your browser and you come back signed in.",
+    button: "Sign in via studiovoxario.com", register: "Create a free account",
+    secure: "You enter your password only on the StudioVoxario website; Connect never sees it. The session is stored encrypted by Windows.",
+    p1: "One account for the website, apps and games", p2: "Access, keys and licenses are verified automatically", p3: "Secure sign-in through your browser",
+  },
   account: {
     title: "Account", guestTitle: "You are not signed in", pendingShort: "Signing in…", pendingTitle: "Finish signing in in your browser",
     pendingText: "A StudioVoxario page opened in your browser – confirm the Connect sign-in there. If it did not open, open it again.",

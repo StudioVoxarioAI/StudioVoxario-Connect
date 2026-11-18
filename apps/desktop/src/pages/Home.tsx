@@ -8,6 +8,7 @@ import { InstallPanel } from "../components/InstallPanel";
 import { OfflineNotice } from "../components/OfflineNotice";
 import { ProductCard, ProductCardSkeleton, StatusBadge } from "../components/ProductCard";
 import { formatPrice, useCatalog } from "../lib/catalog";
+import { useLibrary } from "../lib/account";
 import { formatBytes, useInstalls } from "../lib/installs";
 
 // Deck: velký holo panel vybraného produktu + výběr vpravo (01–05) jako menu ve hře; žádný automatický kolotoč.
@@ -74,8 +75,10 @@ export function Home() {
   const updates = useMemo(() => products.filter((p) => p.latestVersion).slice(0, 4), [products]);
   const sales = products.filter((p) => p.pricing.discountPercent);
   const { data: inst } = useInstalls();
-  const recent = useMemo(() => products.filter((p) => inst?.installs[p.id])
-    .sort((a, b) => (inst!.installs[b.id]!.lastPlayedAt ?? inst!.installs[b.id]!.installedAt).localeCompare(inst!.installs[a.id]!.lastPlayedAt ?? inst!.installs[a.id]!.installedAt)).slice(0, 3), [products, inst]);
+  const { data: lib } = useLibrary();
+  const owned = useMemo(() => new Set((lib?.signedIn ? lib.items : []).filter((i) => i.owned).map((i) => i.productId)), [lib]);
+  const recent = useMemo(() => products.filter((p) => inst?.installs[p.id] && owned.has(p.id))
+    .sort((a, b) => (inst!.installs[b.id]!.lastPlayedAt ?? inst!.installs[b.id]!.installedAt).localeCompare(inst!.installs[a.id]!.lastPlayedAt ?? inst!.installs[a.id]!.installedAt)).slice(0, 3), [products, inst, owned]);
   const job = inst?.jobs[0];
   const jobName = job ? products.find((p) => p.id === job.productId)?.name : undefined;
   return (

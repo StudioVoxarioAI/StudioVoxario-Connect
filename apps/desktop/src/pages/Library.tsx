@@ -1,9 +1,10 @@
 import type { Product } from "@connect/catalog-client";
-import { Badge, Button, EmptyState } from "@connect/ui";
-import { Grid2x2, Library as LibraryIcon, List, LogIn, Star } from "lucide-react";
+import { Badge, EmptyState } from "@connect/ui";
+import { Grid2x2, Library as LibraryIcon, List, Star } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
+import { SignInPanel } from "../components/SignInPanel";
 import { InstallPanel } from "../components/InstallPanel";
 import { useAuth, useLibrary } from "../lib/account";
 import { bridge } from "../lib/bridge";
@@ -35,14 +36,7 @@ export function Library() {
   const sel = owned.find((o) => o.p.id === selId);
   const select = (p: Product) => setParams({ select: p.id });
 
-  if (!auth?.signedIn) {
-    return (
-      <div className="p-8">
-        <EmptyState icon={<LibraryIcon size={36} />} title={t("library.signedOutTitle")} text={t("library.signedOutText")}
-          action={<Button size="lg" onClick={() => bridge.auth.signIn()}><LogIn size={18} />{t("top.signIn")}</Button>} />
-      </div>
-    );
-  }
+  if (!auth?.signedIn) return <SignInPanel />;
   return (
     <div className="flex h-full">
       <aside className="w-60 shrink-0 border-r border-border/60 bg-surface/40 p-4">

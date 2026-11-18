@@ -85,6 +85,12 @@ export const cs = {
     doneText: "Connect je nainstalovaný. Po spuštění se přihlaste účtem StudioVoxario.", uninstalled: "Connect byl odinstalován. Okno můžete zavřít.",
     keepData: "Ponechat přihlášení a nastavení",
   },
+  signin: {
+    title: "Přihlášení", text: "Přihlaste se účtem StudioVoxario – stejným jako na webu. Otevře se bezpečná stránka v prohlížeči a po potvrzení se sem vrátíte přihlášení.",
+    button: "Přihlásit se přes studiovoxario.com", register: "Založit účet zdarma",
+    secure: "Heslo zadáváte jen na webu StudioVoxario, Connect ho nikdy nevidí. Přihlášení se ukládá šifrovaně ve Windows.",
+    p1: "Jeden účet pro web, aplikace i hry", p2: "Přístupy, klíče a licence se ověří samy", p3: "Bezpečné přihlášení přes prohlížeč",
+  },
   account: {
     title: "Účet", guestTitle: "Nejste přihlášeni", pendingShort: "Přihlašování…", pendingTitle: "Dokončete přihlášení v prohlížeči",
     pendingText: "V prohlížeči se otevřela stránka StudioVoxario – potvrďte přihlášení Connectu. Pokud se stránka neotevřela, otevřete ji znovu.",
