@@ -17,5 +17,8 @@ import "./i18n";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./app/App";
+import { Setup } from "./pages/Setup";
 
-createRoot(document.getElementById("root")!).render(<StrictMode><App /></StrictMode>);
+// vlastní instalátor (electron/setup.ts) otevírá stejné UI s #/setup
+const setup = window.location.hash.startsWith("#/setup");
+createRoot(document.getElementById("root")!).render(<StrictMode>{setup ? <Setup /> : <App />}</StrictMode>);

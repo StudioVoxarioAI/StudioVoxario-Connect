@@ -7,9 +7,11 @@ import type { InstallsState } from "./installer";
 import type { LibraryState } from "./library";
 import type { Settings } from "./settings";
 import type { LibraryFolder } from "./system";
+import type { InstallOptions, SetupInfo } from "./setup";
 import type { UpdaterStatus } from "./updater";
 
 export type CatalogState = Catalog & { offline: boolean };
+export type { InstallOptions, SetupInfo };
 export type { AuthStatus, InstallsState, LibraryFolder, LibraryState, Settings, UpdaterStatus };
 type Result<T> = { ok: true; value: T } | { ok: false; error: string };
 type Unsub = () => void;
@@ -85,6 +87,15 @@ const api = {
     check: (): Promise<UpdaterStatus> => ipcRenderer.invoke("connect:updater-check"),
     install: (): Promise<void> => ipcRenderer.invoke("connect:updater-install"),
     onChange: (cb: (s: UpdaterStatus) => void): Unsub => on("connect:updater", cb),
+  },
+  setup: {
+    info: (): Promise<SetupInfo> => ipcRenderer.invoke("connect:setup-info"),
+    pick: (current: string): Promise<string | null> => ipcRenderer.invoke("connect:setup-pick", current),
+    free: (dir: string): Promise<number | null> => ipcRenderer.invoke("connect:setup-free", dir),
+    install: (o: InstallOptions): Promise<{ ok: boolean; dir?: string; error?: string }> => ipcRenderer.invoke("connect:setup-install", o),
+    launch: (dir: string): Promise<void> => ipcRenderer.invoke("connect:setup-launch", dir),
+    uninstall: (keepData: boolean): Promise<{ ok: boolean; error?: string }> => ipcRenderer.invoke("connect:setup-uninstall", keepData),
+    onProgress: (cb: (p: { phase: string; pct: number; line?: string }) => void): Unsub => on("connect:setup-progress", cb),
   },
   onNavigate: (cb: (route: string) => void): Unsub => on("connect:navigate", cb),
   onDeepLink: (cb: (url: string) => void) => {

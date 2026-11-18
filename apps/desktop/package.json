@@ -1,7 +1,7 @@
 {
   "name": "@connect/desktop",
   "productName": "StudioVoxario Connect",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "private": true,
   "description": "StudioVoxario Connect – launcher, obchod a knihovna",
   "author": "StudioVoxario",
@@ -74,6 +74,12 @@
           "arch": [
             "x64"
           ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "build/icon.ico"
@@ -88,7 +94,8 @@
       "createStartMenuShortcut": true,
       "menuCategory": "StudioVoxario",
       "installerIcon": "build/icon.ico",
-      "uninstallerIcon": "build/icon.ico"
+      "uninstallerIcon": "build/icon.ico",
+      "artifactName": "StudioVoxarioConnectUpdate-${version}.${ext}"
     },
     "linux": {
       "target": [
@@ -104,6 +111,11 @@
         "releaseType": "draft"
       }
     ],
-    "executableName": "StudioVoxarioConnect"
+    "executableName": "StudioVoxarioConnect",
+    "portable": {
+      "artifactName": "StudioVoxarioConnectSetup-${version}.${ext}",
+      "splashImage": "build/setup-splash.bmp",
+      "unpackDirName": "StudioVoxarioConnectSetup"
+    }
   }
 }

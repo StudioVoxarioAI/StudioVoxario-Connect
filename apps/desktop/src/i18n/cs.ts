@@ -74,6 +74,17 @@ export const cs = {
   dock: { online: "Online", offline: "Offline – zobrazena uložená data", free: "Volno {{v}}" },
   eyebrow: { store: "02 · Katalog", downloads: "04 · Fronta", settings: "Systém", account: "Účet StudioVoxario" },
   whatsNew: { title: "Co je nového", hint: "Poznámky k aktuální verzi Connectu (stejné jako v Novinkách na webu).", open: "Zobrazit", all: "Všechny novinky na webu", ok: "Rozumím", feature: "Novinka", improvement: "Vylepšení", fix: "Oprava", security: "Bezpečnost" },
+  setup: {
+    title: "Instalace platformy", reinstallTitle: "Přeinstalace / aktualizace", installingTitle: "Instaluji", doneTitle: "Připraveno", uninstallTitle: "Odinstalace",
+    lead: "Všechny hry a software StudioVoxario na jednom místě – obchod, knihovna, stahování a aktualizace.",
+    uninstallText: "StudioVoxario Connect se odebere z počítače. Nainstalované hry ve vašich knihovních složkách zůstanou.",
+    location: "Umístění", change: "Změnit", desktop: "Zástupce na ploše", startMenu: "Nabídka Start", autostart: "Spouštět se systémem",
+    space: "Potřeba {{need}} · volno {{free}}", installed: "nainstalováno {{v}}", terms: "Instalací souhlasíte s obchodními podmínkami StudioVoxario",
+    install: "Instalovat", reinstall: "Přeinstalovat", retry: "Zkusit znovu", launch: "Spustit Connect", uninstall: "Odinstalovat", close: "Zavřít",
+    preparing: "Připravuji…", complete: "Instalace dokončena", failed: "Instalace selhala", noSpace: "Na disku není dost místa.",
+    doneText: "Connect je nainstalovaný. Po spuštění se přihlaste účtem StudioVoxario.", uninstalled: "Connect byl odinstalován. Okno můžete zavřít.",
+    keepData: "Ponechat přihlášení a nastavení",
+  },
   account: {
     title: "Účet", guestTitle: "Nejste přihlášeni", pendingShort: "Přihlašování…", pendingTitle: "Dokončete přihlášení v prohlížeči",
     pendingText: "V prohlížeči se otevřela stránka StudioVoxario – potvrďte přihlášení Connectu. Pokud se stránka neotevřela, otevřete ji znovu.",

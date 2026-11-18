@@ -153,3 +153,17 @@ poznámky jdou do GitHub Release (Markdown + strukturovaná data v komentáři `
 Workflow Release notes je doplní zpětně po každé změně changelogu. Web (Novinky, Historie verzí) je čte živě z GitHub
 Releases API – nová verze se na webu objeví hned po vydání, bez nasazení webu. Connect po aktualizaci ukáže
 okno „Co je nového“ (Nastavení → Obecné ho otevře znovu).
+
+## D22 – Vlastní instalátor (0.3.0)
+Na přání vlastníka celoobrazovkový instalátor místo průvodce NSIS a jinak než u Voxar.app. **Instalátorem je sám
+Connect:** `StudioVoxarioConnectSetup.exe` je portable build (rozbalení s brandovaným splashem `build/setup-splash.bmp`),
+který v režimu instalace (`PORTABLE_EXECUTABLE_FILE`) otevře `#/setup`: obrázky her přes celé okno, logo, průběh,
+volby vlevo dole (umístění, zástupci, start se systémem), tlačítko vpravo dole. Zkopíruje rozbalenou aplikaci
+(`process.noAsar`), zapíše `resources/app-update.yml`, `installer.json`, registr (HKCU: Uninstall\StudioVoxarioConnect,
+protokol `studiovoxario://`, `Software\{GUID}\InstallLocation`), zástupce (`shell.writeShortcutLink`) a spustí Connect.
+Bez práv správce, bez 7z a druhého runtime. **Aktualizace:** dál electron-updater s technickým NSIS balíčkem
+`StudioVoxarioConnectUpdate-x.exe` (tichý, uživatel ho nevidí); NSIS si složku přečte z `InstallLocation` (GUID = UUID v5
+appId, stejně jako electron-builder) a tichý starý odinstalátor (`--uninstall /S`) jen skončí bez mazání. Connect při
+startu drží jediný záznam v Aplikacích Windows (aktualizuje verzi, maže duplicitní záznam NSIS).
+**Odinstalace:** `StudioVoxarioConnect.exe --uninstall` – stejná obrazovka, smazání složky po ukončení procesu.
+Ověřeno E2E na Linuxu (`scripts/e2e-setup.mjs`); registr, zástupce a splash ověří Windows (ruční test).

@@ -9,6 +9,7 @@ import { applyLimits, cancel, enqueue, hooks, kick, syncApps, launch, move, open
 import { claim, libraryNow, licenses, redeemKey, refreshLibrary, setFavorite } from "./library";
 import { settings, updateSettings, type Settings } from "./settings";
 import { adoptFolder, adoptLegacy } from "./migrate";
+import { isSetupMode, isUninstallMode, maintainInstall, runSetup } from "./setup";
 import { checkNow, installNow, setupUpdater, updaterStatus } from "./updater";
 import {
   addLibraryFolder, applyLoginItem, autoUpdate, clearDownloadCache, downloadAllowedNow, exportLogs, libraryFolders, log, moveInstall,
@@ -18,6 +19,10 @@ import {
 const PROTOCOL = "studiovoxario";
 // testy a náhledy: oddělená data aplikace (nikdy nesahá na skutečný profil uživatele)
 if (process.env.CONNECT_USER_DATA) app.setPath("userData", process.env.CONNECT_USER_DATA);
+// vlastní instalátor / odinstalátor (setup.ts): oddělená data a zámek instance, aby šel spustit i při běžícím Connectu
+const setupMode = isSetupMode() || isUninstallMode();
+const realUserData = app.getPath("userData");
+if (setupMode) app.setPath("userData", path.join(app.getPath("temp"), "StudioVoxarioConnectSetup"));
 const isDev = !app.isPackaged && !!process.env.CONNECT_DEV_URL;
 let win: BrowserWindow | null = null;
 let pendingDeepLink: string | null = null;
@@ -84,7 +89,9 @@ function createWindow() {
   else void win.loadFile(path.join(__dirname, "../dist/index.html"));
 }
 
-if (!app.requestSingleInstanceLock()) {
+if (setupMode) {
+  runSetup(realUserData);
+} else if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
   app.on("second-instance", (_e, argv) => {
@@ -177,6 +184,7 @@ if (!app.requestSingleInstanceLock()) {
       if (kind === "rollback") notify("Aktualizace vrácena", `${name} po aktualizaci spadl – vrátili jsme předchozí verzi.`);
     };
     log(`Start ${app.getVersion()} ${process.platform}`);
+    void maintainInstall();
     createWindow();
     applyLimits();
     applyLoginItem();

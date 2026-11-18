@@ -76,6 +76,17 @@ export const en: Dict = {
   dock: { online: "Online", offline: "Offline – showing saved data", free: "{{v}} free" },
   eyebrow: { store: "02 · Catalog", downloads: "04 · Queue", settings: "System", account: "StudioVoxario account" },
   whatsNew: { title: "What's new", hint: "Notes for the current Connect version (same as News on the website).", open: "Show", all: "All news on the website", ok: "Got it", feature: "Feature", improvement: "Improvement", fix: "Fix", security: "Security" },
+  setup: {
+    title: "Platform setup", reinstallTitle: "Reinstall / update", installingTitle: "Installing", doneTitle: "Ready", uninstallTitle: "Uninstall",
+    lead: "All StudioVoxario games and software in one place – store, library, downloads and updates.",
+    uninstallText: "StudioVoxario Connect will be removed. Games installed in your library folders stay.",
+    location: "Location", change: "Change", desktop: "Desktop shortcut", startMenu: "Start menu", autostart: "Launch on startup",
+    space: "Needs {{need}} · free {{free}}", installed: "installed {{v}}", terms: "By installing you agree to the StudioVoxario terms",
+    install: "Install", reinstall: "Reinstall", retry: "Try again", launch: "Launch Connect", uninstall: "Uninstall", close: "Close",
+    preparing: "Preparing…", complete: "Installation complete", failed: "Installation failed", noSpace: "Not enough disk space.",
+    doneText: "Connect is installed. Sign in with your StudioVoxario account after launch.", uninstalled: "Connect was uninstalled. You can close this window.",
+    keepData: "Keep sign-in and settings",
+  },
   account: {
     title: "Account", guestTitle: "You are not signed in", pendingShort: "Signing in…", pendingTitle: "Finish signing in in your browser",
     pendingText: "A StudioVoxario page opened in your browser – confirm the Connect sign-in there. If it did not open, open it again.",
