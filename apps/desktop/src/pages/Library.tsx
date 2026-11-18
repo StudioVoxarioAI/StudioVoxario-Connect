@@ -46,18 +46,19 @@ export function Library() {
   return (
     <div className="flex h-full">
       <aside className="w-60 shrink-0 border-r border-border/60 bg-surface/40 p-4">
-        <h1 className="mb-4 px-2 font-display text-lg font-extrabold tracking-[0.08em]">{t("library.title")}</h1>
+        <div className="hud-label mb-1 px-2">03</div>
+        <h1 className="mb-4 px-2 font-display text-xl font-extrabold uppercase tracking-[0.14em]">{t("library.title")}</h1>
         {cats.map((c) => (
           <button key={c} onClick={() => setCat(c)} aria-pressed={cat === c}
-            className={`flex w-full items-center justify-between rounded-[var(--radius)] px-3 py-2 text-left font-ui text-[15px] font-semibold ${cat === c ? "bg-primary/10 text-foreground" : "text-muted hover:bg-surface-2 hover:text-foreground"}`}>
-            {t(`library.${c}`)} <span className="text-xs text-subtle">{count(c)}</span>
+            className={`relative flex w-full items-center justify-between px-3 py-2 text-left font-display text-[13px] font-semibold uppercase tracking-[0.14em] ${cat === c ? "bg-primary/10 text-foreground before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:bg-primary" : "text-muted hover:bg-surface-2 hover:text-foreground"}`}>
+            {t(`library.${c}`)} <span className="font-mono text-xs text-subtle">{String(count(c)).padStart(2, "0")}</span>
           </button>
         ))}
         <div className="mt-6 space-y-1 border-t border-border/60 pt-4">
           {owned.map(({ p }) => (
             <button key={p.id} onClick={() => select(p)}
               className={`flex w-full items-center gap-2.5 rounded-[var(--radius)] px-2 py-1.5 text-left text-sm ${sel?.p.id === p.id ? "bg-surface-3 text-foreground" : "text-muted hover:bg-surface-2"}`}>
-              <img src={p.media.icon} alt="" className="h-6 w-6 rounded object-cover" /><span className="truncate">{p.name}</span>
+              <img src={p.media.icon} alt="" className="h-6 w-6 border border-border object-cover" /><span className="truncate">{p.name}</span>
             </button>
           ))}
         </div>
@@ -71,9 +72,9 @@ export function Library() {
             </div>
             <div className="absolute bottom-6 left-8 right-8 flex items-end justify-between gap-6">
               <div className="flex items-end gap-4">
-                <img src={sel.p.media.icon} alt="" className="h-16 w-16 rounded-[var(--radius)] border border-white/15" />
+                <img src={sel.p.media.icon} alt="" className="h-16 w-16 border border-primary/50 bg-background/70 p-0.5" />
                 <div>
-                  <h2 className="font-display text-3xl font-extrabold text-white drop-shadow">{sel.p.name}</h2>
+                  <h2 className="font-display text-3xl font-extrabold uppercase tracking-[0.08em] text-white drop-shadow">{sel.p.name}</h2>
                   <div className="mt-1 flex flex-wrap gap-3 text-sm text-white/75">
                     {sel.p.latestVersion && <span>{t("detail.version")} {sel.p.latestVersion}</span>}
                     {sel.p.sizeBytes ? <span>{formatSize(sel.p.sizeBytes, i18n.language)}</span> : null}
@@ -106,15 +107,28 @@ export function Library() {
             <EmptyState icon={<LibraryIcon size={36} />} title={owned.length ? t("library.emptyCat") : t("library.emptyTitle")} text={owned.length ? undefined : t("library.emptyText")}
               action={owned.length ? undefined : <Link to="/store" className="text-primary hover:underline">{t("home.all")}</Link>} />
           ) : view === "grid" ? (
-            <div className="grid grid-cols-2 gap-5 md:grid-cols-4 xl:grid-cols-6">
-              {filtered.map(({ p }) => (
-                <button key={p.id} onClick={() => select(p)} className={`group text-left`}>
-                  <div className={`aspect-[2/3] overflow-hidden rounded-[var(--radius)] border-2 transition ${sel?.p.id === p.id ? "border-primary shadow-glow" : "border-transparent"}`}>
-                    <img src={p.media.cover} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-                  </div>
-                  <div className="mt-2 truncate font-ui text-sm font-semibold">{p.name}</div>
-                </button>
-              ))}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {filtered.map(({ p, item }) => {
+                const rec = inst?.installs[p.id];
+                const active = sel?.p.id === p.id;
+                return (
+                  <button key={p.id} onClick={() => select(p)} aria-pressed={active}
+                    className={`hud-tile group flex items-stretch text-left ${active ? "hud-brackets [--hud-frame:linear-gradient(135deg,hsl(var(--primary)),hsl(var(--primary)/0.5)_50%,hsl(var(--accent)/0.8))]" : ""}`}>
+                    <div className="relative w-36 shrink-0 overflow-hidden">
+                      <img src={p.media.hero} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent to-background/90" />
+                    </div>
+                    <div className="min-w-0 flex-1 px-3 py-3">
+                      <div className="truncate font-display text-[10px] uppercase tracking-[0.24em] text-primary/80">{p.type === "game" ? t("store.games") : t(`category.${p.category ?? "other"}`)}</div>
+                      <div className="truncate font-display text-[15px] font-bold uppercase tracking-[0.05em]">{p.name}</div>
+                      <div className="mt-1.5 flex items-center gap-2 font-mono text-[11px] text-subtle">
+                        {rec ? <span className="text-success">● {rec.running ? t("library.running") : `v${rec.version}`}</span> : <span>○ {t("library.notInstalled")}</span>}
+                        {item.favorite && <Star size={12} className="text-warning" fill="currentColor" />}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           ) : (
             <div className="overflow-hidden rounded-[var(--radius)] border border-border">

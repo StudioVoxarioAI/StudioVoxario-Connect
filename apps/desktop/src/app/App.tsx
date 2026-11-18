@@ -3,10 +3,9 @@ import { useEffect, useState } from "react";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import { Navigator } from "../components/Navigator";
 import { SearchPalette } from "../components/SearchPalette";
-import { Sidebar } from "../components/Sidebar";
-import { TitleBar } from "../components/TitleBar";
+import { CommandBar } from "../components/CommandBar";
+import { StatusDock } from "../components/StatusDock";
 import { Toasts } from "../components/Toasts";
-import { TopBar } from "../components/TopBar";
 import { useSettings } from "../lib/settings";
 import { Account } from "../pages/Account";
 import { Downloads } from "../pages/Downloads";
@@ -32,12 +31,10 @@ export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <HashRouter>
-        <div className="flex h-full flex-col">
-          <TitleBar />
+        <div className="hud-bg flex h-full flex-col">
+          <CommandBar onSearch={() => setSearch(true)} />
           <div className="flex min-h-0 flex-1">
-            <Sidebar />
             <div className="flex min-w-0 flex-1 flex-col">
-              <TopBar onSearch={() => setSearch(true)} />
               <main className="min-h-0 flex-1 overflow-auto">
                 <Routes>
                   <Route path="/" element={<Home />} />
@@ -52,6 +49,7 @@ export function App() {
               </main>
             </div>
           </div>
+          <StatusDock />
         </div>
         <Navigator />
         <SearchPalette open={search} onClose={() => setSearch(false)} />

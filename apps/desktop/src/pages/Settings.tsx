@@ -47,7 +47,7 @@ const inputCls = "h-9 rounded-[var(--radius)] border border-border bg-surface-2 
 
 function Card({ title, children, action }: { title: string; children: ReactNode; action?: ReactNode }) {
   return (
-    <section className="mb-6 rounded-[calc(var(--radius)*1.4)] border border-border bg-surface px-6 py-4">
+    <section className="mb-6 hud px-6 py-4">
       <div className="mb-1 flex items-center justify-between"><h2 className="font-display text-base font-bold">{title}</h2>{action}</div>
       {children}
     </section>
@@ -230,7 +230,7 @@ export function Settings() {
   const info = useQuery({ queryKey: ["app-info"], queryFn: () => bridge.appInfo() });
   const set = (patch: Partial<MainSettings>) => { if (s) qc.setQueryData(["main-settings"], { ...s, ...patch }); void bridge.settings.set(patch); };
   return (
-    <Page title={t("settings.title")}>
+    <Page eyebrow={t("eyebrow.settings")} title={t("settings.title")}>
       <div className="flex gap-8">
         <nav className="w-60 shrink-0 space-y-1">
           {sections.map((k) => (

@@ -41,7 +41,7 @@ export function ProductDetail() {
           <img src={p.media.icon} alt="" className="h-20 w-20 rounded-[calc(var(--radius)*1.2)] border border-white/15 shadow-card" />
           <div>
             <div className="mb-2 flex flex-wrap gap-2"><StatusBadge p={p} /><Badge>{p.type === "game" ? t("store.games") : t(`category.${p.category ?? "other"}`)}</Badge></div>
-            <h1 className="font-display text-4xl font-extrabold tracking-[0.04em] text-white drop-shadow-lg">{p.name}</h1>
+            <h1 className="font-display text-4xl font-extrabold uppercase tracking-[0.08em] text-white drop-shadow-lg">{p.name}</h1>
             {p.tagline && <p className="mt-1 text-[15px] text-white/80">{p.tagline}</p>}
           </div>
         </div>
@@ -50,7 +50,7 @@ export function ProductDetail() {
       <div className="mx-auto grid max-w-[1400px] gap-8 px-8 pb-12 pt-6 lg:grid-cols-[1fr_340px]">
         <div className="min-w-0 space-y-8">
           <div>
-            <div className="relative aspect-video overflow-hidden rounded-[calc(var(--radius)*1.4)] border border-border bg-surface">
+            <div className="relative aspect-video overflow-hidden hud">
               <img src={shots[shot]} alt={`${p.name} – ${shot + 1}`} className="h-full w-full object-cover" />
               {shots.length > 1 && (<>
                 <button aria-label={t("detail.prev")} onClick={() => setShot((shot + shots.length - 1) % shots.length)} className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"><ChevronLeft size={20} /></button>
@@ -93,7 +93,7 @@ export function ProductDetail() {
         </div>
 
         <aside className="lg:sticky lg:top-6 lg:self-start">
-          <div className="rounded-[calc(var(--radius)*1.4)] border border-border bg-surface p-5 shadow-card">
+          <div className="hud p-5 shadow-card">
             <div className="mb-4 flex items-baseline justify-between">
               <span className="font-display text-2xl font-extrabold">{formatPrice(p, t, i18n.language)}</span>
               {p.pricing.discountPercent ? <Badge tone="success">-{p.pricing.discountPercent} %</Badge> : null}

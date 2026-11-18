@@ -4,6 +4,7 @@ export const cs = {
   window: { minimize: "Minimalizovat", maximize: "Maximalizovat", close: "Zavřít" },
   common: { retry: "Zkusit znovu", soon: "Připravujeme", openWeb: "Otevřít na webu", phase: "Fáze {{n}}" },
   home: {
+    queue_one: "{{count}} ve frontě", queue_few: "{{count}} ve frontě", queue_other: "{{count}} ve frontě", 
     eyebrow: "StudioVoxario Connect",
     title: "Všechny hry a software studia na jednom místě",
     lead: "Obchod, knihovna, stahování a aktualizace – Ashes of Eryon, Fantasy, Voxario Studio Engine, Voxar.app, VoxarioProtect a VoxarioBrowser.",
@@ -20,6 +21,7 @@ export const cs = {
     pending: "Produkty, ceny a obrázky se berou z webu StudioVoxario (zdroj pravdy) – napojení katalogu je Fáze 1.",
   },
   library: {
+    notInstalled: "Nenainstalováno", 
     extendUpdates: "Prodloužit aktualizace (Upgrade pass)", buyHint: "Platba proběhne na webu StudioVoxario. Po zaplacení se vraťte do Connectu – knihovna se obnoví sama.", 
     reinstall: "Přeinstalovat", installHost: "Nainstalovat {{name}}", moduleOf: "Součást {{name}}", launchHost: "Otevřít v {{name}}", 
     title: "Knihovna", signedOutTitle: "Přihlaste se ke své knihovně", signedOutText: "Knihovna ukazuje hry a software vašeho účtu StudioVoxario.",
@@ -69,6 +71,8 @@ export const cs = {
     available: "Je k dispozici verze {{v}}.", downloading: "Stahuji verzi {{v}}… {{p}} %", ready: "Verze {{v}} je připravená k instalaci.",
     none: "Máte nejnovější verzi.", error: "Aktualizaci se nepodařilo zkontrolovat: {{e}}",
   },
+  dock: { online: "Online", offline: "Offline – zobrazena uložená data", free: "Volno {{v}}" },
+  eyebrow: { store: "02 · Katalog", downloads: "04 · Fronta", settings: "Systém", account: "Účet StudioVoxario" },
   account: {
     title: "Účet", guestTitle: "Nejste přihlášeni", pendingShort: "Přihlašování…", pendingTitle: "Dokončete přihlášení v prohlížeči",
     pendingText: "V prohlížeči se otevřela stránka StudioVoxario – potvrďte přihlášení Connectu. Pokud se stránka neotevřela, otevřete ji znovu.",

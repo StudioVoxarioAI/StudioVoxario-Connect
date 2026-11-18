@@ -45,7 +45,7 @@ export function Store() {
   const active = f.genres.length + (f.price ? 1 : 0) + (f.status ? 1 : 0) + (f.category ? 1 : 0);
 
   return (
-    <Page title={t("store.title")}>
+    <Page eyebrow={t("eyebrow.store")} title={t("store.title")}>
       <OfflineNotice />
       <div className="mb-5 flex flex-wrap items-center gap-3">
         <div role="tablist" className="flex rounded-[var(--radius)] border border-border bg-surface p-1">
@@ -69,7 +69,7 @@ export function Store() {
         </label>
       </div>
       {open && (
-        <div className="mb-6 grid gap-4 rounded-[calc(var(--radius)*1.4)] border border-border bg-surface p-5 md:grid-cols-2">
+        <div className="mb-6 grid gap-4 hud p-5 md:grid-cols-2">
           {genres.length > 0 && (
             <div><div className="mb-2 font-display text-[11px] uppercase tracking-[0.2em] text-subtle">{t("store.genre")}</div>
               <div className="flex flex-wrap gap-2">{genres.map((g) => (
@@ -91,9 +91,9 @@ export function Store() {
         </div>
       )}
       {isLoading ? (
-        <div className="grid grid-cols-2 gap-5 md:grid-cols-3 xl:grid-cols-5">{Array.from({ length: 6 }, (_, i) => <ProductCardSkeleton key={i} />)}</div>
+        <div className="grid grid-cols-2 gap-5 md:grid-cols-2 xl:grid-cols-3">{Array.from({ length: 6 }, (_, i) => <ProductCardSkeleton key={i} />)}</div>
       ) : list.length ? (
-        <div className="grid grid-cols-2 gap-x-5 gap-y-7 md:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6">{list.map((p) => <ProductCard key={p.id} p={p} />)}</div>
+        <div className="grid grid-cols-2 gap-x-5 gap-y-7 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">{list.map((p) => <ProductCard key={p.id} p={p} />)}</div>
       ) : (
         <EmptyState icon={<SearchX size={34} />} title={t("store.noResults")} text={t("store.noResultsText")} />
       )}

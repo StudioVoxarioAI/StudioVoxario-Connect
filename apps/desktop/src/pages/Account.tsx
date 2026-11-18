@@ -16,7 +16,7 @@ export function Account() {
   const date = (s?: string) => (s ? new Date(s).toLocaleDateString(i18n.language === "cs" ? "cs-CZ" : "en-US") : "—");
   if (!auth?.signedIn) {
     return (
-      <Page title={t("account.title")}>
+      <Page eyebrow={t("eyebrow.account")} title={t("account.title")}>
         <EmptyState icon={<ShieldCheck size={38} />} title={auth?.pending ? t("account.pendingTitle") : t("account.guestTitle")}
           text={auth?.pending ? t("account.pendingText") : t("account.guestText")}
           action={
@@ -39,7 +39,7 @@ export function Account() {
   const u = auth.user!;
   return (
     <Page title={t("account.title")}>
-      <section className="mb-8 flex items-center gap-5 rounded-[calc(var(--radius)*1.4)] border border-border bg-surface p-6">
+      <section className="mb-8 flex items-center gap-5 hud p-6">
         <Avatar src={u.avatar} name={u.name} size={72} />
         <div className="min-w-0 flex-1">
           <div className="font-display text-2xl font-extrabold">{u.name}</div>
@@ -55,7 +55,7 @@ export function Account() {
         <div className="mb-6 flex items-center gap-3 rounded-[var(--radius)] border border-warning/30 bg-warning/10 px-4 py-2.5 text-sm text-warning"><ShieldAlert size={16} />{t("account.noSecureStorage")}</div>
       )}
       <SectionTitle>{t("account.licenses")}</SectionTitle>
-      <div className="mb-8 overflow-hidden rounded-[calc(var(--radius)*1.4)] border border-border bg-surface">
+      <div className="mb-8 overflow-hidden hud">
         {lic.isLoading ? <div className="p-5 text-sm text-subtle"><Loader2 size={16} className="inline animate-spin" /></div>
           : lic.data?.length ? lic.data.map((l) => (
             <div key={l.productId} className="flex items-center justify-between border-b border-border/60 px-5 py-4 last:border-0">

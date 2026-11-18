@@ -6,6 +6,7 @@ export const en: Dict = {
   window: { minimize: "Minimize", maximize: "Maximize", close: "Close" },
   common: { retry: "Try again", soon: "Coming soon", openWeb: "Open on the web", phase: "Phase {{n}}" },
   home: {
+    queue_one: "{{count}} queued", queue_few: "{{count}} queued", queue_other: "{{count}} queued", 
     eyebrow: "StudioVoxario Connect",
     title: "All StudioVoxario games and software in one place",
     lead: "Store, library, downloads and updates – Ashes of Eryon, Fantasy, Voxario Studio Engine, Voxar.app, VoxarioProtect and VoxarioBrowser.",
@@ -22,6 +23,7 @@ export const en: Dict = {
     pending: "Products, prices and images come from the StudioVoxario website (source of truth) – catalog integration is Phase 1.",
   },
   library: {
+    notInstalled: "Not installed", 
     extendUpdates: "Extend updates (Upgrade pass)", buyHint: "Payment happens on the StudioVoxario website. Come back to Connect afterwards – your library refreshes automatically.", 
     reinstall: "Reinstall", installHost: "Install {{name}}", moduleOf: "Part of {{name}}", launchHost: "Open in {{name}}", 
     title: "Library", signedOutTitle: "Sign in to see your library", signedOutText: "The library shows the games and software of your StudioVoxario account.",
@@ -71,6 +73,8 @@ export const en: Dict = {
     available: "Version {{v}} is available.", downloading: "Downloading version {{v}}… {{p}} %", ready: "Version {{v}} is ready to install.",
     none: "You are up to date.", error: "Could not check for updates: {{e}}",
   },
+  dock: { online: "Online", offline: "Offline – showing saved data", free: "{{v}} free" },
+  eyebrow: { store: "02 · Catalog", downloads: "04 · Queue", settings: "System", account: "StudioVoxario account" },
   account: {
     title: "Account", guestTitle: "You are not signed in", pendingShort: "Signing in…", pendingTitle: "Finish signing in in your browser",
     pendingText: "A StudioVoxario page opened in your browser – confirm the Connect sign-in there. If it did not open, open it again.",

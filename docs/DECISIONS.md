@@ -134,3 +134,14 @@ react-router-dom 7.18 (open redirect), zod 4.6 (vyčerpání paměti), vitest 4.
 `tar` a staré `app-builder-lib` ze `electron-builder-squirrel-windows` (nepoužívá se). `pnpm audit --prod`: bez nálezů;
 zbývají jen nástroje pro sestavení/lint. Po aktualizaci znovu prošly E2E testy (instalace, přesun, limit, plánovač,
 aplikace, převzetí) proti produkčním datům webu.
+
+## D20 – Vlastní vizuální identita (0.2.0): HUD StudioVoxario místo „launcheru jako ostatní“
+Na přání vlastníka se Connect nemá podobat Epic Games Store. Změna rozložení i jazyka podle HUD stylu webu
+(holo-pod): **horní velitelská lišta** se záložkami 01–04 místo bočního panelu, **stavová lišta** dole (spojení,
+stahování, rychlost, volné místo, verze), **Domů = „deck“** (velký holo panel + výběr produktů 01–05 jako menu ve hře,
+bez automatického kolotoče; pod ním panely Pokračovat / Stahování a časová osa novinek), **karty naležato** se
+zkosenými rohy, vlasovým neonovým rámem a rohovými závorkami (místo portrétních obálek), zkosená tlačítka a štítky,
+nadpisy verzálkami (Oxanium) se štítkem `// sekce`, ostré rohy (`--radius` 3 px), pozadí s mřížkou a září.
+Utility `.hud`, `.hud-tile`, `.hud-btn`, `.hud-brackets`, `.hud-label`, `.hud-scan` v `packages/ui/src/tokens.css`.
+**Vydávání:** electron-builder 26 zakládal vydání bez platného tagu (422) – vydání teď zakládá workflow jako
+koncept s tagem (`gh release create --draft --target`), electron-builder do něj nahraje soubory, nakonec se zveřejní.

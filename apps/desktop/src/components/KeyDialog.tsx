@@ -26,7 +26,7 @@ export function KeyDialog({ product, onClose, onDone }: { product: Product; onCl
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm" onMouseDown={onClose}>
       <form role="dialog" aria-modal="true" aria-labelledby="key-title" onMouseDown={(e) => e.stopPropagation()}
         onSubmit={(e) => { e.preventDefault(); void submit(); }} onKeyDown={(e) => e.key === "Escape" && onClose()}
-        className="w-full max-w-md rounded-[calc(var(--radius)*1.4)] border border-border bg-surface p-6 shadow-glow">
+        className="w-full max-w-md hud p-6 shadow-glow">
         <div className="mb-4 flex items-center gap-3">
           <span className="grid h-11 w-11 place-items-center rounded-full bg-primary/15 text-primary"><KeyRound size={22} /></span>
           <div><h2 id="key-title" className="font-display text-lg font-bold">{t("key.title")}</h2><p className="text-sm text-muted">{t("key.for", { name: product.name })}</p></div>

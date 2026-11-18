@@ -20,7 +20,7 @@
   --danger: 0 88% 62%;
   --border: 220 30% 14%;
   --ring: 184 100% 54%;
-  --radius: 10px;
+  --radius: 3px;
   --sidebar-width: 236px;
   --topbar-height: 60px;
   --font-display: "Oxanium", "Rajdhani", system-ui, sans-serif;   /* latin-ext: české znaky */
@@ -47,3 +47,37 @@
   --shadow-card: 0 10px 30px -14px rgb(15 23 42 / 0.25);
   color-scheme: light;
 }
+
+/* ---------------------------------------------------------------- HUD jazyk StudioVoxario (jako web: holo-pod)
+   Zkosené rohy, vlasový neonový rám (gradient azurová -> fialová), rohové závorky, jemný sken.
+   Použití: .hud (panel), .hud-tile (karta), .hud-btn (tlačítko), .hud-brackets (rohové závorky), .hud-label */
+:root { --ch: 14px; --hud-frame: linear-gradient(135deg, hsl(var(--primary) / 0.55), hsl(var(--primary) / 0.18) 45%, hsl(var(--violet) / 0.45)); }
+:root[data-theme="light"] { --hud-frame: linear-gradient(135deg, hsl(var(--primary) / 0.6), hsl(var(--border)) 45%, hsl(var(--violet) / 0.5)); }
+
+.hud, .hud-tile {
+  position: relative;
+  border: 1px solid transparent;
+  background: linear-gradient(160deg, hsl(var(--surface) / 0.92), hsl(var(--background) / 0.96)) padding-box, var(--hud-frame) border-box;
+  clip-path: polygon(var(--ch) 0, 100% 0, 100% calc(100% - var(--ch)), calc(100% - var(--ch)) 100%, 0 100%, 0 var(--ch));
+}
+.hud-tile { --ch: 12px; transition: transform .25s ease, filter .25s ease; }
+.hud-tile:hover, .hud-tile:focus-visible { transform: translateY(-3px); filter: drop-shadow(0 0 14px hsl(var(--primary) / 0.35)); --hud-frame: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.4) 50%, hsl(var(--accent) / 0.8)); }
+.hud-cut-tl { clip-path: polygon(var(--ch) 0, 100% 0, 100% 100%, 0 100%, 0 var(--ch)); }
+.hud-btn { --ch: 8px; clip-path: polygon(var(--ch) 0, 100% 0, 100% calc(100% - var(--ch)), calc(100% - var(--ch)) 100%, 0 100%, 0 var(--ch)); border-radius: 0 !important; }
+
+/* rohové závorky (dva rohy bez zkosení) */
+.hud-brackets::before, .hud-brackets::after {
+  content: ""; position: absolute; width: 16px; height: 16px; pointer-events: none; z-index: 2;
+  border: 1.5px solid hsl(var(--primary) / 0.85);
+}
+.hud-brackets::before { top: 5px; right: 5px; border-left: 0; border-bottom: 0; }
+.hud-brackets::after { bottom: 5px; left: 5px; border-right: 0; border-top: 0; }
+
+.hud-label { font-family: var(--font-display); font-size: 11px; letter-spacing: .28em; text-transform: uppercase; color: hsl(var(--primary)); }
+.hud-label::before { content: "// "; opacity: .55; }
+
+/* sken přes obraz (decentní, vypne se při reduced motion) */
+.hud-scan { position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, transparent 0 3px, hsl(var(--primary) / 0.035) 3px 4px); }
+.hud-scan::after { content: ""; position: absolute; left: 0; right: 0; height: 30%; background: linear-gradient(180deg, transparent, hsl(var(--primary) / 0.07), transparent); animation: hud-sweep 7s linear infinite; }
+@keyframes hud-sweep { from { top: -30%; } to { top: 100%; } }
+@media (prefers-reduced-motion: reduce) { .hud-scan::after { animation: none; display: none; } .hud-tile { transition: none; } }

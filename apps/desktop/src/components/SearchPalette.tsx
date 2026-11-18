@@ -25,7 +25,7 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 pt-[12vh] backdrop-blur-sm" onMouseDown={onClose}>
       <div role="dialog" aria-modal="true" aria-label={t("search.placeholder")}
-        className="w-full max-w-2xl overflow-hidden rounded-[calc(var(--radius)*1.4)] border border-border bg-surface shadow-glow"
+        className="w-full max-w-2xl overflow-hidden hud shadow-glow"
         onMouseDown={(e) => e.stopPropagation()}
         onKeyDown={(e) => {
           if (e.key === "Escape") onClose();

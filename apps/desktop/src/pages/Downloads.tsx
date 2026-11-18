@@ -17,8 +17,8 @@ export function Downloads() {
   const bars = Array.from({ length: 60 }, (_, i) => hist[hist.length - 60 + i] ?? 0);
   const name = (id: string) => cat?.products.find((p) => p.id === id);
   return (
-    <Page title={t("downloads.title")}>
-      <div className="mb-7 rounded-[calc(var(--radius)*1.4)] border border-border bg-surface p-5">
+    <Page eyebrow={t("eyebrow.downloads")} title={t("downloads.title")}>
+      <div className="mb-7 hud p-5">
         <div className="mb-3 flex items-center justify-between text-sm">
           <span className="font-display text-[11px] uppercase tracking-[0.2em] text-subtle">{t("downloads.speed")}</span>
           <span className="font-mono text-primary">{formatBytes(data?.speed ?? 0, i18n.language)}/s</span>

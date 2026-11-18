@@ -1,7 +1,7 @@
 {
   "name": "@connect/desktop",
   "productName": "StudioVoxario Connect",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": true,
   "description": "StudioVoxario Connect – launcher, obchod a knihovna",
   "author": "StudioVoxario",
@@ -101,7 +101,7 @@
         "provider": "github",
         "owner": "StudioVoxarioAI",
         "repo": "StudioVoxario-Connect",
-        "releaseType": "release"
+        "releaseType": "draft"
       }
     ],
     "executableName": "StudioVoxarioConnect"

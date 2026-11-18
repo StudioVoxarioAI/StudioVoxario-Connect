@@ -90,7 +90,7 @@ function Modal({ children, onClose, label }: { children: React.ReactNode; onClos
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm" onMouseDown={onClose}>
       <div role="dialog" aria-modal="true" aria-label={label} onMouseDown={(e) => e.stopPropagation()} onKeyDown={(e) => e.key === "Escape" && onClose()}
-        className="w-full max-w-lg rounded-[calc(var(--radius)*1.4)] border border-border bg-surface p-6 text-left shadow-glow">{children}</div>
+        className="w-full max-w-lg hud p-6 text-left shadow-glow">{children}</div>
     </div>
   );
 }
