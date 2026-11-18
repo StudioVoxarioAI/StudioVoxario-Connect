@@ -75,6 +75,7 @@ export const en: Dict = {
   },
   dock: { online: "Online", offline: "Offline – showing saved data", free: "{{v}} free" },
   eyebrow: { store: "02 · Catalog", downloads: "04 · Queue", settings: "System", account: "StudioVoxario account" },
+  whatsNew: { title: "What's new", hint: "Notes for the current Connect version (same as News on the website).", open: "Show", all: "All news on the website", ok: "Got it", feature: "Feature", improvement: "Improvement", fix: "Fix", security: "Security" },
   account: {
     title: "Account", guestTitle: "You are not signed in", pendingShort: "Signing in…", pendingTitle: "Finish signing in in your browser",
     pendingText: "A StudioVoxario page opened in your browser – confirm the Connect sign-in there. If it did not open, open it again.",

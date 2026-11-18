@@ -1,0 +1,31 @@
+name: Release notes
+
+# Doplní / opraví poznámky u už vydaných verzí podle apps/desktop/src/changelog.json
+# (web je čte z GitHub Releases – Novinky a Historie verzí). Spouští se ručně nebo po změně changelogu.
+on:
+  workflow_dispatch:
+  push:
+    paths: ["apps/desktop/src/changelog.json"]
+
+permissions:
+  contents: write
+
+jobs:
+  notes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Aktualizovat poznámky vydaných verzí
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for v in $(node -p "require('./apps/desktop/src/changelog.json').map(e => e.version).join(' ')"); do
+            if gh release view "v$v" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+              node apps/desktop/scripts/release-notes.mjs "$v" notes.md
+              gh release edit "v$v" --repo "$GITHUB_REPOSITORY" --notes-file notes.md
+              echo "v$v: poznámky aktualizovány"
+            fi
+          done

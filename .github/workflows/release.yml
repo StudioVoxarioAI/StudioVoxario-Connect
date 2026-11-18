@@ -31,6 +31,11 @@ jobs:
         run: |
           v="${GITHUB_REF_NAME#v}"
           cd apps/desktop && npm pkg set version="$v"
+      - name: Poznámky k vydání (src/changelog.json – bez nich se nevydává)
+        shell: bash
+        run: |
+          v=$(node -p "require('./apps/desktop/package.json').version")
+          node apps/desktop/scripts/release-notes.mjs "$v" notes.md
       - name: Založit vydání (koncept s tagem na tomto commitu)
         shell: bash
         env:
@@ -40,7 +45,7 @@ jobs:
           pre=""; case "$v" in *-*) pre="--prerelease";; esac
           gh release view "v$v" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || \
             gh release create "v$v" --repo "$GITHUB_REPOSITORY" --draft $pre --target "$GITHUB_SHA" \
-              --title "StudioVoxario Connect $v" --notes "StudioVoxario Connect $v – instalátor pro Windows. Nainstalované Connecty se aktualizují samy."
+              --title "StudioVoxario Connect $v" --notes-file notes.md
       - name: Sestavit a vydat (Windows, NSIS)
         run: pnpm --filter @connect/desktop release:win
         env:
@@ -62,4 +67,4 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           v=$(node -p "require('./apps/desktop/package.json').version")
-          gh release edit "v$v" --repo "$GITHUB_REPOSITORY" --draft=false
+          gh release edit "v$v" --repo "$GITHUB_REPOSITORY" --notes-file notes.md --draft=false

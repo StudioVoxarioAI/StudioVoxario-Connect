@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import type { LibraryFolder, Settings as MainSettings } from "../../electron/preload";
 import { Page } from "../components/Page";
 import { toast } from "../components/Toasts";
+import { openWhatsNew } from "../components/WhatsNew";
 import { bridge, isDesktop } from "../lib/bridge";
 import { useCatalog } from "../lib/catalog";
 import { formatBytes, useInstalls, useMainSettings, useUpdater } from "../lib/installs";
@@ -255,6 +256,7 @@ export function Settings() {
                 <Segmented value={s.launcherChannel} onChange={(v) => { set({ launcherChannel: v }); setTimeout(() => void bridge.updater.check(), 300); }} options={[{ v: "stable", label: t("settings.stable") }, { v: "beta", label: "Beta" }]} />
               </Row>
               <UpdaterRow />
+              <Row label={t("whatsNew.title")} hint={t("whatsNew.hint")}><Button size="sm" variant="secondary" onClick={() => openWhatsNew()}>{t("whatsNew.open")}</Button></Row>
             </Card>
           )}
           {sec === "appearance" && (

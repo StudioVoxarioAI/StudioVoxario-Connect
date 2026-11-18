@@ -73,6 +73,7 @@ export const cs = {
   },
   dock: { online: "Online", offline: "Offline – zobrazena uložená data", free: "Volno {{v}}" },
   eyebrow: { store: "02 · Katalog", downloads: "04 · Fronta", settings: "Systém", account: "Účet StudioVoxario" },
+  whatsNew: { title: "Co je nového", hint: "Poznámky k aktuální verzi Connectu (stejné jako v Novinkách na webu).", open: "Zobrazit", all: "Všechny novinky na webu", ok: "Rozumím", feature: "Novinka", improvement: "Vylepšení", fix: "Oprava", security: "Bezpečnost" },
   account: {
     title: "Účet", guestTitle: "Nejste přihlášeni", pendingShort: "Přihlašování…", pendingTitle: "Dokončete přihlášení v prohlížeči",
     pendingText: "V prohlížeči se otevřela stránka StudioVoxario – potvrďte přihlášení Connectu. Pokud se stránka neotevřela, otevřete ji znovu.",

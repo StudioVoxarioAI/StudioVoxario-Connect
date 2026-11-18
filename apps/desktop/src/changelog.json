@@ -1,0 +1,38 @@
+[
+  {
+    "version": "0.2.1",
+    "date": "2026-11-18",
+    "title": "Co je nového po každé aktualizaci a jediná cesta k instalaci",
+    "titleEn": "What's new after every update and a single way to install",
+    "changes": [
+      { "type": "feature", "text": "Po aktualizaci Connect ukáže okno „Co je nového“ se skutečnými poznámkami k nové verzi; znovu ho otevřete v Nastavení → Obecné.", "textEn": "After an update Connect shows a “What's new” window with the real notes for the new version; reopen it in Settings → General." },
+      { "type": "feature", "text": "Poznámky ke každé verzi Connectu se samy objeví na webu v Novinkách a Historii verzí.", "textEn": "Notes for every Connect version now appear on the website under News and Version history automatically." },
+      { "type": "improvement", "text": "Web už nenabízí samostatné instalátory – Voxar.app, VoxarioBrowser, Ashes of Eryon i Voxario Studio Engine se instalují přes Connect (Voxar.app dál jen s přístupovým klíčem, Ashes jen s přístupem).", "textEn": "The website no longer offers standalone installers – Voxar.app, VoxarioBrowser, Ashes of Eryon and Voxario Studio Engine install through Connect (Voxar.app still requires an access key, Ashes requires access)." },
+      { "type": "improvement", "text": "Tlačítko „Instalovat ve StudioVoxario Connect“ v obchodě na webu otevře engine přímo v knihovně Connectu.", "textEn": "The “Install in StudioVoxario Connect” button in the web store opens the engine directly in the Connect library." }
+    ]
+  },
+  {
+    "version": "0.2.0",
+    "date": "2026-11-18",
+    "title": "Nový vzhled StudioVoxario a bezpečnostní aktualizace",
+    "titleEn": "New StudioVoxario look and security updates",
+    "changes": [
+      { "type": "feature", "text": "Vlastní HUD vzhled StudioVoxario: horní velitelská lišta místo bočního panelu, stavová lišta s připojením, stahováním a volným místem.", "textEn": "Own StudioVoxario HUD look: top command bar instead of a sidebar, status bar with connection, downloads and free space." },
+      { "type": "feature", "text": "Domů: velký panel s výběrem produktů 01–05, panely Pokračovat ve hře a Stahování, časová osa novinek.", "textEn": "Home: large panel with a 01–05 product selector, Continue playing and Downloads panels, news timeline." },
+      { "type": "improvement", "text": "Karty obchodu a knihovny naležato se zkosenými rohy a neonovým rámečkem, ostřejší tlačítka a nadpisy.", "textEn": "Landscape store and library cards with chamfered corners and a neon frame, sharper buttons and headings." },
+      { "type": "security", "text": "Electron 45 (dřívější verze 33 už nedostávala opravy) a aktualizované knihovny – v aplikaci žádná známá zranitelnost.", "textEn": "Electron 45 (version 33 no longer received fixes) and updated libraries – no known vulnerabilities in the app." }
+    ]
+  },
+  {
+    "version": "0.1.0",
+    "date": "2026-11-18",
+    "title": "První vydání StudioVoxario Connect",
+    "titleEn": "First StudioVoxario Connect release",
+    "changes": [
+      { "type": "feature", "text": "Obchod, knihovna, stahování a aktualizace všech her a aplikací StudioVoxario v jedné aplikaci, přihlášení účtem webu.", "textEn": "Store, library, downloads and updates for all StudioVoxario games and apps in one app, signed in with your website account." },
+      { "type": "feature", "text": "Stahování s navazováním po přerušení, aktualizace jen změněných souborů, ověření a oprava souborů, návrat verze při neúspěšné aktualizaci.", "textEn": "Resumable downloads, delta updates, file verification and repair, automatic rollback after a failed update." },
+      { "type": "feature", "text": "Knihovní složky na více discích, přesun her, omezení rychlosti, plánovač stahování, automatické aktualizace.", "textEn": "Library folders on multiple drives, moving games, speed limit, download scheduler, automatic updates." },
+      { "type": "feature", "text": "Hry ze starého launcheru Ashes of Eryon převezme bez nového stahování.", "textEn": "Games from the old Ashes of Eryon launcher are adopted without downloading again." }
+    ]
+  }
+]

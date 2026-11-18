@@ -6,6 +6,7 @@ import { SearchPalette } from "../components/SearchPalette";
 import { CommandBar } from "../components/CommandBar";
 import { StatusDock } from "../components/StatusDock";
 import { Toasts } from "../components/Toasts";
+import { WhatsNew } from "../components/WhatsNew";
 import { useSettings } from "../lib/settings";
 import { Account } from "../pages/Account";
 import { Downloads } from "../pages/Downloads";
@@ -54,6 +55,7 @@ export function App() {
         <Navigator />
         <SearchPalette open={search} onClose={() => setSearch(false)} />
         <Toasts />
+        <WhatsNew />
       </HashRouter>
     </QueryClientProvider>
   );

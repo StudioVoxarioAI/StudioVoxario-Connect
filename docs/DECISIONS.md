@@ -145,3 +145,11 @@ nadpisy verzálkami (Oxanium) se štítkem `// sekce`, ostré rohy (`--radius` 3
 Utility `.hud`, `.hud-tile`, `.hud-btn`, `.hud-brackets`, `.hud-label`, `.hud-scan` v `packages/ui/src/tokens.css`.
 **Vydávání:** electron-builder 26 zakládal vydání bez platného tagu (422) – vydání teď zakládá workflow jako
 koncept s tagem (`gh release create --draft --target`), electron-builder do něj nahraje soubory, nakonec se zveřejní.
+
+## D21 – Skutečné poznámky ke každé verzi (0.2.1)
+Jediný zdroj: `apps/desktop/src/changelog.json` (verze, datum, nadpis cs/en, změny typu feature/improvement/fix/security
+– stejný formát jako `src/data/changelog.ts` webu). Workflow Release bez záznamu pro vydávanou verzi **skončí chybou**;
+poznámky jdou do GitHub Release (Markdown + strukturovaná data v komentáři `<!-- connect-changelog {...} -->`).
+Workflow Release notes je doplní zpětně po každé změně changelogu. Web (Novinky, Historie verzí) je čte živě z GitHub
+Releases API – nová verze se na webu objeví hned po vydání, bez nasazení webu. Connect po aktualizaci ukáže
+okno „Co je nového“ (Nastavení → Obecné ho otevře znovu).
