@@ -1,14 +1,16 @@
-import { Download, Loader2, Search } from "lucide-react";
+import { Download, Loader2, RefreshCw, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { useAuth } from "../lib/account";
 import { bridge } from "../lib/bridge";
+import { useUpdater } from "../lib/installs";
 import { Avatar } from "./Avatar";
 import { DownloadIndicator } from "./DownloadIndicator";
 
 export function TopBar({ onSearch }: { onSearch: () => void }) {
   const { t } = useTranslation();
   const { data: auth } = useAuth();
+  const { data: upd } = useUpdater();
   return (
     <header className="flex h-[var(--topbar-height)] shrink-0 items-center gap-4 border-b border-border/60 bg-background/80 px-6 backdrop-blur">
       <button onClick={onSearch}
@@ -18,6 +20,12 @@ export function TopBar({ onSearch }: { onSearch: () => void }) {
         <kbd className="rounded border border-border bg-surface-3 px-1.5 py-0.5 font-mono text-[11px] text-subtle">Ctrl K</kbd>
       </button>
       <div className="ml-auto flex items-center gap-3">
+        {upd?.state === "ready" && (
+          <button onClick={() => bridge.updater.install()} title={t("updater.readyText", { v: upd.version })}
+            className="flex items-center gap-2 rounded-full border border-success/50 bg-success/10 px-3 py-1.5 text-sm font-semibold text-success hover:bg-success/20">
+            <RefreshCw size={15} />{t("updater.restart")}
+          </button>
+        )}
         <DownloadIndicator fallback={<Link to="/downloads" className="flex items-center gap-2 rounded-[var(--radius)] px-3 py-2 text-sm text-muted hover:bg-surface-2 hover:text-foreground" title={t("top.noDownloads")}>
           <Download size={17} /><span className="hidden xl:inline">{t("top.noDownloads")}</span>
         </Link>} />

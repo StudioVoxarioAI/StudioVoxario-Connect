@@ -7,9 +7,10 @@ import type { InstallsState } from "./installer";
 import type { LibraryState } from "./library";
 import type { Settings } from "./settings";
 import type { LibraryFolder } from "./system";
+import type { UpdaterStatus } from "./updater";
 
 export type CatalogState = Catalog & { offline: boolean };
-export type { AuthStatus, InstallsState, LibraryFolder, LibraryState, Settings };
+export type { AuthStatus, InstallsState, LibraryFolder, LibraryState, Settings, UpdaterStatus };
 type Result<T> = { ok: true; value: T } | { ok: false; error: string };
 type Unsub = () => void;
 function on<T>(channel: string, cb: (v: T) => void): Unsub {
@@ -58,7 +59,7 @@ const api = {
     launch: (id: string, after: "minimize" | "close" | "keep"): Promise<{ ok: boolean; error?: string }> => ipcRenderer.invoke("connect:launch", id, after),
     openFolder: (id: string): Promise<void> => ipcRenderer.invoke("connect:open-folder", id),
     onChange: (cb: (s: InstallsState) => void): Unsub => on("connect:installs", cb),
-    onNotify: (cb: (n: { kind: "done" | "installed" | "verified" | "rollback" | "crash"; name: string }) => void): Unsub => on("connect:notify", cb),
+    onNotify: (cb: (n: { kind: "done" | "installed" | "verified" | "adopted" | "rollback" | "crash"; name: string }) => void): Unsub => on("connect:notify", cb),
   },
   settings: {
     get: (): Promise<Settings> => ipcRenderer.invoke("connect:settings-get"),
@@ -76,6 +77,14 @@ const api = {
     clearCache: (): Promise<number> => ipcRenderer.invoke("connect:clear-cache"),
     exportLogs: (): Promise<string | null> => ipcRenderer.invoke("connect:export-logs"),
     openLogs: (): Promise<string> => ipcRenderer.invoke("connect:open-logs"),
+    adoptLegacy: (): Promise<number> => ipcRenderer.invoke("connect:legacy-adopt"),
+    adoptFolder: (id: string): Promise<{ ok: boolean; error?: string }> => ipcRenderer.invoke("connect:adopt-folder", id),
+  },
+  updater: {
+    status: (): Promise<UpdaterStatus> => ipcRenderer.invoke("connect:updater-status"),
+    check: (): Promise<UpdaterStatus> => ipcRenderer.invoke("connect:updater-check"),
+    install: (): Promise<void> => ipcRenderer.invoke("connect:updater-install"),
+    onChange: (cb: (s: UpdaterStatus) => void): Unsub => on("connect:updater", cb),
   },
   onNavigate: (cb: (route: string) => void): Unsub => on("connect:navigate", cb),
   onDeepLink: (cb: (url: string) => void) => {

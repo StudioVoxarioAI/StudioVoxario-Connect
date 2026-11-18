@@ -32,7 +32,7 @@ export const BuildSource = z.object({
   requiresElevation: z.boolean().optional(),
   /** module: produkt je součást jiné aplikace (VoxarioProtect v Voxar.app) */
   moduleOf: z.string().optional(),
-  /** detekce existující instalace (migrace ze starého launcheru, Fáze 7) */
+  /** převzetí existující instalace (starý launcher, Fáze 7): %PROMĚNNÁ% a %REG:<klíč Uninstall>% = jeho InstallLocation */
   legacyPaths: z.array(z.string()).optional(),
 });
 export type BuildSource = z.infer<typeof BuildSource>;

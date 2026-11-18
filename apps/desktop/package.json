@@ -14,9 +14,10 @@
     "typecheck": "tsc --noEmit -p . && tsc --noEmit -p electron",
     "pack:win": "pnpm build && electron-builder --win --x64",
     "pack:linux": "pnpm build && electron-builder --linux AppImage",
-    "shots": "pnpm build:renderer && node scripts/shots.mjs"
+    "shots": "pnpm build:renderer && node scripts/shots.mjs",
+    "release:win": "pnpm build && electron-builder --win --x64 --publish always"
   },
-  "dependencies": {
+  "devDependencies": {
     "@connect/catalog-client": "workspace:*",
     "@connect/installer-core": "workspace:*",
     "@connect/ui": "workspace:*",
@@ -25,15 +26,6 @@
     "@fontsource/oxanium": "^5.3.0",
     "@fontsource/rajdhani": "^5.1.1",
     "@tanstack/react-query": "^5.62.8",
-    "i18next": "^24.2.0",
-    "lucide-react": "^0.468.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-i18next": "^15.2.0",
-    "react-router-dom": "^6.28.1",
-    "zustand": "^5.0.2"
-  },
-  "devDependencies": {
     "@types/node": "^22.10.2",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
@@ -41,10 +33,18 @@
     "autoprefixer": "^10.4.20",
     "electron": "33.3.1",
     "electron-builder": "25.1.8",
+    "electron-updater": "6.3.9",
     "esbuild": "^0.24.2",
+    "i18next": "^24.2.0",
+    "lucide-react": "^0.468.0",
     "postcss": "^8.4.49",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-i18next": "^15.2.0",
+    "react-router-dom": "^6.28.1",
     "tailwindcss": "^3.4.17",
-    "vite": "^6.0.6"
+    "vite": "^6.0.6",
+    "zustand": "^5.0.2"
   },
   "build": {
     "appId": "com.studiovoxario.connect",
@@ -75,19 +75,35 @@
             "x64"
           ]
         }
-      ]
+      ],
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
-      "shortcutName": "StudioVoxario Connect"
+      "shortcutName": "StudioVoxario Connect",
+      "deleteAppDataOnUninstall": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "menuCategory": "StudioVoxario",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico"
     },
     "linux": {
       "target": [
         "AppImage"
       ],
       "category": "Game"
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "StudioVoxarioAI",
+        "repo": "StudioVoxario-Connect",
+        "releaseType": "release"
+      }
+    ],
+    "executableName": "StudioVoxarioConnect"
   }
 }

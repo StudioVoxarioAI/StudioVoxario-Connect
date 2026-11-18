@@ -8,7 +8,7 @@ import { Page } from "../components/Page";
 import { toast } from "../components/Toasts";
 import { bridge, isDesktop } from "../lib/bridge";
 import { useCatalog } from "../lib/catalog";
-import { formatBytes, useInstalls, useMainSettings } from "../lib/installs";
+import { formatBytes, useInstalls, useMainSettings, useUpdater } from "../lib/installs";
 import { useSettings } from "../lib/settings";
 
 const sections = ["downloads", "general", "appearance", "notifications", "diagnostics"] as const;
@@ -186,6 +186,41 @@ function Downloads({ s, set }: { s: MainSettings; set: (p: Partial<MainSettings>
   </>);
 }
 
+function LegacyRow() {
+  const { t } = useTranslation();
+  const { data: catalog } = useCatalog();
+  const { data: inst } = useInstalls();
+  const games = (catalog?.products ?? []).filter((p) => p.build?.kind === "voxario-manifest" && !inst?.installs[p.id]);
+  const [pick, setPick] = useState("");
+  return (
+    <Row label={t("settings.legacy")} hint={t("settings.legacyText")}>
+      <div className="flex items-center gap-2">
+        <Button size="sm" variant="ghost" disabled={!isDesktop} onClick={async () => { const n = await bridge.system.adoptLegacy(); if (!n) toast("info", t("settings.legacyNone")); }}>{t("settings.legacyScan")}</Button>
+        {games.length > 0 && (
+          <select aria-label={t("settings.legacyPick")} value={pick} disabled={!isDesktop} className={`${inputCls} w-44`}
+            onChange={async (e) => { const id = e.target.value; setPick(""); if (!id) return; const r = await bridge.system.adoptFolder(id); if (r.ok) toast("adopted", t("notify.adopted", { name: games.find((g) => g.id === id)?.name })); else if (r.error) toast("error", r.error); }}>
+            <option value="">{t("settings.legacyPick")}</option>
+            {games.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
+          </select>
+        )}
+      </div>
+    </Row>
+  );
+}
+
+function UpdaterRow() {
+  const { t } = useTranslation();
+  const { data: u } = useUpdater();
+  const info = useQuery({ queryKey: ["app-info"], queryFn: () => bridge.appInfo() });
+  const st = u?.state ?? "disabled";
+  return (
+    <Row label={t("updater.title", { v: info.data?.version ?? "…" })} hint={t(`updater.${st}`, { v: u?.version, p: u?.percent ?? 0, e: u?.error ?? "" })}>
+      {st === "ready" ? <Button size="sm" onClick={() => bridge.updater.install()}>{t("updater.restart")}</Button>
+        : <Button size="sm" variant="secondary" disabled={st === "disabled" || st === "checking" || st === "downloading"} onClick={() => void bridge.updater.check()}>{t("updater.check")}</Button>}
+    </Row>
+  );
+}
+
 export function Settings() {
   const { t } = useTranslation();
   const [sec, setSec] = useState<Section>(() => (new URLSearchParams(location.hash.split("?")[1]).get("s") as Section) || "downloads");
@@ -217,8 +252,9 @@ export function Settings() {
               <Row label={t("settings.startup")} hint={t("settings.startupText")}><Toggle label={t("settings.startup")} on={s.launchOnStartup} onChange={(v) => set({ launchOnStartup: v })} /></Row>
               <Row label={t("settings.tray")} hint={t("settings.trayText")}><Toggle label={t("settings.tray")} on={s.minimizeToTray} onChange={(v) => set({ minimizeToTray: v })} /></Row>
               <Row label={t("settings.launcherChannel")} hint={t("settings.launcherChannelText")}>
-                <Segmented value={s.launcherChannel} onChange={(v) => set({ launcherChannel: v })} options={[{ v: "stable", label: t("settings.stable") }, { v: "beta", label: "Beta" }]} />
+                <Segmented value={s.launcherChannel} onChange={(v) => { set({ launcherChannel: v }); setTimeout(() => void bridge.updater.check(), 300); }} options={[{ v: "stable", label: t("settings.stable") }, { v: "beta", label: "Beta" }]} />
               </Row>
+              <UpdaterRow />
             </Card>
           )}
           {sec === "appearance" && (
@@ -241,6 +277,7 @@ export function Settings() {
               <Row label={t("settings.verifyAll")} hint={t("settings.verifyAllText")}>
                 <Button size="sm" variant="secondary" disabled={!isDesktop} onClick={async () => toast("info", t("settings.verifyQueued", { count: await bridge.system.verifyAll() }))}><ShieldCheck size={15} />{t("settings.verify")}</Button>
               </Row>
+              <LegacyRow />
               <Row label={t("settings.clearCache")} hint={t("settings.clearCacheText")}>
                 <Button size="sm" variant="secondary" disabled={!isDesktop} onClick={async () => toast("info", t("settings.cleared", { v: formatBytes(await bridge.system.clearCache()) }))}><Trash2 size={15} />{t("settings.clear")}</Button>
               </Row>

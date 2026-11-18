@@ -1,0 +1,39 @@
+name: Release
+
+# Vydání Connectu: tag v* (např. v0.2.0) -> Windows instalátor + latest.yml na GitHub Releases.
+# Aplikace si nové vydání najde sama (electron-updater). Předběžné vydání (v0.3.0-beta.1) dostane jen kanál Beta.
+# TODO: podpis kódu (Authenticode) – nastavit CSC_LINK / CSC_KEY_PASSWORD v secrets; bez podpisu Windows SmartScreen varuje.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - name: Verze z tagu
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          cd apps/desktop && npm pkg set version="$v"
+      - name: Sestavit a vydat (Windows, NSIS)
+        run: pnpm --filter @connect/desktop release:win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+          EP_PRE_RELEASE: ${{ contains(github.ref_name, '-') }}

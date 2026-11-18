@@ -38,6 +38,7 @@ export const en: Dict = {
     eta: "{{v}} left", up: "Move up", down: "Move down", diskFree: "Free space in library: {{v}}",
   },
   settings: {
+    legacy: "Existing installations", legacyText: "Games installed by the Ashes of Eryon launcher are adopted without downloading again.", legacyScan: "Search", legacyNone: "No other installation found.", legacyPick: "Choose game folder…", 
     title: "Settings",
     sections: { downloads: "Downloads & locations", general: "General", appearance: "Appearance", notifications: "Notifications", diagnostics: "Diagnostics" },
     language: "Language", theme: "Theme", dark: "Dark", light: "Light", afterLaunch: "After launching a game",
@@ -55,7 +56,7 @@ export const en: Dict = {
     channel: "Channel – {{name}}", channelText: "Beta gets test builds earlier.", stable: "Stable",
     startup: "Launch on startup", startupText: "Connect starts after Windows sign-in (hidden in the notification area).",
     tray: "Close to the notification area", trayText: "Downloads continue with the window closed; quit from the tray icon.",
-    launcherChannel: "Connect app channel", launcherChannelText: "Stable or beta build of Connect itself (Phase 7).",
+    launcherChannel: "Connect app channel", launcherChannelText: "Beta gets new Connect versions earlier (pre-releases).",
     notifText: "Windows system notifications. A rollback after a failed update is always reported.",
     notif_done: "Download finished", notif_update: "New update", notif_sale: "Deal on a followed product",
     verifyAll: "Verify all games", verifyAllText: "Recomputes checksums and downloads only damaged or missing files.", verify: "Verify",
@@ -63,6 +64,12 @@ export const en: Dict = {
     clearCache: "Clear download cache", clearCacheText: "Deletes partial files of downloads that are not waiting.", clear: "Clear", cleared: "Freed {{v}}.",
     exportLogsText: "For support: version, system, libraries and install history (no passwords or tokens).", openLogs: "Open folder", export: "Export", exported: "Log saved.",
     telemetry: "Anonymous diagnostics", telemetryText: "Off by default. Connect does not send anything yet.",
+  },
+  updater: {
+    title: "StudioVoxario Connect {{v}}", check: "Check now", restart: "Restart and update", readyText: "Connect {{v}} is downloaded – restarting takes a few seconds.",
+    idle: "Updates are checked automatically.", disabled: "Development build – updates are off.", checking: "Checking for updates…",
+    available: "Version {{v}} is available.", downloading: "Downloading version {{v}}… {{p}} %", ready: "Version {{v}} is ready to install.",
+    none: "You are up to date.", error: "Could not check for updates: {{e}}",
   },
   account: {
     title: "Account", guestTitle: "You are not signed in", pendingShort: "Signing in…", pendingTitle: "Finish signing in in your browser",
@@ -110,7 +117,7 @@ export const en: Dict = {
     target: "Location", defaultLibrary: "Default library", size: "Size", free: "Free space", noSpace: "Not enough disk space.",
   },
   uninstall: { textApp: "The app uninstaller will run. Your data and settings are kept.",  title: "Uninstall {{name}}?", text: "The game files will be deleted. You can reinstall any time from your library.", keep: "Keep saved games and settings" },
-  notify: { installed: "{{name}} is installed.",  verified: "{{name}}: files verified and repaired.",  purchase: "Purchase complete – your library is up to date.",  done: "{{name}} is ready to play.", rollback: "The new version of {{name}} did not start – the previous version was restored.", crash: "{{name}} closed unexpectedly. Try Verify files." },
+  notify: { adopted: "{{name}}: existing launcher installation adopted (no download).",  installed: "{{name}} is installed.",  verified: "{{name}}: files verified and repaired.",  purchase: "Purchase complete – your library is up to date.",  done: "{{name}} is ready to play.", rollback: "The new version of {{name}} did not start – the previous version was restored.", crash: "{{name}} closed unexpectedly. Try Verify files." },
   time: { hm: "{{h}} h {{m}} min", ms: "{{m}} min {{s}} s", s: "{{s}} s" },
   search: { placeholder: "Search the store and your library…", hint: "Ctrl+K", inLibrary: "In your library", inStore: "In the store", games: "Games", software: "Software",
     hintText: "Search by name, genre or tag – works without diacritics and with typos.", none: "Nothing found for “{{q}}”.",

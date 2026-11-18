@@ -57,8 +57,9 @@
           "beta": "https://rioexuvgvmdwvidfakxy.supabase.co/storage/v1/object/public/game-updates/unity/latest-beta.json"
         },
         "legacyPaths": [
-          "%LOCALAPPDATA%\\StudioVoxario\\AshesOfEryon",
-          "%LOCALAPPDATA%\\Programs\\Ashes of Eryon Launcher\\..\\Game"
+          "%REG:HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\StudioVoxario.AshesOfEryon%\\Game",
+          "%LOCALAPPDATA%\\StudioVoxario\\Ashes of Eryon\\Game",
+          "%LOCALAPPDATA%\\StudioVoxario\\AshesOfEryon"
         ]
       }
     },
@@ -109,6 +110,8 @@
         "kind": "voxario-manifest",
         "manifestUrl": "https://rioexuvgvmdwvidfakxy.supabase.co/storage/v1/object/public/game-updates/unity/latest-fantasy.json",
         "legacyPaths": [
+          "%REG:HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\StudioVoxario.AshesOfEryon%\\Game-fantasy",
+          "%LOCALAPPDATA%\\StudioVoxario\\Ashes of Eryon\\Game-fantasy",
           "%LOCALAPPDATA%\\StudioVoxario\\AshesOfEryon-fantasy"
         ]
       }

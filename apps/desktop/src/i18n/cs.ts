@@ -36,6 +36,7 @@ export const cs = {
     eta: "zbývá {{v}}", up: "Posunout výš", down: "Posunout níž", diskFree: "Volné místo v knihovně: {{v}}",
   },
   settings: {
+    legacy: "Existující instalace", legacyText: "Hry nainstalované launcherem Ashes of Eryon Connect převezme bez nového stahování.", legacyScan: "Vyhledat", legacyNone: "Žádná další instalace nenalezena.", legacyPick: "Vybrat složku hry…", 
     title: "Nastavení",
     sections: { downloads: "Stahování a umístění", general: "Obecné", appearance: "Vzhled", notifications: "Oznámení", diagnostics: "Diagnostika" },
     language: "Jazyk", theme: "Téma", dark: "Tmavé", light: "Světlé", afterLaunch: "Po spuštění hry",
@@ -53,7 +54,7 @@ export const cs = {
     channel: "Kanál – {{name}}", channelText: "Beta dostává testovací verze dřív.", stable: "Stabilní",
     startup: "Spouštět se systémem", startupText: "Connect se spustí po přihlášení do Windows (skrytě v oznamovací oblasti).",
     tray: "Zavřením schovat do oznamovací oblasti", trayText: "Stahování pokračuje i se zavřeným oknem; ukončení přes ikonu v liště.",
-    launcherChannel: "Kanál aplikace Connect", launcherChannelText: "Stabilní nebo beta verze samotné aplikace (Fáze 7).",
+    launcherChannel: "Kanál aplikace Connect", launcherChannelText: "Beta dostává nové verze Connectu dřív (předběžná vydání).",
     notifText: "Systémová oznámení Windows. Návrat verze po neúspěšné aktualizaci se oznamuje vždy.",
     notif_done: "Dokončené stahování", notif_update: "Nová aktualizace", notif_sale: "Sleva na sledovaný produkt",
     verifyAll: "Ověřit všechny hry", verifyAllText: "Přepočítá kontrolní součty a stáhne jen poškozené nebo chybějící soubory.", verify: "Ověřit",
@@ -61,6 +62,12 @@ export const cs = {
     clearCache: "Vyčistit mezipaměť stahování", clearCacheText: "Smaže rozpracované soubory nečekajících stahování.", clear: "Vyčistit", cleared: "Uvolněno {{v}}.",
     exportLogsText: "Pro podporu: verze, systém, knihovny a průběh instalací (bez hesel a tokenů).", openLogs: "Otevřít složku", export: "Exportovat", exported: "Log uložen.",
     telemetry: "Anonymní diagnostika", telemetryText: "Ve výchozím stavu vypnuto. Connect zatím nic neodesílá.",
+  },
+  updater: {
+    title: "StudioVoxario Connect {{v}}", check: "Zkontrolovat", restart: "Restartovat a aktualizovat", readyText: "Connect {{v}} je stažený – restart trvá pár sekund.",
+    idle: "Aktualizace se kontrolují automaticky.", disabled: "Vývojová verze – aktualizace jsou vypnuté.", checking: "Kontroluji aktualizace…",
+    available: "Je k dispozici verze {{v}}.", downloading: "Stahuji verzi {{v}}… {{p}} %", ready: "Verze {{v}} je připravená k instalaci.",
+    none: "Máte nejnovější verzi.", error: "Aktualizaci se nepodařilo zkontrolovat: {{e}}",
   },
   account: {
     title: "Účet", guestTitle: "Nejste přihlášeni", pendingShort: "Přihlašování…", pendingTitle: "Dokončete přihlášení v prohlížeči",
@@ -108,7 +115,7 @@ export const cs = {
     target: "Umístění", defaultLibrary: "Výchozí knihovna", size: "Velikost", free: "Volné místo", noSpace: "Na disku není dost místa.",
   },
   uninstall: { textApp: "Spustí se odinstalátor aplikace. Vaše data a nastavení zůstanou zachované.",  title: "Odinstalovat {{name}}?", text: "Soubory hry se smažou. Hru můžete kdykoli znovu nainstalovat z knihovny.", keep: "Ponechat uložené pozice a nastavení" },
-  notify: { installed: "{{name}} je nainstalováno.",  verified: "{{name}}: soubory ověřeny a opraveny.",  purchase: "Nákup dokončen – knihovna je aktualizovaná.",  done: "{{name}} je připraveno ke hraní.", rollback: "Nová verze {{name}} se nespustila – vrátila se předchozí verze.", crash: "{{name}} se neočekávaně ukončilo. Zkuste Ověřit soubory." },
+  notify: { adopted: "{{name}}: převzali jsme instalaci ze starého launcheru (bez stahování).",  installed: "{{name}} je nainstalováno.",  verified: "{{name}}: soubory ověřeny a opraveny.",  purchase: "Nákup dokončen – knihovna je aktualizovaná.",  done: "{{name}} je připraveno ke hraní.", rollback: "Nová verze {{name}} se nespustila – vrátila se předchozí verze.", crash: "{{name}} se neočekávaně ukončilo. Zkuste Ověřit soubory." },
   time: { hm: "{{h}} h {{m}} min", ms: "{{m}} min {{s}} s", s: "{{s}} s" },
   search: { placeholder: "Hledat v obchodě a knihovně…", hint: "Ctrl+K", inLibrary: "Ve vaší knihovně", inStore: "V obchodě", games: "Hry", software: "Software",
     hintText: "Hledejte podle názvu, žánru nebo štítku – funguje i bez diakritiky a s překlepy.", none: "Pro „{{q}}“ nic nenalezeno.",

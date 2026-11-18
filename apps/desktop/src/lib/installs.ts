@@ -28,3 +28,9 @@ export function formatDuration(sec: number, t: (k: string, o?: Record<string, un
   const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = Math.floor(sec % 60);
   return h ? t("time.hm", { h, m }) : m ? t("time.ms", { m, s }) : t("time.s", { s });
 }
+
+export function useUpdater() {
+  const qc = useQueryClient();
+  useEffect(() => bridge.updater.onChange((s) => qc.setQueryData(["updater"], s)), [qc]);
+  return useQuery({ queryKey: ["updater"], queryFn: () => bridge.updater.status(), staleTime: Infinity });
+}

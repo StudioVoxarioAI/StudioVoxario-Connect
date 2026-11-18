@@ -8,6 +8,8 @@ import { catalogNow, refresh as refreshCatalog } from "./catalog";
 import { applyLimits, cancel, enqueue, hooks, kick, syncApps, launch, move, openFolder, pause, resume, state as installsState, uninstall } from "./installer";
 import { claim, libraryNow, licenses, redeemKey, refreshLibrary, setFavorite } from "./library";
 import { settings, updateSettings, type Settings } from "./settings";
+import { adoptFolder, adoptLegacy } from "./migrate";
+import { checkNow, installNow, setupUpdater, updaterStatus } from "./updater";
 import {
   addLibraryFolder, applyLoginItem, autoUpdate, clearDownloadCache, downloadAllowedNow, exportLogs, libraryFolders, log, moveInstall,
   notify, removeLibraryFolder, setDefaultLibrary, setupTray, verifyAll,
@@ -148,6 +150,19 @@ if (!app.requestSingleInstanceLock()) {
     ipcMain.handle("connect:verify-all", () => verifyAll());
     ipcMain.handle("connect:clear-cache", () => clearDownloadCache());
     ipcMain.handle("connect:export-logs", () => exportLogs(win));
+    const announce = (found: Array<{ productId: string }>) => {
+      for (const f of found) {
+        const name = catalogNow()?.products.find((p) => p.id === f.productId)?.name ?? f.productId;
+        win?.webContents.send("connect:notify", { kind: "adopted", name });
+        log(`Převzata instalace ${f.productId}`);
+      }
+      return found.length;
+    };
+    ipcMain.handle("connect:legacy-adopt", async () => announce(await adoptLegacy()));
+    ipcMain.handle("connect:adopt-folder", (_e, id: string) => adoptFolder(win, String(id)));
+    ipcMain.handle("connect:updater-status", () => updaterStatus());
+    ipcMain.handle("connect:updater-check", () => checkNow());
+    ipcMain.handle("connect:updater-install", () => { quitting = true; installNow(); });
     ipcMain.handle("connect:open-logs", () => shell.openPath(path.join(app.getPath("userData"), "logs")));
     ipcMain.handle("connect:open-external", (_e, url: string) => {
       if (typeof url === "string" && /^https:\/\//.test(url)) return shell.openExternal(url);
@@ -166,6 +181,7 @@ if (!app.requestSingleInstanceLock()) {
     applyLimits();
     applyLoginItem();
     setupTray(() => win, iconPath());
+    setupUpdater(log);
     // plánovač: každou minutu zkusit frontu; každých 30 min obnovit katalog a hledat aktualizace
     setInterval(() => kick(), 60_000).unref();
     setInterval(() => { void refreshCatalog().then(() => autoUpdate()).catch(() => undefined); }, 30 * 60_000).unref();
@@ -175,6 +191,13 @@ if (!app.requestSingleInstanceLock()) {
       await restore();
       await refreshLibrary().catch(() => undefined);
       await syncApps();
+      // hry ze starého launcheru Ashes of Eryon převzít bez stahování (jen poprvé – pak už je Connect má)
+      const adopted = await adoptLegacy().catch(() => []);
+      for (const f of adopted) {
+        const name = catalogNow()?.products.find((p) => p.id === f.productId)?.name ?? f.productId;
+        setTimeout(() => win?.webContents.send("connect:notify", { kind: "adopted", name }), 1500);
+        log(`Převzata instalace ${f.productId} z ${f.dir}`);
+      }
       autoUpdate();
     })();
   });

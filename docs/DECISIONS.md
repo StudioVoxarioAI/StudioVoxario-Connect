@@ -108,3 +108,15 @@ Connect instalátor vůbec nestáhne. **VoxarioProtect** je modul Voxar.app: „
 (173 MB, PE) z GitHub Releases; samotné spuštění instalátoru a registr ověří Windows (CI build + ruční test).
 **Zjištění na webu:** politika úložiště `shop_files_buyer_read` pouští jen předplatitele (`shop_entitlements`), ne
 držitele licence (`shop_licenses`) – návrh opravy v `WEB_PROPOSAL.md` (Connect i web pak stáhnou engine s licencí).
+
+## D17 – Vydávání, aktualizace Connectu a převzetí starých instalací (Fáze 7)
+**Aktualizace Connectu:** `electron-updater` s GitHub Releases repozitáře Connect (`latest.yml`), stahování na pozadí,
+instalace po kliknutí „Restartovat a aktualizovat“ (nebo při ukončení). Kanál Beta = i předběžná vydání (tag
+`vX.Y.Z-beta.N`). Kontrola při startu a každých 6 h; ve vývojové verzi vypnuto. **Vydání:** workflow `release.yml`
+na tag `v*` (lint, typecheck, testy, NSIS instalátor, publikace). Podpis kódu je TODO (certifikát vlastníka).
+Všechny závislosti jsou sbalené (Vite + esbuild), v instalátoru nejsou `node_modules` (app.asar ~6 MB).
+**Převzetí:** Connect při startu najde hry starého launcheru Ashes of Eryon – kořen z registru
+`StudioVoxario.AshesOfEryon` → `Game` / `Game-fantasy`, výchozí `%LOCALAPPDATA%\StudioVoxario\Ashes of Eryon\Game`
+a záložní `%LOCALAPPDATA%\StudioVoxario\AshesOfEryon{-fantasy}` – a převezme je bez stahování (formát
+`install.json` je stejný). Ruční převzetí: Nastavení → Diagnostika. Ověřeno E2E (`e2e-migrate.mjs`): převzatá hra se
+spustí a ověření souborů nic nestáhne. Beta kanál starého launcheru (`-beta`) se nepřebírá (Connect má kanál jinak).
