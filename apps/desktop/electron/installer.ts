@@ -94,10 +94,14 @@ function emit(now = false) {
   if (!emitTimer) emitTimer = setTimeout(send, 250);
 }
 
-// měření rychlosti: každou sekundu vzorek do grafu
+// měření rychlosti: každou sekundu vzorek; zobrazená rychlost = průměr posledních 5 s (bez skoků mezi soubory)
+const recent: number[] = [];
 setInterval(() => {
-  speed = speed * 0.4 + windowBytes * 0.6;
+  recent.push(windowBytes);
+  if (recent.length > 5) recent.shift();
   windowBytes = 0;
+  speed = active ? recent.reduce((a, b) => a + b, 0) / recent.length : 0;
+  if (!active) recent.length = 0;
   if (active || history.some((v) => v > 0)) { history.push(Math.round(speed)); if (history.length > 60) history.shift(); }
   if (active) emit();
 }, 1000).unref();

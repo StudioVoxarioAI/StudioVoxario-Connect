@@ -1,5 +1,28 @@
 [
   {
+    "version": "0.5.1",
+    "date": "2026-11-18",
+    "title": "Stabilní a rychlejší stahování",
+    "titleEn": "Steady and faster downloads",
+    "changes": [
+      {
+        "type": "fix",
+        "text": "Rychlost stahování už nepadá na pár KB/s: malé soubory (u Fantasy 291 ze 407) se stahují ve vlastní skupině až po 16 najednou souběžně s velkými – o jejich čase rozhoduje odezva serveru, ne přenos. Celá Fantasy (949 MB) se v testu stáhla za 38 s.",
+        "textEn": "Download speed no longer drops to a few KB/s: small files (291 of 407 in Fantasy) download in their own group of up to 16 at once alongside large ones – server latency, not bandwidth, decides their time. The whole of Fantasy (949 MB) downloaded in 38 s in testing."
+      },
+      {
+        "type": "improvement",
+        "text": "Velké soubory se stahují od největšího a jejich části souběžně.",
+        "textEn": "Large files download largest first, with their parts in parallel."
+      },
+      {
+        "type": "improvement",
+        "text": "Zobrazená rychlost je průměr posledních 5 sekund – bez skoků mezi soubory.",
+        "textEn": "The displayed speed is a 5-second average – no jumps between files."
+      }
+    ]
+  },
+  {
     "version": "0.5.0",
     "date": "2026-11-18",
     "title": "Hry ze soukromého úložiště",

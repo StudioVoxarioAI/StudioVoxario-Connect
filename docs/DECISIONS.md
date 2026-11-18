@@ -191,3 +191,10 @@ Buildy her (`game-updates/unity/…`) už nejsou veřejné: migrace webu přepne
 `launcher/` zůstává čitelné. Connect stahuje přes `/storage/v1/object/authenticated/…` s tokenem uživatele
 (`electron/storage.ts`, token se obnovuje za běhu); dokud je bucket veřejný, záložně veřejná adresa. Pořadí nasazení:
 nejdřív Connect 0.5.0 (automatická aktualizace do 15 min), potom migrace webu. Starý launcher Ashes hry nestáhne.
+
+## D26 – Stabilní rychlost stahování (0.5.1)
+Měření na skutečném buildu Fantasy (379 souborů do 10 MB, 257 MB): původně 150 s, průměr 1,7 MB/s, 94 ze 148 sekund
+pod 1 MB/s. Příčina: ~0,5 s odezva serveru na každý soubor a jen 3 souběžné soubory (291 souborů < 1 MB). Nově dvě
+skupiny souběžně – velké soubory (≥ 4 MB, od největšího) podle nastavení „Souběžná spojení“, malé až 16 najednou;
+části velkých souborů paralelně. Za stejných podmínek (cache serveru) 8,7 s → 4,2 s; celá Fantasy (949 MB) v aplikaci
+za 38 s, zobrazená rychlost 20–46 MB/s. Zobrazená rychlost = průměr posledních 5 s.

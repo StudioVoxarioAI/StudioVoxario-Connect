@@ -148,15 +148,12 @@ export async function fetchManifestFile(file: ManifestFile, baseUrl: string, sta
     fs.renameSync(target + ".partial", target);
   } else {
     // části neznají přesnou velikost předem (poslední je menší) – každá se stahuje celá, hotové se přeskočí
-    const pieces: string[] = [];
-    for (let i = 1; i <= parts; i++) {
-      const piece = `${target}.part${i}`;
-      if (!fs.existsSync(piece + ".ok")) {
-        await downloadResumable(`${url}.part${i}`, piece, undefined, ctx);
-        fs.writeFileSync(piece + ".ok", "");
-      }
-      pieces.push(piece);
-    }
+    const pieces = Array.from({ length: parts }, (_, i) => `${target}.part${i + 1}`);
+    await Promise.all(pieces.map(async (piece, i) => {      // části souběžně
+      if (fs.existsSync(piece + ".ok")) return;
+      await downloadResumable(`${url}.part${i + 1}`, piece, undefined, ctx);
+      fs.writeFileSync(piece + ".ok", "");
+    }));
     const out = fs.createWriteStream(target);
     for (const p of pieces) await pipeline(fs.createReadStream(p), out, { end: false });
     await new Promise<void>((r, j) => out.end((e?: Error | null) => (e ? j(e) : r())));
@@ -244,7 +241,8 @@ export interface RunOptions extends DownloadCtx {
   manifestUrl: string;
   manifest: VoxManifest;
   mode: "install" | "update" | "repair";
-  concurrency?: number;
+  concurrency?: number;                     // souběžně stahované velké soubory
+  smallConcurrency?: number;                // souběžně stahované malé soubory (výchozí 16)
   onPlan?: (totalBytes: number, files: number) => void;
   onPhase?: (phase: "downloading" | "verifying" | "installing") => void;
 }
@@ -276,23 +274,29 @@ export async function runInstall(o: RunOptions): Promise<InstallState> {
     if (fs.existsSync(t + ".ok")) o.onBytes?.(f.size);
     else { try { o.onBytes?.(fs.statSync(t + ".partial").size); } catch { /* nic */ } }
   }
-  const queue = [...plan.download];
-  const workers = Array.from({ length: Math.max(1, o.concurrency ?? 3) }, async () => {
-    for (let f = queue.shift(); f; f = queue.shift()) {
-      const t = path.join(staging, ...f.path.split("/"));
-      if (fs.existsSync(t + ".ok")) continue;
-      let before = 0;
-      try { before = fs.statSync(t + ".partial").size; } catch { before = 0; }
-      try {
-        await fetchManifestFile(f, o.manifestUrl, staging, { ...o, onBytes: (n) => o.onBytes?.(n) });
-      } catch (e) {
-        if (/poškozený/.test(String((e as Error).message))) {   // jeden pokus znovu
-          o.onBytes?.(-(f.size - before));
-          await fetchManifestFile(f, o.manifestUrl, staging, o);
-        } else throw e;
-      }
+  // Malé soubory: o čase rozhoduje odezva serveru (~0,5 s na požadavek), ne přenos – stahují se ve vlastní skupině
+  // s velkým počtem spojení souběžně s velkými (jinak rychlost padá na desítky KB/s). Velké od největšího.
+  const SMALL = 4 * 1024 * 1024;
+  const big = plan.download.filter((f) => f.size >= SMALL).sort((a, b) => b.size - a.size);
+  const small = plan.download.filter((f) => f.size < SMALL);
+  const fetchOne = async (f: ManifestFile) => {
+    const t = path.join(staging, ...f.path.split("/"));
+    if (fs.existsSync(t + ".ok")) return;
+    let before = 0;
+    try { before = fs.statSync(t + ".partial").size; } catch { before = 0; }
+    try {
+      await fetchManifestFile(f, o.manifestUrl, staging, { ...o, onBytes: (n) => o.onBytes?.(n) });
+    } catch (e) {
+      if (/poškozený/.test(String((e as Error).message))) {   // jeden pokus znovu
+        o.onBytes?.(-(f.size - before));
+        await fetchManifestFile(f, o.manifestUrl, staging, o);
+      } else throw e;
     }
+  };
+  const pool = (queue: ManifestFile[], n: number) => Array.from({ length: Math.max(1, n) }, async () => {
+    for (let f = queue.shift(); f; f = queue.shift()) await fetchOne(f);
   });
+  const workers = [...pool(big, o.concurrency ?? 3), ...pool(small, o.smallConcurrency ?? 16)];
   await Promise.all(workers);
   o.onPhase?.("installing");
   if (o.mode === "repair") {
