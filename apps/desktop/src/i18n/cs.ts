@@ -66,7 +66,7 @@ export const cs = {
     telemetry: "Anonymní diagnostika", telemetryText: "Ve výchozím stavu vypnuto. Connect zatím nic neodesílá.",
   },
   updater: {
-    title: "StudioVoxario Connect {{v}}", check: "Zkontrolovat", restart: "Restartovat a aktualizovat", readyText: "Connect {{v}} je stažený – restart trvá pár sekund.",
+    title: "StudioVoxario Connect {{v}}", check: "Zkontrolovat", restart: "Restartovat a aktualizovat", restartIn: "Aktualizace za {{s}} s", later: "Později", readyText: "Connect {{v}} je stažený – restart trvá pár sekund.",
     idle: "Aktualizace se kontrolují automaticky.", disabled: "Vývojová verze – aktualizace jsou vypnuté.", checking: "Kontroluji aktualizace…",
     available: "Je k dispozici verze {{v}}.", downloading: "Stahuji verzi {{v}}… {{p}} %", ready: "Verze {{v}} je připravená k instalaci.",
     none: "Máte nejnovější verzi.", error: "Aktualizaci se nepodařilo zkontrolovat: {{e}}",

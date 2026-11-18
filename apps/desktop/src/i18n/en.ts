@@ -68,7 +68,7 @@ export const en: Dict = {
     telemetry: "Anonymous diagnostics", telemetryText: "Off by default. Connect does not send anything yet.",
   },
   updater: {
-    title: "StudioVoxario Connect {{v}}", check: "Check now", restart: "Restart and update", readyText: "Connect {{v}} is downloaded – restarting takes a few seconds.",
+    title: "StudioVoxario Connect {{v}}", check: "Check now", restart: "Restart and update", restartIn: "Updating in {{s}} s", later: "Later", readyText: "Connect {{v}} is downloaded – restarting takes a few seconds.",
     idle: "Updates are checked automatically.", disabled: "Development build – updates are off.", checking: "Checking for updates…",
     available: "Version {{v}} is available.", downloading: "Downloading version {{v}}… {{p}} %", ready: "Version {{v}} is ready to install.",
     none: "You are up to date.", error: "Could not check for updates: {{e}}",

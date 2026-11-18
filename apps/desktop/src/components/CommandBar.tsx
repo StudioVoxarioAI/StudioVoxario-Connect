@@ -1,4 +1,5 @@
 import { Loader2, LogIn, Minus, RefreshCw, Search, Settings, Square, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../lib/account";
@@ -12,6 +13,23 @@ const tabs = [
   { to: "/library", key: "library", code: "03" },
   { to: "/downloads", key: "downloads", code: "04" },
 ] as const;
+
+/** Stažená aktualizace Connectu: odpočet automatického restartu (s „Později“), jinak tlačítko restartu. */
+function UpdateChip({ version, restartAt }: { version?: string; restartAt?: number }) {
+  const { t } = useTranslation();
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => { if (!restartAt) return; const id = setInterval(() => setNow(Date.now()), 500); return () => clearInterval(id); }, [restartAt]);
+  const left = restartAt ? Math.max(0, Math.ceil((restartAt - now) / 1000)) : 0;
+  return (
+    <div className="no-drag flex items-center gap-1">
+      <button onClick={() => bridge.updater.install()} title={t("updater.readyText", { v: version })}
+        className="hud-btn flex h-9 items-center gap-2 whitespace-nowrap bg-success/15 px-3 text-xs font-semibold uppercase tracking-wider text-success hover:bg-success/25">
+        <RefreshCw size={14} className={restartAt ? "animate-spin" : ""} />{restartAt ? t("updater.restartIn", { s: left }) : t("updater.restart")}
+      </button>
+      {restartAt && <button onClick={() => bridge.updater.postpone()} className="h-9 px-2 text-xs text-muted hover:text-foreground">{t("updater.later")}</button>}
+    </div>
+  );
+}
 
 // Velitelská lišta: logo, záložky (horní navigace místo bočního panelu), hledání, účet, nastavení, okno.
 // Celá lišta slouží k tahání okna (okno je bez rámu), ovládací prvky jsou no-drag.
@@ -51,12 +69,7 @@ export function CommandBar({ onSearch }: { onSearch: () => void }) {
           <Search size={15} /><span className="flex-1 truncate">{t("top.search")}</span>
           <kbd className="font-mono text-[10px] text-subtle">CTRL K</kbd>
         </button>
-        {upd?.state === "ready" && (
-          <button onClick={() => bridge.updater.install()} title={t("updater.readyText", { v: upd.version })}
-            className="no-drag hud-btn flex h-9 items-center gap-2 bg-success/15 px-3 text-xs font-semibold uppercase tracking-wider text-success hover:bg-success/25">
-            <RefreshCw size={14} />{t("updater.restart")}
-          </button>
-        )}
+        {upd?.state === "ready" && <UpdateChip version={upd.version} restartAt={upd.restartAt} />}
         {auth?.user ? (
           <Link to="/account" className="no-drag hud-btn flex h-9 items-center gap-2 border border-border bg-surface-2/80 pl-1 pr-3 text-sm hover:border-primary/50">
             <Avatar src={auth.user.avatar} name={auth.user.name} />

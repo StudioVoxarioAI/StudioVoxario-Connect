@@ -167,3 +167,11 @@ appId, stejně jako electron-builder) a tichý starý odinstalátor (`--uninstal
 startu drží jediný záznam v Aplikacích Windows (aktualizuje verzi, maže duplicitní záznam NSIS).
 **Odinstalace:** `StudioVoxarioConnect.exe --uninstall` – stejná obrazovka, smazání složky po ukončení procesu.
 Ověřeno E2E na Linuxu (`scripts/e2e-setup.mjs`); registr, zástupce a splash ověří Windows (ruční test).
+
+## D23 – Automatická aktualizace Connectu bez zásahu uživatele (0.3.2)
+Do 0.3.1 se Connect aktualizoval jen po kliknutí na „Restartovat a aktualizovat“ nebo při úplném ukončení – a protože
+zavřením okna se schová do lišty, nová verze se často nenainstalovala vůbec; kontrola navíc běžela jen při startu
+a jednou za 6 h. Ověřeno, že aktualizátor vydání vidí (0.3.0 → 0.3.1, `StudioVoxarioConnectUpdate-0.3.1.exe`).
+Nově: kontrola při startu, každých 15 min a při návratu do okna; po stažení se verze **sama nainstaluje, když je klid**
+(nic neběží ani se nestahuje) – v pozadí hned, s otevřeným oknem po 30 s odpočtu s „Později“ (odklad 2 h).
+`generateUpdatesFilesForAllChannels` přidává `beta.yml` pro kanál Beta.

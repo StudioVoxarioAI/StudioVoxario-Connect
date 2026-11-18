@@ -1,5 +1,28 @@
 [
   {
+    "version": "0.3.2",
+    "date": "2026-11-18",
+    "title": "Connect se aktualizuje sám",
+    "titleEn": "Connect updates itself",
+    "changes": [
+      {
+        "type": "fix",
+        "text": "Automatické aktualizace Connectu: nová verze se hledá každých 15 minut a při návratu do okna (dřív jen při startu a jednou za 6 hodin) a po stažení se sama nainstaluje, jakmile se nic nehraje ani nestahuje – i když je Connect schovaný v liště.",
+        "textEn": "Connect auto-updates: new versions are checked every 15 minutes and when you return to the window (previously only at start and every 6 hours) and install themselves once nothing is playing or downloading – even when Connect is hidden in the tray."
+      },
+      {
+        "type": "improvement",
+        "text": "Když máte okno otevřené, ukáže se odpočet „Aktualizace za 30 s“ s možností Později (odklad o 2 hodiny).",
+        "textEn": "With the window open, an “Updating in 30 s” countdown appears with a Later option (postpones by 2 hours)."
+      },
+      {
+        "type": "fix",
+        "text": "Kanál Beta aplikace Connect dostává aktualizace (chyběl soubor beta.yml).",
+        "textEn": "The Connect Beta channel now receives updates (beta.yml was missing)."
+      }
+    ]
+  },
+  {
     "version": "0.3.1",
     "date": "2026-11-18",
     "title": "Přihlášení ve stylu webu StudioVoxario",

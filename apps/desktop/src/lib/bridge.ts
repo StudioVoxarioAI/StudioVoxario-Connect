@@ -71,6 +71,7 @@ const browserFallback: ConnectApi = {
     status: async () => ({ state: "disabled" as const }),
     check: async () => ({ state: "disabled" as const }),
     install: async () => undefined,
+    postpone: async () => undefined,
     onChange: () => () => undefined,
   },
   setup: {

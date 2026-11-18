@@ -86,6 +86,7 @@ const api = {
     status: (): Promise<UpdaterStatus> => ipcRenderer.invoke("connect:updater-status"),
     check: (): Promise<UpdaterStatus> => ipcRenderer.invoke("connect:updater-check"),
     install: (): Promise<void> => ipcRenderer.invoke("connect:updater-install"),
+    postpone: (): Promise<void> => ipcRenderer.invoke("connect:updater-postpone"),
     onChange: (cb: (s: UpdaterStatus) => void): Unsub => on("connect:updater", cb),
   },
   setup: {

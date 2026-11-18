@@ -10,7 +10,7 @@ import { claim, libraryNow, licenses, redeemKey, refreshLibrary, setFavorite } f
 import { settings, updateSettings, type Settings } from "./settings";
 import { adoptFolder, adoptLegacy } from "./migrate";
 import { isSetupMode, isUninstallMode, maintainInstall, runSetup } from "./setup";
-import { checkNow, installNow, setupUpdater, updaterStatus } from "./updater";
+import { checkNow, installNow, onWindowFocus, postpone, setupUpdater, updaterStatus } from "./updater";
 import {
   addLibraryFolder, applyLoginItem, autoUpdate, clearDownloadCache, downloadAllowedNow, exportLogs, libraryFolders, log, moveInstall,
   notify, removeLibraryFolder, setDefaultLibrary, setupTray, verifyAll,
@@ -66,6 +66,7 @@ function createWindow() {
   // návrat z prohlížeče (nákup, klíč, účet na webu): obnovit knihovnu, nejvýš jednou za 20 s
   let lastFocusRefresh = 0;
   win.on("focus", () => {
+    onWindowFocus();
     if (Date.now() - lastFocusRefresh < 20_000) return;
     lastFocusRefresh = Date.now();
     void refreshLibrary().catch(() => undefined);
@@ -170,6 +171,7 @@ if (setupMode) {
     ipcMain.handle("connect:updater-status", () => updaterStatus());
     ipcMain.handle("connect:updater-check", () => checkNow());
     ipcMain.handle("connect:updater-install", () => { quitting = true; installNow(); });
+    ipcMain.handle("connect:updater-postpone", () => postpone());
     ipcMain.handle("connect:open-logs", () => shell.openPath(path.join(app.getPath("userData"), "logs")));
     ipcMain.handle("connect:open-external", (_e, url: string) => {
       if (typeof url === "string" && /^https:\/\//.test(url)) return shell.openExternal(url);
@@ -189,7 +191,10 @@ if (setupMode) {
     applyLimits();
     applyLoginItem();
     setupTray(() => win, iconPath());
-    setupUpdater(log);
+    setupUpdater(log, () => {
+      const st = installsState();
+      return Object.values(st.installs).some((r) => r.running) || st.jobs.some((j) => j.phase === "downloading" || j.phase === "verifying" || j.phase === "installing");
+    });
     // plánovač: každou minutu zkusit frontu; každých 30 min obnovit katalog a hledat aktualizace
     setInterval(() => kick(), 60_000).unref();
     setInterval(() => { void refreshCatalog().then(() => autoUpdate()).catch(() => undefined); }, 30 * 60_000).unref();
@@ -210,6 +215,7 @@ if (setupMode) {
     })();
   });
   app.on("before-quit", () => { quitting = true; });
+  // automatická aktualizace (quitAndInstall) musí okno opravdu zavřít, i když se jinak schovává do lišty
   app.on("window-all-closed", () => { if (process.platform !== "darwin") app.quit(); });
   app.on("activate", () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
 }
