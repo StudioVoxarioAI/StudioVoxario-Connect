@@ -3,6 +3,7 @@
 // Jedna instance; deep link studiovoxario:// (nákup na webu, otevření produktu) se předá do okna.
 import { app, BrowserWindow, ipcMain, shell } from "electron";
 import path from "node:path";
+import { catalogNow, refresh as refreshCatalog } from "./catalog";
 
 const PROTOCOL = "studiovoxario";
 const isDev = !app.isPackaged && !!process.env.CONNECT_DEV_URL;
@@ -77,6 +78,8 @@ if (!app.requestSingleInstanceLock()) {
       else if (action === "maximize") { if (win.isMaximized()) win.unmaximize(); else win.maximize(); }
       else win.close();
     });
+    ipcMain.handle("connect:catalog-get", () => { void refreshCatalog(); return catalogNow(); });
+    ipcMain.handle("connect:catalog-refresh", () => refreshCatalog());
     ipcMain.handle("connect:open-external", (_e, url: string) => {
       if (typeof url === "string" && /^https:\/\//.test(url)) return shell.openExternal(url);
       return undefined;

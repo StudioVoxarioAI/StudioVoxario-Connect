@@ -10,6 +10,7 @@ import { Account } from "../pages/Account";
 import { Downloads } from "../pages/Downloads";
 import { Home } from "../pages/Home";
 import { Library } from "../pages/Library";
+import { ProductDetail } from "../pages/ProductDetail";
 import { Settings } from "../pages/Settings";
 import { Store } from "../pages/Store";
 
@@ -39,6 +40,7 @@ export function App() {
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/store" element={<Store />} />
+                  <Route path="/store/:id" element={<ProductDetail />} />
                   <Route path="/library" element={<Library />} />
                   <Route path="/downloads" element={<Downloads />} />
                   <Route path="/account" element={<Account />} />

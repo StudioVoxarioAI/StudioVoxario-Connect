@@ -40,3 +40,15 @@ v **SQLite** v hlavním procesu (Fáze 3, `better-sqlite3`), ne v rendereru.
 ## D9 – Repozitář a větve
 Nový repozitář `StudioVoxarioAI/StudioVoxario-Connect`; web se nemění (jen čtení). Vývoj ve větvi
 `claude/happy-bardeen-psq6y3`; výchozí větev repozitáře (`main`) založí vlastník nebo ji vytvoříme po schválení.
+
+## D10 – Katalog: snapshot v aplikaci, dokud ho neservíruje web (Fáze 1)
+Web zatím nemá jednotný katalog a jeho repozitář se bez schválení nemění. Connect proto čte katalog v pořadí:
+`https://studiovoxario.com/connect/catalog.json` (návrh pro web, `docs/WEB_PROPOSAL.md`) → poslední uložená cache →
+snapshot přibalený k aplikaci (`apps/desktop/public/catalog.json` + `catalog-media/`). Živé údaje se i tak berou
+z webu: **cena** z obchodu (`shop_items` podle `shopKey`), **verze a velikost** z manifestů her (`game-updates`).
+Jakmile web soubor zveřejní, Connect ho použije bez nového vydání (stejný formát). Média vyrábí
+`tools/make-media.py` jen z obrázků webu, hry a enginu (obálky bez textu – přejmenování nevyžaduje nový obrázek).
+
+## D11 – Síť hlavního procesu přes `net.fetch`
+Hlavní proces stahuje přes síťový stack Chromia (`electron.net.fetch`) – respektuje systémové proxy a certifikáty
+(firemní sítě), na rozdíl od `fetch` z Node.

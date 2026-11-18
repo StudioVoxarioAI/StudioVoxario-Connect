@@ -15,6 +15,26 @@ export type ProductCategory = z.infer<typeof ProductCategory>;
 export const AccessRequirement = z.enum(["none", "access_key", "account_permission", "license"]);
 export type AccessRequirement = z.infer<typeof AccessRequirement>;
 
+export const BuildSource = z.object({
+  kind: z.enum(["voxario-manifest", "installer", "shop-file", "module"]),
+  /** voxario-manifest: URL manifestu kanálu stable ({version, exe, files[{path,url,size,sha256,parts}]}), url souborů relativně k němu */
+  manifestUrl: z.string().optional(),
+  channels: z.record(z.string()).optional(),          // kanál -> URL manifestu (beta…)
+  /** installer: instalátor aplikace (Setup.exe), verze z JSON {version}, aplikace se aktualizuje sama */
+  installerUrl: z.string().optional(),
+  versionUrl: z.string().optional(),
+  silentArgs: z.array(z.string()).optional(),
+  installDir: z.string().optional(),                   // kam instalátor instaluje (%LOCALAPPDATA%\…) – detekce instalace
+  executable: z.string().optional(),
+  selfUpdates: z.boolean().optional(),
+  requiresElevation: z.boolean().optional(),
+  /** module: produkt je součást jiné aplikace (VoxarioProtect v Voxar.app) */
+  moduleOf: z.string().optional(),
+  /** detekce existující instalace (migrace ze starého launcheru, Fáze 7) */
+  legacyPaths: z.array(z.string()).optional(),
+});
+export type BuildSource = z.infer<typeof BuildSource>;
+
 export const Product = z.object({
   id: z.string().min(1),
   type: ProductType,
@@ -46,6 +66,13 @@ export const Product = z.object({
   latestVersion: z.string().optional(),
   changelog: z.array(z.object({ version: z.string(), date: z.string(), notes: z.string() })).optional(),
   storeUrl: z.string().optional(),
+  featured: z.number().optional(),          // pořadí v doporučených (menší = výš), bez hodnoty = nedoporučeno
+  developer: z.string().optional(),
+  /** Odkud se bere cena: záznam obchodu webu (shop_items.product_key) – cena z obchodu má přednost. */
+  shopKey: z.string().optional(),
+  /** Odkud se stahuje (Fáze 3 a 6): manifest hry, instalátor aplikace, soubor z obchodu, nebo modul jiné aplikace. */
+  build: BuildSource.optional(),
+  sizeBytes: z.number().optional(),          // velikost poslední verze (z manifestu)
 });
 export type Product = z.infer<typeof Product>;
 

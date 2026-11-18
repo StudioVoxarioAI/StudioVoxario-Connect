@@ -1,0 +1,185 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-11-18T01:00:00Z",
+  "_comment": "Katalog StudioVoxario Connect. Cílově ho servíruje web (https://studiovoxario.com/connect/catalog.json, docs/WEB_PROPOSAL.md); tahle kopie je výchozí snapshot pro první spuštění bez sítě. Cena se bere živě z obchodu webu (shopKey), verze a velikost z manifestu buildu. Média relativně k mediaBase.",
+  "api": {
+    "supabaseUrl": "https://rioexuvgvmdwvidfakxy.supabase.co",
+    "publishableKey": "sb_publishable_s0KxdrY9Wm7_j2mtI-PnJg_eYbQln9-",
+    "web": "https://studiovoxario.com"
+  },
+  "mediaBase": "catalog-media/",
+  "products": [
+    {
+      "id": "ashes-of-eryon",
+      "type": "game",
+      "name": "Ashes of Eryon",
+      "tagline": "Every choice leaves a scar.",
+      "description": "Temné fantasy RPG ze světa Eryonu. Prozkoumej zpustošený kontinent, kde každé rozhodnutí zanechává stopu – v příběhu, ve světě i v tobě.\n\n**Early access:** hra se vyvíjí s komunitou, nové kapitoly, oblasti a vylepšení přicházejí v pravidelných aktualizacích. Přístup ke hře se uděluje k účtu StudioVoxario.\n\n- příběhové kapitoly (Kapitola I v testu)\n- vlastní engine Voxario s realistickým vykreslováním\n- aktualizace jen změněných souborů (ověřené SHA-256)",
+      "media": {
+        "icon": "ashes-of-eryon/icon.webp",
+        "cover": "ashes-of-eryon/cover.webp",
+        "hero": "ashes-of-eryon/hero.webp",
+        "screenshots": ["ashes-of-eryon/shot-1.webp", "ashes-of-eryon/shot-2.webp", "ashes-of-eryon/shot-3.webp"]
+      },
+      "tags": ["RPG", "Temné fantasy", "Příběh", "Singleplayer"],
+      "genres": ["RPG", "Akční"],
+      "pricing": { "model": "free" },
+      "access": "account_permission",
+      "status": "early_access",
+      "platforms": ["windows"],
+      "systemRequirements": {
+        "min": "Windows 10 64-bit · 4jádrový procesor · 8 GB RAM · grafika s Vulkan 1.2 (GTX 1050 / RX 560) · 6 GB místa",
+        "recommended": "Windows 11 64-bit · 6jádrový procesor · 16 GB RAM · RTX 3060 / RX 6600 · SSD"
+      },
+      "developer": "StudioVoxario",
+      "featured": 1,
+      "storeUrl": "https://studiovoxario.com/ashes",
+      "build": {
+        "kind": "voxario-manifest",
+        "manifestUrl": "https://rioexuvgvmdwvidfakxy.supabase.co/storage/v1/object/public/game-updates/unity/latest.json",
+        "channels": { "beta": "https://rioexuvgvmdwvidfakxy.supabase.co/storage/v1/object/public/game-updates/unity/latest-beta.json" },
+        "legacyPaths": ["%LOCALAPPDATA%\\StudioVoxario\\AshesOfEryon", "%LOCALAPPDATA%\\Programs\\Ashes of Eryon Launcher\\..\\Game"]
+      }
+    },
+    {
+      "id": "fantasy",
+      "type": "game",
+      "name": "Fantasy",
+      "tagline": "Otevřený fantasy svět Aethelgard – začni ve Valorii Harbor.",
+      "description": "Otevřený fantasy svět o rozloze 8 × 8 km: listnaté lesy Verdant Canopy, zasněžené štíty Frostfang Peaks, sopečná pustina Ignis Scar, krystalové jeskyně i Azure Ocean. Cesta začíná ve **Valorii Harbor** – městě na skalní plošině nad mořem, s přístavem, královským hradem a obyvateli, kteří žijí vlastním životem.\n\n- fotorealistická krajina, voda a počasí s cyklem dne a noci\n- zvěř v lesích (jeleni, vlci, divočáci, medvědi) s vlastními trasami\n- boj, povolání, talenty a úkoly\n\n*Pracovní název – finální jméno hry přijde s dalšími aktualizacemi.*",
+      "media": {
+        "icon": "fantasy/icon.webp",
+        "cover": "fantasy/cover.webp",
+        "hero": "fantasy/hero.webp",
+        "screenshots": ["fantasy/shot-1.webp", "fantasy/shot-2.webp", "fantasy/shot-3.webp", "fantasy/shot-4.webp", "fantasy/shot-5.webp", "fantasy/shot-6.webp"]
+      },
+      "tags": ["Otevřený svět", "Fantasy", "RPG", "Průzkum"],
+      "genres": ["RPG", "Otevřený svět"],
+      "pricing": { "model": "free" },
+      "access": "none",
+      "status": "early_access",
+      "platforms": ["windows"],
+      "systemRequirements": {
+        "min": "Windows 10 64-bit · 4jádrový procesor · 8 GB RAM · grafika s Vulkan 1.2 · 2 GB místa",
+        "recommended": "Windows 11 64-bit · 8jádrový procesor · 16 GB RAM · RTX 3060 a novější (DLSS, ray tracing) · SSD"
+      },
+      "developer": "StudioVoxario",
+      "featured": 2,
+      "build": {
+        "kind": "voxario-manifest",
+        "manifestUrl": "https://rioexuvgvmdwvidfakxy.supabase.co/storage/v1/object/public/game-updates/unity/latest-fantasy.json",
+        "legacyPaths": ["%LOCALAPPDATA%\\StudioVoxario\\AshesOfEryon-fantasy"]
+      }
+    },
+    {
+      "id": "voxario-studio-engine",
+      "type": "software",
+      "category": "engine",
+      "name": "Voxario Studio Engine",
+      "tagline": "Herní engine studia StudioVoxario – editor, Vulkan, DLSS a ray tracing.",
+      "description": "Engine, na kterém vznikají hry studia. Editor scén, skriptování v Lua, realistické vykreslování (PBR, SSAO, mlha jako v Blenderu, voda, tráva a stromy), **DLSS a ray tracing** na kartách RTX, velké světy se streamováním terénu, nástroje pro postavy (Motion Forge) a tvory (Creature Forge, Quadruped Forge se srstí).\n\nLicence obsahuje aktualizace po dobu jejího trvání.",
+      "media": {
+        "icon": "voxario-studio-engine/icon.webp",
+        "cover": "voxario-studio-engine/cover.webp",
+        "hero": "voxario-studio-engine/hero.webp",
+        "screenshots": ["voxario-studio-engine/shot-1.webp", "voxario-studio-engine/shot-2.webp", "voxario-studio-engine/shot-3.webp", "voxario-studio-engine/shot-4.webp"]
+      },
+      "tags": ["Engine", "Vývoj her", "Vulkan", "Editor"],
+      "pricing": { "model": "paid", "price": 720, "currency": "CZK" },
+      "shopKey": "voxario-studio-engine",
+      "access": "license",
+      "status": "released",
+      "platforms": ["windows"],
+      "systemRequirements": {
+        "min": "Windows 10 64-bit · grafika s Vulkan 1.2 · 8 GB RAM",
+        "recommended": "Windows 11 · RTX 2060 a novější (DLSS, ray tracing) · 16 GB RAM"
+      },
+      "developer": "StudioVoxario",
+      "featured": 3,
+      "storeUrl": "https://studiovoxario.com/obchod",
+      "build": { "kind": "shop-file" }
+    },
+    {
+      "id": "voxar-app",
+      "type": "software",
+      "category": "communication",
+      "name": "Voxar.app",
+      "tagline": "Komunita StudioVoxario v jednom okně.",
+      "description": "Kanály, hlasové místnosti, události a obchod s kosmetikou. Celá komunita v jednom okně – samostatná aplikace pro Windows, kterou Connect nainstaluje a aktualizuje.\n\n**Přístup s klíčem:** Voxar.app se odemyká přístupovým klíčem. Před instalací ho zadáte v Connectu.",
+      "media": {
+        "icon": "voxar-app/icon.webp",
+        "cover": "voxar-app/cover.webp",
+        "hero": "voxar-app/hero.webp",
+        "screenshots": ["voxar-app/shot-1.webp"]
+      },
+      "tags": ["Komunita", "Chat", "Hlas"],
+      "pricing": { "model": "free" },
+      "access": "access_key",
+      "status": "released",
+      "platforms": ["windows"],
+      "developer": "StudioVoxario",
+      "featured": 4,
+      "storeUrl": "https://studiovoxario.com/app",
+      "build": {
+        "kind": "installer",
+        "installerUrl": "https://github.com/Sokolcz97-rgb/Voxar.app/releases/latest/download/StudioVoxarioSetup.exe",
+        "versionUrl": "https://studiovoxario.com/desktop-version.json",
+        "installDir": "%LOCALAPPDATA%\\Voxar.app",
+        "executable": "Voxar.app.exe",
+        "selfUpdates": true
+      }
+    },
+    {
+      "id": "voxario-protect",
+      "type": "software",
+      "category": "security",
+      "name": "VoxarioProtect",
+      "tagline": "Posílí Windows Defender, hlídá autostart a vrátí změny jedním klikem.",
+      "description": "Bezpečnostní modul StudioVoxario: spolupracuje s Windows Defenderem, hlídá položky po spuštění a změny systému a umí je vrátit jedním klikem. Nic nemění bez tvého potvrzení.\n\nVoxarioProtect je součástí aplikace Voxar.app – Connect ji nainstaluje s modulem Protect (vyžaduje přístupový klíč Voxar.app).",
+      "media": {
+        "icon": "voxario-protect/icon.webp",
+        "cover": "voxario-protect/cover.webp",
+        "hero": "voxario-protect/hero.webp",
+        "screenshots": ["voxario-protect/shot-1.webp"]
+      },
+      "tags": ["Bezpečnost", "Windows Defender", "Ochrana"],
+      "pricing": { "model": "free" },
+      "access": "access_key",
+      "status": "released",
+      "platforms": ["windows"],
+      "developer": "StudioVoxario",
+      "storeUrl": "https://studiovoxario.com/desktop",
+      "build": { "kind": "module", "moduleOf": "voxar-app" }
+    },
+    {
+      "id": "voxario-browser",
+      "type": "software",
+      "category": "browser",
+      "name": "VoxarioBrowser",
+      "tagline": "Web bez hranic. Tvoje pravidla.",
+      "description": "Herní prohlížeč s pracovními prostory, ochranou soukromí, blokací reklam a vlastními aktualizacemi. Nastavení jako výchozí prohlížeč jen na tvou žádost – Connect ho nikdy nemění sám.",
+      "media": {
+        "icon": "voxario-browser/icon.webp",
+        "cover": "voxario-browser/cover.webp",
+        "hero": "voxario-browser/hero.webp",
+        "screenshots": ["voxario-browser/shot-1.webp"]
+      },
+      "tags": ["Prohlížeč", "Soukromí", "Blokace reklam"],
+      "pricing": { "model": "free" },
+      "access": "none",
+      "status": "released",
+      "platforms": ["windows"],
+      "developer": "StudioVoxario",
+      "featured": 5,
+      "storeUrl": "https://studiovoxario.com/browser",
+      "build": {
+        "kind": "installer",
+        "installerUrl": "https://github.com/Sokolcz97-rgb/Voxar.app/releases/latest/download/VoxarioBrowserSetup.exe",
+        "versionUrl": "https://studiovoxario.com/desktop-version.json",
+        "installDir": "%LOCALAPPDATA%\\VoxarioBrowser",
+        "executable": "VoxarioBrowser.exe",
+        "selfUpdates": true
+      }
+    }
+  ]
+}
