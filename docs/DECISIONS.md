@@ -74,3 +74,18 @@ přehashováním, bezpečné cesty. Místo SQLite (D8) **JSON úložiště s ato
 líné načtení): data jsou malá (desítky záznamů), odpadá nativní modul (`better-sqlite3` by se musel sestavovat pro
 každou verzi Electronu a platformu). Ověřeno E2E (`scripts/e2e-install.mjs`, `e2e-resume.mjs`): skutečný build
 Ashes of Eryon (102,8 MB, 107 souborů) se stáhne, ověří, opraví i odinstaluje; stahování přežije zavření aplikace.
+
+## D15 – Nastavení a systém (Fáze 4)
+Nastavení stahování a systému žije v hlavním procesu (`settings.json`), UI ho jen čte a mění přes IPC. **Knihovní
+složky:** první = výchozí cíl, další na jiných discích (`dialog.showOpenDialog`, podsložka `StudioVoxarioLibrary`),
+volné místo přes `statfs`, složku s hrami nejde odebrat. **Přesun instalace:** na stejném disku přejmenováním, mezi
+disky kopií s kontrolou velikosti a `install.json`, původní se maže až po úspěšné kopii (ověřeno E2E: /tmp ↔
+/dev/shm, následné ověření nestáhlo nic). **Plánovač:** okno od–do i přes půlnoc (`inSchedule`, testy); mimo okno
+fronta čeká, ruční oprava běží vždy. **Omezení rychlosti** platí hned i pro běžící stahování (opravena chyba, kdy
+vypnutí limitu během čekání omezovač zasekl). **Hlídač spojení:** bez dat 30 s -> pokus se přeruší a naváže přes Range
+(zaseknuté spojení s CDN se dřív nikdy neobnovilo). **Automatické aktualizace:** při startu a každých 30 min (obnova
+katalogu), volitelně jen když nic neběží; kanál stable/beta podle produktu (manifest `channels.beta`). **Systém:**
+spouštění se systémem (`setLoginItemSettings`, `--hidden`), ikona v oznamovací oblasti (zavření okna = schovat,
+stahování běží dál), systémová oznámení (dokončení, aktualizace, návrat verze vždy), log `userData/logs/connect.log`
+bez tokenů a klíčů, export pro podporu. Telemetrie výchozí vypnutá a zatím nic neodesílá. Deep linky
+`studiovoxario://product|library|purchase-complete|downloads|settings|account` (bílá listina, `parseDeepLink`, testy).

@@ -4,11 +4,12 @@ import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { commitStaging, markVerified, readState, rollbackInstall, runInstall, uninstall, type Fetcher, type VoxManifest } from "./node";
+import { RateLimiter, commitStaging, markVerified, readState, rollbackInstall, runInstall, uninstall, type Fetcher, type VoxManifest } from "./node";
 
 // lokální „CDN“: soubory v paměti, podpora HTTP Range, počítání požadavků
 const files = new Map<string, Buffer>();
 const hits: string[] = [];
+const stallOnce = new Set<string>();   // první požadavek pošle polovinu a pak se zasekne
 let server: http.Server;
 let base = "";
 beforeAll(async () => {
@@ -17,6 +18,11 @@ beforeAll(async () => {
     hits.push(u);
     const body = files.get(u);
     if (!body) { res.writeHead(404); res.end(); return; }
+    if (stallOnce.delete(u) && !req.headers.range) {
+      res.writeHead(200, { "content-length": body.length });
+      res.write(body.subarray(0, Math.floor(body.length / 2)));
+      return;   // spojení zůstane viset
+    }
     const m = /^bytes=(\d+)-$/.exec(String(req.headers.range ?? ""));
     if (m) {
       const start = Number(m[1]);
@@ -145,5 +151,30 @@ describe("runInstall", () => {
     expect(fs.readFileSync(path.join(dir, "Saves", "slot1.sav"), "utf8")).toBe("postup");
     uninstall(dir, false);
     expect(fs.existsSync(dir)).toBe(false);
+  });
+});
+
+describe("zaseknuté spojení", () => {
+  it("hlídač přeruší visící stahování a naváže Range", async () => {
+    const dir = tmp();
+    const m = publish("3.0.0", { "Game.exe": rand(4000, 9), "Data/hang.pak": rand(300_000, 8) });
+    stallOnce.add("3.0.0/Data/hang.pak");
+    hits.length = 0;
+    const s = await runInstall({ fetch: fetcher, productId: "fantasy", dir, manifestUrl: base + "latest.json", manifest: m, mode: "install", stallMs: 300 });
+    expect(s.version).toBe("3.0.0");
+    expect(fs.readFileSync(path.join(dir, "Data/hang.pak")).equals(rand(300_000, 8))).toBe(true);
+    expect(hits.filter((h) => h === "3.0.0/Data/hang.pak").length).toBe(2);
+  }, 10_000);
+});
+
+describe("RateLimiter", () => {
+  it("vypnutí limitu během čekání čekání ukončí", async () => {
+    const l = new RateLimiter(1000);
+    await l.take(1000);
+    const t0 = Date.now();
+    const p = l.take(50_000);           // při 1 kB/s by čekal ~50 s
+    setTimeout(() => { l.bytesPerSecond = 0; }, 100);
+    await p;
+    expect(Date.now() - t0).toBeLessThan(1500);
   });
 });

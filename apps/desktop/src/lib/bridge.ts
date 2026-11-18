@@ -35,7 +35,7 @@ const browserFallback: ConnectApi = {
     onChange: () => () => undefined,
   },
   installs: {
-    get: async () => ({ installs: {}, jobs: [], speed: 0, history: [], defaultLibrary: "" }),
+    get: async () => ({ installs: {}, jobs: [], speed: 0, history: [], defaultLibrary: "", scheduleWaiting: false }),
     install: async () => ({ ok: false as const, error: "Instalace je jen v aplikaci." }),
     pause: async () => browserFallback.installs.get(),
     resume: async () => browserFallback.installs.get(),
@@ -53,6 +53,19 @@ const browserFallback: ConnectApi = {
     set: async () => browserFallback.settings.get(),
     onChange: () => () => undefined,
   },
+  system: {
+    libraries: async () => [],
+    addLibrary: async () => [],
+    removeLibrary: async () => ({ ok: true as const, value: [] }),
+    setDefaultLibrary: async () => [],
+    relocate: async () => ({ ok: false as const, error: "web" }),
+    onRelocate: () => () => undefined,
+    verifyAll: async () => 0,
+    clearCache: async () => 0,
+    exportLogs: async () => null,
+    openLogs: async () => "",
+  },
+  onNavigate: () => () => undefined,
   onDeepLink: () => () => undefined,
   onWindowState: () => () => undefined,
 };

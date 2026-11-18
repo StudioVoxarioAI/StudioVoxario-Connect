@@ -5,9 +5,13 @@ import { app, BrowserWindow, ipcMain, shell } from "electron";
 import path from "node:path";
 import { cancelSignIn, restore, signIn, signOut, status as authStatus } from "./auth";
 import { catalogNow, refresh as refreshCatalog } from "./catalog";
-import { cancel, enqueue, launch, move, openFolder, pause, resume, state as installsState, uninstall } from "./installer";
+import { applyLimits, cancel, enqueue, hooks, kick, launch, move, openFolder, pause, resume, state as installsState, uninstall } from "./installer";
 import { claim, libraryNow, licenses, redeemKey, refreshLibrary, setFavorite } from "./library";
 import { settings, updateSettings, type Settings } from "./settings";
+import {
+  addLibraryFolder, applyLoginItem, autoUpdate, clearDownloadCache, downloadAllowedNow, exportLogs, libraryFolders, log, moveInstall,
+  notify, removeLibraryFolder, setDefaultLibrary, setupTray, verifyAll,
+} from "./system";
 
 const PROTOCOL = "studiovoxario";
 // testy a náhledy: oddělená data aplikace (nikdy nesahá na skutečný profil uživatele)
@@ -15,6 +19,9 @@ if (process.env.CONNECT_USER_DATA) app.setPath("userData", process.env.CONNECT_U
 const isDev = !app.isPackaged && !!process.env.CONNECT_DEV_URL;
 let win: BrowserWindow | null = null;
 let pendingDeepLink: string | null = null;
+let quitting = false;
+const startHidden = process.argv.includes("--hidden");   // spuštění se systémem: jen do lišty
+const iconPath = () => path.join(__dirname, "../dist/icon.png");
 
 function deepLinkFrom(argv: string[]): string | null {
   return argv.find((a) => a.startsWith(`${PROTOCOL}://`)) ?? null;
@@ -44,7 +51,11 @@ function createWindow() {
       spellcheck: false,
     },
   });
-  win.once("ready-to-show", () => win?.show());
+  win.once("ready-to-show", () => { if (!(startHidden && settings().minimizeToTray)) win?.show(); });
+  // zavření okna s lištou = schovat (stahování pokračuje); Ukončit v liště aplikaci opravdu ukončí
+  win.on("close", (e) => {
+    if (!quitting && settings().minimizeToTray && process.env.CONNECT_NO_TRAY !== "1") { e.preventDefault(); win?.hide(); }
+  });
   win.on("maximize", () => win?.webContents.send("connect:window-state", { maximized: true }));
   win.on("unmaximize", () => win?.webContents.send("connect:window-state", { maximized: false }));
   win.webContents.on("did-finish-load", () => {
@@ -69,7 +80,7 @@ if (!app.requestSingleInstanceLock()) {
   app.on("second-instance", (_e, argv) => {
     const link = deepLinkFrom(argv);
     if (link) sendDeepLink(link);
-    if (win) { if (win.isMinimized()) win.restore(); win.focus(); }
+    if (win) { if (win.isMinimized()) win.restore(); win.show(); win.focus(); }
   });
   app.on("open-url", (e, url) => { e.preventDefault(); sendDeepLink(url); });   // macOS
   if (process.defaultApp && process.argv[1]) app.setAsDefaultProtocolClient(PROTOCOL, process.execPath, [path.resolve(process.argv[1])]);
@@ -109,19 +120,55 @@ if (!app.requestSingleInstanceLock()) {
     ipcMain.handle("connect:launch", (_e, id: string, after: "minimize" | "close" | "keep") => launch(String(id), after));
     ipcMain.handle("connect:open-folder", (_e, id: string) => openFolder(String(id)));
     ipcMain.handle("connect:settings-get", () => settings());
-    ipcMain.handle("connect:settings-set", (_e, patch: Partial<Settings>) => updateSettings(patch ?? {}));
+    ipcMain.handle("connect:settings-set", (_e, patch: Partial<Settings>) => {
+      const s = updateSettings(patch ?? {});
+      applyLimits();
+      applyLoginItem();
+      setupTray(() => win, iconPath());
+      return s;
+    });
+    // Fáze 4: knihovní složky, přesun instalace, diagnostika
+    const wrapA = async <T>(fn: () => Promise<T>) => { try { return { ok: true as const, value: await fn() }; } catch (e) { return { ok: false as const, error: (e as Error).message }; } };
+    ipcMain.handle("connect:libraries-get", () => libraryFolders());
+    ipcMain.handle("connect:libraries-add", () => addLibraryFolder(win));
+    ipcMain.handle("connect:libraries-remove", (_e, dir: string) => wrap(() => removeLibraryFolder(String(dir))));
+    ipcMain.handle("connect:libraries-default", (_e, dir: string) => setDefaultLibrary(String(dir)));
+    ipcMain.handle("connect:install-relocate", (e, id: string, dir: string) => wrapA(async () => {
+      await moveInstall(String(id), String(dir), (done, total) => e.sender.send("connect:relocate-progress", { id, done, total }));
+      return libraryFolders();
+    }));
+    ipcMain.handle("connect:verify-all", () => verifyAll());
+    ipcMain.handle("connect:clear-cache", () => clearDownloadCache());
+    ipcMain.handle("connect:export-logs", () => exportLogs(win));
+    ipcMain.handle("connect:open-logs", () => shell.openPath(path.join(app.getPath("userData"), "logs")));
     ipcMain.handle("connect:open-external", (_e, url: string) => {
       if (typeof url === "string" && /^https:\/\//.test(url)) return shell.openExternal(url);
       return undefined;
     });
+    hooks.allowed = downloadAllowedNow;
+    hooks.log = log;
+    hooks.onNotify = (kind, name) => {
+      const n = settings().notifications;
+      if (kind === "done" && n.done) notify("Stahování dokončeno", `${name} je připraveno ke hraní.`);
+      if (kind === "rollback") notify("Aktualizace vrácena", `${name} po aktualizaci spadl – vrátili jsme předchozí verzi.`);
+    };
+    log(`Start ${app.getVersion()} ${process.platform}`);
     createWindow();
+    applyLimits();
+    applyLoginItem();
+    setupTray(() => win, iconPath());
+    // plánovač: každou minutu zkusit frontu; každých 30 min obnovit katalog a hledat aktualizace
+    setInterval(() => kick(), 60_000).unref();
+    setInterval(() => { void refreshCatalog().then(() => autoUpdate()).catch(() => undefined); }, 30 * 60_000).unref();
     // po startu: obnovit přihlášení, katalog a knihovnu (nic z toho neblokuje okno)
     void (async () => {
       await refreshCatalog().catch(() => undefined);
       await restore();
       await refreshLibrary().catch(() => undefined);
+      autoUpdate();
     })();
   });
+  app.on("before-quit", () => { quitting = true; });
   app.on("window-all-closed", () => { if (process.platform !== "darwin") app.quit(); });
   app.on("activate", () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
 }

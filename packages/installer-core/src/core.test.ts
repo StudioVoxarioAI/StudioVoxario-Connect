@@ -45,3 +45,19 @@ describe("DownloadQueue", () => {
     expect(etaSeconds(1000, 0)).toBeNull();
   });
 });
+
+import { inSchedule } from "./schedule";
+describe("inSchedule", () => {
+  const at = (h: number, m = 0) => new Date(2026, 0, 1, h, m);
+  it("vypnutý plánovač = vždy", () => expect(inSchedule({ enabled: false, from: "01:00", to: "02:00" }, at(12))).toBe(true));
+  it("okno přes den", () => {
+    const s = { enabled: true, from: "09:00", to: "17:30" };
+    expect(inSchedule(s, at(9))).toBe(true); expect(inSchedule(s, at(17, 29))).toBe(true);
+    expect(inSchedule(s, at(17, 30))).toBe(false); expect(inSchedule(s, at(3))).toBe(false);
+  });
+  it("okno přes půlnoc", () => {
+    const s = { enabled: true, from: "23:00", to: "06:00" };
+    expect(inSchedule(s, at(23, 30))).toBe(true); expect(inSchedule(s, at(2))).toBe(true);
+    expect(inSchedule(s, at(6))).toBe(false); expect(inSchedule(s, at(12))).toBe(false);
+  });
+});

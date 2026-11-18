@@ -50,8 +50,9 @@ export class RateLimiter {
   private last = Date.now();
   constructor(public bytesPerSecond = 0) {}
   async take(n: number) {
-    if (this.bytesPerSecond <= 0) return;
     for (;;) {
+      // limit se může změnit (i vypnout) během čekání – kontrola v každém kole
+      if (this.bytesPerSecond <= 0) { this.allowance = 0; return; }
       const now = Date.now();
       this.allowance = Math.min(this.bytesPerSecond, this.allowance + ((now - this.last) / 1000) * this.bytesPerSecond);
       this.last = now;
@@ -67,6 +68,7 @@ export interface DownloadCtx {
   limiter?: RateLimiter;
   onBytes?: (n: number) => void;           // přírůstek stažených bajtů (pro rychlost a průběh)
   onWait?: (ms: number, status: number) => void;
+  stallMs?: number;                        // bez dat déle než tolik -> přerušit a navázat (výchozí 30 s)
 }
 
 /**
@@ -82,8 +84,16 @@ export async function downloadResumable(url: string, dest: string, size: number 
     try { have = fs.statSync(dest).size; } catch { have = 0; }
     if (size !== undefined && have === size) return;
     if (size !== undefined && have > size) { fs.rmSync(dest, { force: true }); have = 0; }
+    // hlídač zaseknutého spojení: když server přestane posílat data, pokus se přeruší a naváže (Range)
+    const att = new AbortController();
+    const onAbort = () => att.abort();
+    ctx.signal?.addEventListener("abort", onAbort, { once: true });
+    let stalled = false;
+    let timer: NodeJS.Timeout | undefined;
+    const bump = () => { clearTimeout(timer); timer = setTimeout(() => { stalled = true; att.abort(); }, ctx.stallMs ?? 30_000); };
+    bump();
     try {
-      const res = await ctx.fetch(url, { headers: have > 0 ? { range: `bytes=${have}-` } : {}, signal: ctx.signal });
+      const res = await ctx.fetch(url, { headers: have > 0 ? { range: `bytes=${have}-` } : {}, signal: att.signal });
       if (res.status === 416) { fs.rmSync(dest, { force: true }); continue; }
       if (!res.ok) {
         lastError = new Error(`HTTP ${res.status}`);
@@ -100,21 +110,26 @@ export async function downloadResumable(url: string, dest: string, size: number 
       const src = Readable.fromWeb(res.body as WebReadableStream<Uint8Array>);
       const meter = async function* (source: AsyncIterable<Buffer>) {
         for await (const chunk of source) {
+          bump();
           await ctx.limiter?.take(chunk.length);
+          bump();
           ctx.onBytes?.(chunk.length);
           yield chunk;
         }
       };
-      await pipeline(src, meter, out, { signal: ctx.signal });
+      await pipeline(src, meter, out, { signal: att.signal });
       if (size !== undefined && fs.statSync(dest).size !== size) throw new Error("incomplete");
       return;
     } catch (e) {
       if (ctx.signal?.aborted) throw new Error("aborted");
       if (e === lastError && !/HTTP (429|5\d\d)/.test(String((e as Error).message))) throw e;
-      lastError = e;
-      const wait = Math.min(60_000, 2000 * 2 ** attempt);
+      lastError = stalled ? new Error("Spojení se zaseklo") : e;
+      const wait = stalled ? 500 : Math.min(60_000, 2000 * 2 ** attempt);
       ctx.onWait?.(wait, 0);
       await sleep(wait);
+    } finally {
+      clearTimeout(timer);
+      ctx.signal?.removeEventListener("abort", onAbort);
     }
   }
   throw lastError instanceof Error ? lastError : new Error("Stažení selhalo");

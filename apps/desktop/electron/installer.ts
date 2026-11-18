@@ -30,6 +30,7 @@ export interface InstallsState {
   history: number[];             // posledních 60 vzorků (1 s) pro graf
   diskFree?: number;
   defaultLibrary: string;
+  scheduleWaiting: boolean;      // fronta čeká na okno plánovače
 }
 
 const installs = new JsonStore<Record<string, InstallRecord>>("installs", {});
@@ -44,6 +45,17 @@ const limiter = new RateLimiter(0);
 let speed = 0;
 const history: number[] = [];
 let windowBytes = 0;
+
+// Fáze 4: plánovač (smí se teď stahovat?) a systémová oznámení – nastavuje system.ts (bez kruhového importu)
+export const hooks = {
+  allowed: (): boolean => true,
+  onNotify: (_kind: "done" | "verified" | "rollback" | "crash", _name: string): void => undefined,
+  log: (_line: string): void => undefined,
+};
+/** Nastavení se změnilo: omezení rychlosti platí hned, i pro běžící stahování. */
+export function applyLimits() { limiter.bytesPerSecond = settings().speedLimitKBps * 1024; void pump(); }
+/** Plánovač: zkusit spustit frontu (volá se každou minutu). */
+export function kick() { void pump(); }
 
 function products(): Product[] { return currentCatalog()?.products ?? []; }
 function product(id: string): Product | undefined { return products().find((p) => p.id === id); }
@@ -63,7 +75,8 @@ export function state(): InstallsState {
   }
   let diskFree: number | undefined;
   try { const dir = settings().libraries[0] || defaultLibraryDir(); fs.mkdirSync(dir, { recursive: true }); const s = fs.statfsSync(dir); diskFree = s.bavail * s.bsize; } catch { /* nic */ }
-  return { installs: out, jobs: queueStore.get().jobs, speed, history: [...history], diskFree, defaultLibrary: settings().libraries[0] || defaultLibraryDir() };
+  return { installs: out, jobs: queueStore.get().jobs, speed, history: [...history], diskFree, defaultLibrary: settings().libraries[0] || defaultLibraryDir(),
+    scheduleWaiting: !active && queueStore.get().jobs.some((j) => j.phase === "queued" && j.mode !== "repair") && !hooks.allowed() };
 }
 
 let emitTimer: NodeJS.Timeout | null = null;
@@ -126,6 +139,8 @@ async function pump() {
   if (active) return;
   const job = queueStore.get().jobs.find((j) => j.phase === "queued");
   if (!job) return;
+  // ruční oprava jde vždy, instalace a aktualizace podle plánovače
+  if (job.mode !== "repair" && !hooks.allowed()) return;
   const p = product(job.productId);
   const ctrl = new AbortController();
   active = { productId: job.productId, ctrl };
@@ -155,9 +170,11 @@ async function pump() {
                             lastPlayedAt: prev?.lastPlayedAt, playtimeSeconds: prev?.playtimeSeconds ?? 0 };
     });
     queueStore.update((q) => { q.jobs = q.jobs.filter((x) => x.productId !== job.productId); });
-    notify("done", p.name);
+    notify(job.mode === "repair" ? "verified" : "done", p.name);
+    hooks.log(`${job.mode} ${job.productId} ${st.version} OK`);
   } catch (e) {
     const msg = (e as Error).message;
+    if (!ctrl.signal.aborted) hooks.log(`${job.mode} ${job.productId} CHYBA ${msg}`);
     if (ctrl.signal.aborted) setJob(job.productId, (j) => { if (j.phase !== "queued") j.phase = "paused"; });
     else setJob(job.productId, (j) => { j.phase = "error"; j.error = msg; });
   } finally {
@@ -266,8 +283,9 @@ function refreshRecord(id: string) {
   if (rec && st) installs.update((all) => { all[id] = { ...rec, version: st.version, sizeOnDisk: dirSize(rec.dir) }; });
 }
 
-function notify(kind: "done" | "rollback" | "crash", name: string) {
+function notify(kind: "done" | "verified" | "rollback" | "crash", name: string) {
   for (const w of BrowserWindow.getAllWindows()) w.webContents.send("connect:notify", { kind, name });
+  hooks.onNotify(kind, name);
 }
 
 /** Převzetí existující instalace (stávající launcher Ashes, Fáze 7): složka s install.json -> záznam bez stahování. */

@@ -6,9 +6,10 @@ import type { AuthStatus } from "./auth";
 import type { InstallsState } from "./installer";
 import type { LibraryState } from "./library";
 import type { Settings } from "./settings";
+import type { LibraryFolder } from "./system";
 
 export type CatalogState = Catalog & { offline: boolean };
-export type { AuthStatus, InstallsState, LibraryState, Settings };
+export type { AuthStatus, InstallsState, LibraryFolder, LibraryState, Settings };
 type Result<T> = { ok: true; value: T } | { ok: false; error: string };
 type Unsub = () => void;
 function on<T>(channel: string, cb: (v: T) => void): Unsub {
@@ -57,13 +58,26 @@ const api = {
     launch: (id: string, after: "minimize" | "close" | "keep"): Promise<{ ok: boolean; error?: string }> => ipcRenderer.invoke("connect:launch", id, after),
     openFolder: (id: string): Promise<void> => ipcRenderer.invoke("connect:open-folder", id),
     onChange: (cb: (s: InstallsState) => void): Unsub => on("connect:installs", cb),
-    onNotify: (cb: (n: { kind: "done" | "rollback" | "crash"; name: string }) => void): Unsub => on("connect:notify", cb),
+    onNotify: (cb: (n: { kind: "done" | "verified" | "rollback" | "crash"; name: string }) => void): Unsub => on("connect:notify", cb),
   },
   settings: {
     get: (): Promise<Settings> => ipcRenderer.invoke("connect:settings-get"),
     set: (patch: Partial<Settings>): Promise<Settings> => ipcRenderer.invoke("connect:settings-set", patch),
     onChange: (cb: (s: Settings) => void): Unsub => on("connect:settings", cb),
   },
+  system: {
+    libraries: (): Promise<LibraryFolder[]> => ipcRenderer.invoke("connect:libraries-get"),
+    addLibrary: (): Promise<LibraryFolder[]> => ipcRenderer.invoke("connect:libraries-add"),
+    removeLibrary: (dir: string): Promise<Result<LibraryFolder[]>> => ipcRenderer.invoke("connect:libraries-remove", dir),
+    setDefaultLibrary: (dir: string): Promise<LibraryFolder[]> => ipcRenderer.invoke("connect:libraries-default", dir),
+    relocate: (id: string, dir: string): Promise<Result<LibraryFolder[]>> => ipcRenderer.invoke("connect:install-relocate", id, dir),
+    onRelocate: (cb: (p: { id: string; done: number; total: number }) => void): Unsub => on("connect:relocate-progress", cb),
+    verifyAll: (): Promise<number> => ipcRenderer.invoke("connect:verify-all"),
+    clearCache: (): Promise<number> => ipcRenderer.invoke("connect:clear-cache"),
+    exportLogs: (): Promise<string | null> => ipcRenderer.invoke("connect:export-logs"),
+    openLogs: (): Promise<string> => ipcRenderer.invoke("connect:open-logs"),
+  },
+  onNavigate: (cb: (route: string) => void): Unsub => on("connect:navigate", cb),
   onDeepLink: (cb: (url: string) => void) => {
     const fn = (_e: unknown, url: string) => cb(url);
     ipcRenderer.on("connect:deep-link", fn);

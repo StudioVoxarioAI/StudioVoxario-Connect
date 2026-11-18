@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { HashRouter, Route, Routes } from "react-router-dom";
+import { Navigator } from "../components/Navigator";
 import { SearchPalette } from "../components/SearchPalette";
 import { Sidebar } from "../components/Sidebar";
 import { TitleBar } from "../components/TitleBar";
@@ -52,6 +53,7 @@ export function App() {
             </div>
           </div>
         </div>
+        <Navigator />
         <SearchPalette open={search} onClose={() => setSearch(false)} />
         <Toasts />
       </HashRouter>
