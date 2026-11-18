@@ -3,7 +3,9 @@
 // Jedna instance; deep link studiovoxario:// (nákup na webu, otevření produktu) se předá do okna.
 import { app, BrowserWindow, ipcMain, shell } from "electron";
 import path from "node:path";
+import { cancelSignIn, restore, signIn, signOut, status as authStatus } from "./auth";
 import { catalogNow, refresh as refreshCatalog } from "./catalog";
+import { claim, libraryNow, licenses, redeemKey, refreshLibrary, setFavorite } from "./library";
 
 const PROTOCOL = "studiovoxario";
 const isDev = !app.isPackaged && !!process.env.CONNECT_DEV_URL;
@@ -80,11 +82,28 @@ if (!app.requestSingleInstanceLock()) {
     });
     ipcMain.handle("connect:catalog-get", () => { void refreshCatalog(); return catalogNow(); });
     ipcMain.handle("connect:catalog-refresh", () => refreshCatalog());
+    // účet a knihovna
+    ipcMain.handle("connect:auth-status", () => authStatus());
+    ipcMain.handle("connect:auth-sign-in", () => signIn());
+    ipcMain.handle("connect:auth-cancel", () => cancelSignIn());
+    ipcMain.handle("connect:auth-sign-out", async () => { const s = await signOut(); void refreshLibrary(); return s; });
+    ipcMain.handle("connect:library-get", () => { void refreshLibrary(); return libraryNow(); });
+    ipcMain.handle("connect:library-refresh", () => refreshLibrary());
+    ipcMain.handle("connect:library-claim", (_e, id: string) => claim(String(id)));
+    ipcMain.handle("connect:library-redeem", (_e, id: string, code: string) => redeemKey(String(id), String(code)));
+    ipcMain.handle("connect:library-favorite", (_e, id: string, on: boolean) => setFavorite(String(id), !!on));
+    ipcMain.handle("connect:library-licenses", () => licenses());
     ipcMain.handle("connect:open-external", (_e, url: string) => {
       if (typeof url === "string" && /^https:\/\//.test(url)) return shell.openExternal(url);
       return undefined;
     });
     createWindow();
+    // po startu: obnovit přihlášení, katalog a knihovnu (nic z toho neblokuje okno)
+    void (async () => {
+      await refreshCatalog().catch(() => undefined);
+      await restore();
+      await refreshLibrary().catch(() => undefined);
+    })();
   });
   app.on("window-all-closed", () => { if (process.platform !== "darwin") app.quit(); });
   app.on("activate", () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });

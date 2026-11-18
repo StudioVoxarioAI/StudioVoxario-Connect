@@ -1,9 +1,14 @@
-import { Download, Search, UserCircle2 } from "lucide-react";
+import { Download, Loader2, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { useAuth } from "../lib/account";
+import { bridge } from "../lib/bridge";
+import { Avatar } from "./Avatar";
+import { DownloadIndicator } from "./DownloadIndicator";
 
 export function TopBar({ onSearch }: { onSearch: () => void }) {
   const { t } = useTranslation();
+  const { data: auth } = useAuth();
   return (
     <header className="flex h-[var(--topbar-height)] shrink-0 items-center gap-4 border-b border-border/60 bg-background/80 px-6 backdrop-blur">
       <button onClick={onSearch}
@@ -13,13 +18,23 @@ export function TopBar({ onSearch }: { onSearch: () => void }) {
         <kbd className="rounded border border-border bg-surface-3 px-1.5 py-0.5 font-mono text-[11px] text-subtle">Ctrl K</kbd>
       </button>
       <div className="ml-auto flex items-center gap-3">
-        <Link to="/downloads" className="flex items-center gap-2 rounded-[var(--radius)] px-3 py-2 text-sm text-muted hover:bg-surface-2 hover:text-foreground" title={t("top.noDownloads")}>
+        <DownloadIndicator fallback={<Link to="/downloads" className="flex items-center gap-2 rounded-[var(--radius)] px-3 py-2 text-sm text-muted hover:bg-surface-2 hover:text-foreground" title={t("top.noDownloads")}>
           <Download size={17} /><span className="hidden xl:inline">{t("top.noDownloads")}</span>
-        </Link>
-        <Link to="/account" className="flex items-center gap-2 rounded-full border border-border bg-surface-2 py-1 pl-1 pr-3 text-sm hover:border-primary/40">
-          <UserCircle2 size={26} className="text-subtle" />
-          <span className="font-ui font-semibold">{t("top.signIn")}</span>
-        </Link>
+        </Link>} />
+        {auth?.user ? (
+          <Link to="/account" className="flex items-center gap-2 rounded-full border border-border bg-surface-2 py-1 pl-1 pr-3 text-sm hover:border-primary/40">
+            <Avatar src={auth.user.avatar} name={auth.user.name} />
+            <span className="max-w-[160px] truncate font-ui font-semibold">{auth.user.name}</span>
+          </Link>
+        ) : auth?.pending ? (
+          <Link to="/account" className="flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 py-1.5 pl-2 pr-3 text-sm text-primary">
+            <Loader2 size={16} className="animate-spin" /><span className="font-ui font-semibold">{t("account.pendingShort")}</span>
+          </Link>
+        ) : (
+          <button onClick={() => bridge.auth.signIn()} className="flex items-center gap-2 rounded-full border border-border bg-surface-2 py-1 pl-1 pr-3 text-sm hover:border-primary/40">
+            <Avatar /><span className="font-ui font-semibold">{t("top.signIn")}</span>
+          </button>
+        )}
       </div>
     </header>
   );

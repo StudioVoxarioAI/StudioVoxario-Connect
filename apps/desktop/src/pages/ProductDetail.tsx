@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Markdown } from "../components/Markdown";
+import { ProductAction } from "../components/ProductAction";
 import { StatusBadge } from "../components/ProductCard";
 import { bridge } from "../lib/bridge";
 import { formatPrice, formatSize, useProduct } from "../lib/catalog";
@@ -27,7 +28,6 @@ export function ProductDetail() {
     <div className="p-8"><EmptyState icon={<PackageSearch size={34} />} title={t("detail.notFound")} action={<Link to="/store" className="text-primary">{t("detail.back")}</Link>} /></div>
   );
   const shots = p.media.screenshots.length ? p.media.screenshots : [p.media.hero];
-  const action = p.status === "coming_soon" ? t("detail.follow") : p.pricing.model === "free" ? t("detail.get") : t("detail.buy");
   return (
     <div>
       <section className="relative h-[420px] overflow-hidden">
@@ -104,8 +104,7 @@ export function ProductDetail() {
                 <div><div className="font-semibold">{t(`access.${p.access}`)}</div><div className="text-muted">{t(`access.${p.access}_text`)}</div></div>
               </div>
             )}
-            <Button size="lg" className="w-full" disabled title={t("detail.phaseHint")}>{action}</Button>
-            <p className="mt-2 text-center text-xs text-subtle">{t("detail.phaseHint")}</p>
+            <ProductAction p={p} />
             {p.storeUrl && (
               <Button variant="ghost" size="sm" className="mt-2 w-full" onClick={() => bridge.openExternal(p.storeUrl!)}><ExternalLink size={14} />{t("common.openWeb")}</Button>
             )}

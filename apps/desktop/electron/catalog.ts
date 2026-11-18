@@ -31,6 +31,8 @@ function writeCache(c: Catalog) {
   } catch { /* cache je jen urychlení */ }
 }
 
+export function currentCatalog(): Catalog | null { return current; }
+
 /** Okamžitá odpověď bez sítě (cache -> snapshot). */
 export function catalogNow(): Catalog & { offline: boolean } {
   if (!current) {

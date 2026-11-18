@@ -18,6 +18,22 @@ const browserFallback: ConnectApi = {
     refresh: async () => browserFallback.catalog.get(),
     onUpdate: () => () => undefined,
   },
+  auth: {
+    status: async () => ({ signedIn: false, pending: false, user: null, error: null, secureStorage: false, offline: false }),
+    signIn: async () => browserFallback.auth.status(),
+    cancel: async () => browserFallback.auth.status(),
+    signOut: async () => browserFallback.auth.status(),
+    onChange: () => () => undefined,
+  },
+  library: {
+    get: async () => ({ signedIn: false, items: [], offline: false }),
+    refresh: async () => ({ signedIn: false, items: [], offline: false }),
+    claim: async () => ({ signedIn: false, items: [], offline: false }),
+    redeemKey: async () => ({ ok: false, reason: "web", library: { signedIn: false, items: [], offline: false } }),
+    favorite: async () => ({ signedIn: false, items: [], offline: false }),
+    licenses: async () => [],
+    onChange: () => () => undefined,
+  },
   onDeepLink: () => () => undefined,
   onWindowState: () => () => undefined,
 };

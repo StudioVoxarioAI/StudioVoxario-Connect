@@ -52,3 +52,15 @@ Jakmile web soubor zveřejní, Connect ho použije bez nového vydání (stejný
 ## D11 – Síť hlavního procesu přes `net.fetch`
 Hlavní proces stahuje přes síťový stack Chromia (`electron.net.fetch`) – respektuje systémové proxy a certifikáty
 (firemní sítě), na rozdíl od `fetch` z Node.
+
+## D12 – Přihlášení: stávající tok launcheru (Fáze 2)
+Connect používá beze změny webu edge funkci `launcher-auth` a stránku `/game/auth/launcher` (PKCE, lokální
+callback 127.0.0.1, výměna `token_hash` za vlastní relaci přes `/auth/v1/verify`) s parametrem `app=connect`.
+Web zatím pro `connect` ukáže text launcheru Ashes (neznámá aplikace -> výchozí); vlastní text je v návrhu pro web.
+Obnovovací token šifrovaně přes `safeStorage` (DPAPI / Keychain / libsecret); bez bezpečného úložiště se neukládá.
+
+## D13 – Knihovna podle typu přístupu (Fáze 2)
+`none` + zdarma -> „Přidat do knihovny“ (lokálně k účtu); `access_key` -> klíč ověří web (`app-access` redeem, s účtem);
+odemčení platí pro skupinu (VoxarioProtect = modul Voxar.app); `account_permission` -> `ashes_can_play()`;
+`license` -> `shop_license_status(product_key)` (vlastnictví, aktualizace, odkaz na koupi). Poslední stav z webu se
+pamatuje (offline knihovna). `CONNECT_DEMO=1` = ukázkový účet jen pro vývoj a náhledy.

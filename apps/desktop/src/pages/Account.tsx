@@ -1,22 +1,74 @@
-import { Button, EmptyState } from "@connect/ui";
-import { ExternalLink, LogIn, ShieldCheck } from "lucide-react";
+import { Badge, Button, EmptyState, SectionTitle } from "@connect/ui";
+import { useQuery } from "@tanstack/react-query";
+import { ExternalLink, Loader2, LogIn, LogOut, ShieldCheck, ShieldAlert, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { Avatar } from "../components/Avatar";
 import { Page } from "../components/Page";
+import { useAuth } from "../lib/account";
 import { bridge } from "../lib/bridge";
 
+const WEB = "https://studiovoxario.com";
+
 export function Account() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { data: auth } = useAuth();
+  const lic = useQuery({ queryKey: ["licenses", auth?.user?.id], queryFn: () => bridge.library.licenses(), enabled: !!auth?.signedIn, retry: 0 });
+  const date = (s?: string) => (s ? new Date(s).toLocaleDateString(i18n.language === "cs" ? "cs-CZ" : "en-US") : "—");
+  if (!auth?.signedIn) {
+    return (
+      <Page title={t("account.title")}>
+        <EmptyState icon={<ShieldCheck size={38} />} title={auth?.pending ? t("account.pendingTitle") : t("account.guestTitle")}
+          text={auth?.pending ? t("account.pendingText") : t("account.guestText")}
+          action={
+            <div className="mt-2 flex flex-col items-center gap-3">
+              {auth?.error && <p role="alert" className="text-sm text-danger">{auth.error}</p>}
+              <div className="flex gap-3">
+                {auth?.pending ? (<>
+                  <Button size="lg" onClick={() => bridge.auth.signIn()}><Loader2 size={18} className="animate-spin" />{t("account.reopen")}</Button>
+                  <Button size="lg" variant="secondary" onClick={() => bridge.auth.cancel()}><X size={16} />{t("key.cancel")}</Button>
+                </>) : (<>
+                  <Button size="lg" onClick={() => bridge.auth.signIn()}><LogIn size={18} />{t("top.signIn")}</Button>
+                  <Button variant="secondary" size="lg" onClick={() => bridge.openExternal(`${WEB}/auth`)}><ExternalLink size={16} />{t("account.register")}</Button>
+                </>)}
+              </div>
+            </div>
+          } />
+      </Page>
+    );
+  }
+  const u = auth.user!;
   return (
     <Page title={t("account.title")}>
-      <EmptyState icon={<ShieldCheck size={38} />} title={t("account.guestTitle")} text={t("account.guestText")}
-        action={
-          <div className="mt-2 flex gap-3">
-            <Button size="lg" disabled title={t("common.phase", { n: 2 })}><LogIn size={18} />{t("top.signIn")}</Button>
-            <Button variant="secondary" size="lg" onClick={() => bridge.openExternal("https://studiovoxario.com/auth")}>
-              <ExternalLink size={16} />{t("account.manage")}
-            </Button>
-          </div>
-        } />
+      <section className="mb-8 flex items-center gap-5 rounded-[calc(var(--radius)*1.4)] border border-border bg-surface p-6">
+        <Avatar src={u.avatar} name={u.name} size={72} />
+        <div className="min-w-0 flex-1">
+          <div className="font-display text-2xl font-extrabold">{u.name}</div>
+          <div className="text-muted">{u.email}</div>
+          <div className="mt-1 text-sm text-subtle">{t("account.member", { d: date(u.createdAt) })}</div>
+        </div>
+        <div className="flex flex-col gap-2">
+          <Button variant="secondary" onClick={() => bridge.openExternal(`${WEB}/profile`)}><ExternalLink size={15} />{t("account.manage")}</Button>
+          <Button variant="ghost" onClick={() => bridge.auth.signOut()}><LogOut size={15} />{t("account.signOut")}</Button>
+        </div>
+      </section>
+      {!auth.secureStorage && (
+        <div className="mb-6 flex items-center gap-3 rounded-[var(--radius)] border border-warning/30 bg-warning/10 px-4 py-2.5 text-sm text-warning"><ShieldAlert size={16} />{t("account.noSecureStorage")}</div>
+      )}
+      <SectionTitle>{t("account.licenses")}</SectionTitle>
+      <div className="mb-8 overflow-hidden rounded-[calc(var(--radius)*1.4)] border border-border bg-surface">
+        {lic.isLoading ? <div className="p-5 text-sm text-subtle"><Loader2 size={16} className="inline animate-spin" /></div>
+          : lic.data?.length ? lic.data.map((l) => (
+            <div key={l.productId} className="flex items-center justify-between border-b border-border/60 px-5 py-4 last:border-0">
+              <div><div className="font-ui font-semibold">{l.title}</div><div className="text-sm text-subtle">{t("account.purchased", { d: date(l.purchasedAt) })}</div></div>
+              <div className="text-right">
+                <Badge tone={l.updatesActive ? "success" : "warning"}>{l.updatesActive ? t("account.updatesActive") : t("account.updatesEnded")}</Badge>
+                <div className="mt-1 text-xs text-subtle">{t("account.updatesUntil", { d: date(l.updatesUntil) })}</div>
+              </div>
+            </div>
+          )) : <div className="p-5 text-sm text-subtle">{lic.isError ? t("account.licensesError") : t("account.noLicenses")}</div>}
+      </div>
+      <SectionTitle>{t("account.purchases")}</SectionTitle>
+      <Button variant="secondary" onClick={() => bridge.openExternal(`${WEB}/obchod`)}><ExternalLink size={15} />{t("account.purchasesWeb")}</Button>
     </Page>
   );
 }
