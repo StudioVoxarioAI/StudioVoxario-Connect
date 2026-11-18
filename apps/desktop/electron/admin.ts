@@ -15,6 +15,7 @@ async function call(fn: string, legacy: string, body: Record<string, unknown>, l
     return await rest<AccessRow[]>(`/rest/v1/rpc/${fn}`, { method: "POST", body: { p_game: game, ...body } });
   } catch (e) {
     if (notFound(e) && game === "ashes-of-eryon") return rest<AccessRow[]>(`/rest/v1/rpc/${legacy}`, { method: "POST", body: legacyBody });
+    if (notFound(e)) throw new Error("Databáze webu ještě nemá přístupy k této hře. V Lovable je potřeba spustit migraci supabase/migrations/20261118160000_game_access_platform_roles.sql – pak tu půjde přístup udělit.");
     throw e;
   }
 }

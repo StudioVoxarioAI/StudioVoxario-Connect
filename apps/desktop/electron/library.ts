@@ -83,7 +83,8 @@ async function platformRole(uid: string): Promise<{ role: PlatformRole; manages:
     const rows = await rest<Array<{ role: string }>>(`/rest/v1/user_roles?select=role&user_id=eq.${encodeURIComponent(uid)}`);
     const roles = rows.map((x) => x.role);
     const role: PlatformRole = roles.includes("admin") ? "admin" : roles.includes("editor") ? "editor" : "player";
-    return { role, manages: role === "admin" ? ["ashes-of-eryon"] : [] };
+    // správce vidí ve Správě obě hry; Fantasy jde spravovat až s migrací webu (Správa to vysvětlí)
+    return { role, manages: role === "admin" ? ["ashes-of-eryon", "fantasy"] : role === "editor" ? ["fantasy"] : [] };
   }
 }
 

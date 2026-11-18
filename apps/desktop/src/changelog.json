@@ -1,5 +1,18 @@
 [
   {
+    "version": "0.5.2",
+    "date": "2026-11-18",
+    "title": "Správa: Fantasy vždy viditelná",
+    "titleEn": "Admin: Fantasy always visible",
+    "changes": [
+      {
+        "type": "fix",
+        "text": "Ve Správě se správci vždy zobrazí Ashes of Eryon i Fantasy; když databáze webu ještě nemá přístupy ke hrám, Connect přesně řekne, co je potřeba spustit.",
+        "textEn": "The Admin page always shows both Ashes of Eryon and Fantasy to admins; if the website database lacks game access yet, Connect says exactly what needs to run."
+      }
+    ]
+  },
+  {
     "version": "0.5.1",
     "date": "2026-11-18",
     "title": "Stabilní a rychlejší stahování",
