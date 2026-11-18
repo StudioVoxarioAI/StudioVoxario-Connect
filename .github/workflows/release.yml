@@ -1,6 +1,6 @@
 name: Release
 
-# Vydání Connectu: tag v* (např. v0.2.0) -> Windows instalátor + latest.yml na GitHub Releases.
+# Vydání Connectu: tag v* (např. v0.2.0) nebo ručně (Actions → Release → Run workflow; verze z apps/desktop/package.json) -> Windows instalátor + latest.yml na GitHub Releases.
 # Aplikace si nové vydání najde sama (electron-updater). Předběžné vydání (v0.3.0-beta.1) dostane jen kanál Beta.
 # TODO: podpis kódu (Authenticode) – nastavit CSC_LINK / CSC_KEY_PASSWORD v secrets; bez podpisu Windows SmartScreen varuje.
 on:
@@ -36,13 +36,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
-          EP_PRE_RELEASE: ${{ contains(github.ref_name, '-') }}
       - name: Stabilní odkaz pro web (StudioVoxarioConnectSetup.exe bez čísla verze)
-        if: startsWith(github.ref, 'refs/tags/v') && !contains(github.ref_name, '-')
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          v=$(node -p "require('./apps/desktop/package.json').version")
+          case "$v" in *-*) echo "předběžné vydání – stabilní odkaz se nemění"; exit 0;; esac
           f=$(ls apps/desktop/release/StudioVoxarioConnectSetup-*.exe | head -1)
           cp "$f" StudioVoxarioConnectSetup.exe
-          gh release upload "$GITHUB_REF_NAME" StudioVoxarioConnectSetup.exe --clobber
+          gh release upload "v$v" StudioVoxarioConnectSetup.exe --clobber --repo "$GITHUB_REPOSITORY"
