@@ -5,11 +5,13 @@ import { Link, NavLink } from "react-router-dom";
 import { useAuth, useLibrary } from "../lib/account";
 import { bridge } from "../lib/bridge";
 import { useInstalls, useUpdater } from "../lib/installs";
+import { useLive } from "../lib/live";
 import { Avatar } from "./Avatar";
 
 const tabs = [
   { to: "/", key: "home" },
   { to: "/store", key: "store" },
+  { to: "/live", key: "live" },
   { to: "/library", key: "library" },
   { to: "/downloads", key: "downloads" },
 ] as const;
@@ -40,6 +42,8 @@ export function CommandBar({ onSearch }: { onSearch: () => void }) {
   const { data: upd } = useUpdater();
   const { data: inst } = useInstalls();
   const jobs = inst?.jobs.length ?? 0;
+  const { data: live } = useLive();
+  const liveCount = live?.streams.filter((s) => s.status === "live").length ?? 0;
   const win = "no-drag grid h-full w-11 place-items-center text-subtle transition hover:bg-surface-3 hover:text-foreground";
   return (
     <header className="drag relative flex h-[58px] shrink-0 items-stretch border-b border-primary/20 bg-background/95">
@@ -57,6 +61,7 @@ export function CommandBar({ onSearch }: { onSearch: () => void }) {
             className={({ isActive }) => `group relative flex items-center gap-2 px-5 font-display text-[13px] font-semibold uppercase tracking-[0.2em] transition ${isActive ? "text-foreground" : "text-muted hover:text-foreground"}`}>
             {({ isActive }) => (<>
               {t(`nav.${x.key}`)}
+              {x.key === "live" && liveCount > 0 && <span className="flex items-center gap-1 bg-[#e8132b] px-1.5 text-[10px] text-white shadow-[0_0_10px_rgba(232,19,43,0.6)]"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />{liveCount}</span>}
               {x.key === "downloads" && jobs > 0 && <span className="hud-btn [--ch:4px] bg-primary px-1.5 text-[10px] text-primary-foreground">{jobs}</span>}
               <span aria-hidden className={`absolute inset-x-3 bottom-0 h-[2px] bg-primary shadow-[0_0_10px_hsl(var(--primary))] transition ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-40"}`} />
               {isActive && <span aria-hidden className="absolute left-2 top-2 h-2 w-2 border-l border-t border-primary/80" />}

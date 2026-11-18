@@ -267,8 +267,8 @@ export function Settings() {
           {sec === "notifications" && s && (
             <Card title={t("settings.sections.notifications")}>
               <p className="mb-1 text-sm text-subtle">{t("settings.notifText")}</p>
-              {(["done", "update", "sale"] as const).map((k) => (
-                <Row key={k} label={t(`settings.notif_${k}`)}><Toggle label={t(`settings.notif_${k}`)} on={s.notifications[k]} onChange={(v) => set({ notifications: { ...s.notifications, [k]: v } })} /></Row>
+              {(["done", "update", "sale", "live"] as const).map((k) => (
+                <Row key={k} label={t(`settings.notif_${k}`)}><Toggle label={t(`settings.notif_${k}`)} on={s.notifications[k] !== false} onChange={(v) => set({ notifications: { ...s.notifications, [k]: v } })} /></Row>
               ))}
             </Card>
           )}

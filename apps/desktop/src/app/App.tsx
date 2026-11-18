@@ -13,6 +13,8 @@ import { Admin } from "../pages/Admin";
 import { Downloads } from "../pages/Downloads";
 import { Home } from "../pages/Home";
 import { Library } from "../pages/Library";
+import { Live } from "../pages/Live";
+import { LiveWatch } from "../pages/LiveWatch";
 import { ProductDetail } from "../pages/ProductDetail";
 import { Settings } from "../pages/Settings";
 import { Store } from "../pages/Store";
@@ -42,6 +44,8 @@ export function App() {
                   <Route path="/" element={<Home />} />
                   <Route path="/store" element={<Store />} />
                   <Route path="/store/:id" element={<ProductDetail />} />
+                  <Route path="/live" element={<Live />} />
+                  <Route path="/live/:id" element={<LiveWatch />} />
                   <Route path="/library" element={<Library />} />
                   <Route path="/downloads" element={<Downloads />} />
                   <Route path="/account" element={<Account />} />

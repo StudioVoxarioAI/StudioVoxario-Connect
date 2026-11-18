@@ -1,5 +1,28 @@
 [
   {
+    "version": "0.6.0",
+    "date": "2026-11-19",
+    "title": "Živá vysílání z YouTube s chatem",
+    "titleEn": "Live streams from YouTube with chat",
+    "changes": [
+      {
+        "type": "feature",
+        "text": "Nová sekce Živě vedle Obchodu: streameři StudioVoxario, kteří právě vysílají na YouTube, s miniaturami, které si sami nastavili, počtem diváků a délkou vysílání; v navigaci počet živých.",
+        "textEn": "New Live section next to the Store: StudioVoxario streamers live on YouTube right now, with their own custom thumbnails, viewer count and uptime; the navigation shows how many are live."
+      },
+      {
+        "type": "feature",
+        "text": "Sledování přímo v Connectu: přehrávač YouTube a vedle něj živý chat (psaní po přihlášení k YouTube), divadelní režim, chat v samostatném okně, popis a další vysílání.",
+        "textEn": "Watch right inside Connect: the YouTube player with live chat next to it (write after signing in to YouTube), theater mode, pop-out chat, description and other streams."
+      },
+      {
+        "type": "feature",
+        "text": "Naplánovaná vysílání s odpočtem a připomenutím; oznámení, když streamer začne vysílat (lze vypnout v Nastavení → Oznámení). Na Domů pruh Právě živě.",
+        "textEn": "Scheduled streams with a countdown and reminders; a notification when a streamer goes live (can be turned off in Settings → Notifications). A Live now strip on Home."
+      }
+    ]
+  },
+  {
     "version": "0.5.2",
     "date": "2026-11-18",
     "title": "Správa: Fantasy vždy viditelná",

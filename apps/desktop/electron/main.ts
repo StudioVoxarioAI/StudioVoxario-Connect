@@ -9,6 +9,7 @@ import { applyLimits, cancel, enqueue, hooks, kick, syncApps, launch, move, open
 import { claim, libraryNow, licenses, redeemKey, refreshLibrary, setFavorite } from "./library";
 import { settings, updateSettings, type Settings } from "./settings";
 import { accessGrant, accessList, accessRevoke } from "./admin";
+import { liveNow, onLive, popoutChat, refreshLive, remind, setLiveFocus, setupYouTubeEmbeds, youtubeSignIn, youtubeSignOut } from "./live";
 import { adoptFolder, adoptLegacy } from "./migrate";
 import { isSetupMode, isUninstallMode, maintainInstall, runSetup } from "./setup";
 import { checkNow, installNow, onWindowFocus, postpone, setupUpdater, updaterStatus } from "./updater";
@@ -181,6 +182,15 @@ if (setupMode) {
     ipcMain.handle("connect:updater-check", () => checkNow());
     ipcMain.handle("connect:updater-install", () => { quitting = true; installNow(); });
     ipcMain.handle("connect:updater-postpone", () => postpone());
+    // živá vysílání (YouTube)
+    ipcMain.handle("connect:live-get", () => liveNow());
+    ipcMain.handle("connect:live-refresh", () => refreshLive());
+    ipcMain.handle("connect:live-focus", (_e, on: boolean) => setLiveFocus(!!on));
+    ipcMain.handle("connect:live-remind", (_e, videoId: string, on: boolean) => remind(String(videoId), !!on));
+    ipcMain.handle("connect:live-yt-sign-in", () => youtubeSignIn(win));
+    ipcMain.handle("connect:live-yt-sign-out", () => youtubeSignOut());
+    ipcMain.handle("connect:live-popout", (_e, videoId: string) => popoutChat(String(videoId)));
+    onLive((st) => win?.webContents.send("connect:live", st));
     ipcMain.handle("connect:open-logs", () => shell.openPath(path.join(app.getPath("userData"), "logs")));
     ipcMain.handle("connect:open-external", (_e, url: string) => {
       if (typeof url === "string" && /^https:\/\//.test(url)) return shell.openExternal(url);
@@ -195,6 +205,7 @@ if (setupMode) {
       if (kind === "rollback") notify("Aktualizace vrácena", `${name} po aktualizaci spadl – vrátili jsme předchozí verzi.`);
     };
     log(`Start ${app.getVersion()} ${process.platform}`);
+    setupYouTubeEmbeds();
     void maintainInstall();
     createWindow();
     applyLimits();

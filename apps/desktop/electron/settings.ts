@@ -12,7 +12,8 @@ export interface Settings {
   channels: Record<string, "stable" | "beta">;                 // kanál podle produktu
   launchOnStartup: boolean;
   minimizeToTray: boolean;
-  notifications: { done: boolean; update: boolean; sale: boolean };
+  notifications: { done: boolean; update: boolean; sale: boolean; live?: boolean };   // live = streamer začal vysílat
+  liveReminders?: string[];                  // naplánovaná vysílání s připomínkou (ID videí)
   launcherChannel: "stable" | "beta";
   telemetry: boolean;
 }
@@ -20,7 +21,7 @@ export interface Settings {
 const DEFAULTS: Settings = {
   libraries: [], speedLimitKBps: 0, connections: 3, autoUpdate: true, autoUpdateOnlyIdle: true,
   schedule: { enabled: false, from: "01:00", to: "07:00" }, channels: {}, launchOnStartup: false, minimizeToTray: true,
-  notifications: { done: true, update: true, sale: true }, launcherChannel: "stable", telemetry: false,
+  notifications: { done: true, update: true, sale: true, live: true }, liveReminders: [], launcherChannel: "stable", telemetry: false,
 };
 const store = new JsonStore<Settings>("settings", DEFAULTS);
 

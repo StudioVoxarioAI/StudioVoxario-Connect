@@ -10,6 +10,8 @@ import { ProductCard, ProductCardSkeleton, StatusBadge } from "../components/Pro
 import { formatPrice, useCatalog } from "../lib/catalog";
 import { useLibrary } from "../lib/account";
 import { formatBytes, useInstalls } from "../lib/installs";
+import { useLive, viewers } from "../lib/live";
+import { ChannelAvatar, LivePill, Thumb } from "./Live";
 
 // Deck: velký holo panel vybraného produktu + výběr vpravo (01–05) jako menu ve hře; žádný automatický kolotoč.
 function Deck({ items }: { items: Product[] }) {
@@ -75,6 +77,8 @@ export function Home() {
   const owned = useMemo(() => new Set((lib?.signedIn ? lib.items : []).filter((i) => i.owned).map((i) => i.productId)), [lib]);
   const recent = useMemo(() => products.filter((p) => inst?.installs[p.id] && owned.has(p.id))
     .sort((a, b) => (inst!.installs[b.id]!.lastPlayedAt ?? inst!.installs[b.id]!.installedAt).localeCompare(inst!.installs[a.id]!.lastPlayedAt ?? inst!.installs[a.id]!.installedAt)).slice(0, 3), [products, inst, owned]);
+  const { data: liveData } = useLive();
+  const liveNow = (liveData?.streams ?? []).filter((s) => s.status === "live" && s.videoId).slice(0, 4);
   const job = inst?.jobs[0];
   const jobName = job ? products.find((p) => p.id === job.productId)?.name : undefined;
   return (
@@ -118,6 +122,20 @@ export function Home() {
           )}
         </section>
       </div>
+
+      {liveNow.length > 0 && (<>
+        <SectionTitle action={<Link to="/live" className="hud-label hover:text-foreground">{t("home.allLive")}</Link>}>{t("home.live")}</SectionTitle>
+        <div className="mb-9 grid grid-cols-2 gap-5 xl:grid-cols-4">
+          {liveNow.map((s) => (
+            <Link key={s.userId} to={`/live/${s.videoId}`} className="group">
+              <div className="hud relative aspect-video overflow-hidden [--ch:10px]"><Thumb s={s} className="transition group-hover:scale-[1.04]" />
+                <div className="absolute left-1.5 top-1.5"><LivePill small /></div>
+                <div className="absolute bottom-1.5 left-1.5 bg-black/70 px-1.5 font-mono text-[10px] text-white">{viewers(s.viewers, i18n.language)}</div></div>
+              <div className="mt-2 flex gap-2"><ChannelAvatar s={s} size={28} /><div className="min-w-0"><div className="line-clamp-1 text-sm font-semibold group-hover:text-primary">{s.title}</div><div className="truncate text-xs text-muted">{s.channelTitle}</div></div></div>
+            </Link>
+          ))}
+        </div>
+      </>)}
 
       <SectionTitle action={<Link to="/store" className="hud-label hover:text-foreground">{t("home.all")}</Link>}>{t("home.recommended")}</SectionTitle>
       <div className="mb-9 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">

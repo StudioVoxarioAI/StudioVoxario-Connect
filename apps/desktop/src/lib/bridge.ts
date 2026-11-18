@@ -18,6 +18,16 @@ const browserFallback: ConnectApi = {
     refresh: async () => browserFallback.catalog.get(),
     onUpdate: () => () => undefined,
   },
+  live: {
+    get: async () => ({ streams: [], checkedAt: null, loadedAt: null, error: null, youtube: { signedIn: false, name: null } }),
+    refresh: async () => browserFallback.live.get(),
+    focus: async () => undefined,
+    remind: async () => [],
+    youtubeSignIn: async () => browserFallback.live.get(),
+    youtubeSignOut: async () => browserFallback.live.get(),
+    popoutChat: async (id: string) => { window.open(`https://www.youtube.com/live_chat?v=${id}&is_popout=1`, "_blank", "noopener"); },
+    onChange: () => () => undefined,
+  },
   auth: {
     status: async () => ({ signedIn: false, pending: false, user: null, error: null, secureStorage: false, offline: false }),
     signIn: async () => browserFallback.auth.status(),

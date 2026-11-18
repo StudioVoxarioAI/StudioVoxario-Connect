@@ -10,10 +10,11 @@ import type { AccessRow } from "./admin";
 import type { LibraryFolder } from "./system";
 import type { InstallOptions, SetupInfo } from "./setup";
 import type { UpdaterStatus } from "./updater";
+import type { LiveState } from "./live";
 
 export type CatalogState = Catalog & { offline: boolean };
 export type { AccessRow, InstallOptions, SetupInfo };
-export type { AuthStatus, InstallsState, LibraryFolder, LibraryState, Settings, UpdaterStatus };
+export type { AuthStatus, InstallsState, LibraryFolder, LibraryState, LiveState, Settings, UpdaterStatus };
 type Result<T> = { ok: true; value: T } | { ok: false; error: string };
 type Unsub = () => void;
 function on<T>(channel: string, cb: (v: T) => void): Unsub {
@@ -34,6 +35,16 @@ const api = {
       ipcRenderer.on("connect:catalog", fn);
       return () => { ipcRenderer.removeListener("connect:catalog", fn); };
     },
+  },
+  live: {
+    get: (): Promise<LiveState> => ipcRenderer.invoke("connect:live-get"),
+    refresh: (): Promise<LiveState> => ipcRenderer.invoke("connect:live-refresh"),
+    focus: (on: boolean): Promise<void> => ipcRenderer.invoke("connect:live-focus", on),
+    remind: (videoId: string, on: boolean): Promise<string[]> => ipcRenderer.invoke("connect:live-remind", videoId, on),
+    youtubeSignIn: (): Promise<LiveState> => ipcRenderer.invoke("connect:live-yt-sign-in"),
+    youtubeSignOut: (): Promise<LiveState> => ipcRenderer.invoke("connect:live-yt-sign-out"),
+    popoutChat: (videoId: string): Promise<void> => ipcRenderer.invoke("connect:live-popout", videoId),
+    onChange: (cb: (s: LiveState) => void): Unsub => on("connect:live", cb),
   },
   auth: {
     status: (): Promise<AuthStatus> => ipcRenderer.invoke("connect:auth-status"),

@@ -1,0 +1,20 @@
+// Náhledy sekce Živě (ukázkový režim: živá vysílání, naplánovaná, streameři, sledování s chatem)
+import { createRequire } from "node:module";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+const require = createRequire(import.meta.url);
+const { _electron } = require("playwright");
+const ud = fs.mkdtempSync(path.join(os.tmpdir(), "connect-live-"));
+const out = path.resolve("shots"); fs.mkdirSync(out, { recursive: true });
+const app = await _electron.launch({ executablePath: require("electron"), args: [".", "--no-sandbox"], env: { ...process.env, CONNECT_DEMO: "1", CONNECT_USER_DATA: ud, CONNECT_NO_TRAY: "1" } });
+const win = await app.firstWindow();
+await win.setViewportSize({ width: 1440, height: 900 });
+await win.waitForTimeout(4500);
+const go = async (h, n, wait = 2200) => { await win.evaluate((x) => { window.location.hash = x; }, h); await win.waitForTimeout(wait); await win.screenshot({ path: path.join(out, n + ".png") }); };
+await go("#/live", "50-zive");
+await win.evaluate(() => document.querySelector("main").scrollTo(0, 900)); await win.waitForTimeout(600); await win.screenshot({ path: path.join(out, "51-zive-2.png") });
+await go("#/live/demo1", "52-sledovani", 6000);
+await win.evaluate(() => document.querySelector("main").scrollTo(0, 600)); await win.waitForTimeout(500); await win.screenshot({ path: path.join(out, "53-sledovani-2.png") });
+await app.close();
+fs.rmSync(ud, { recursive: true, force: true });
