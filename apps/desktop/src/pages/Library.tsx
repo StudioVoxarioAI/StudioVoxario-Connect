@@ -40,7 +40,6 @@ export function Library() {
   return (
     <div className="flex h-full">
       <aside className="w-60 shrink-0 border-r border-border/60 bg-surface/40 p-4">
-        <div className="hud-label mb-1 px-2">03</div>
         <h1 className="mb-4 px-2 font-display text-xl font-extrabold uppercase tracking-[0.14em]">{t("library.title")}</h1>
         {cats.map((c) => (
           <button key={c} onClick={() => setCat(c)} aria-pressed={cat === c}

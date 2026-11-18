@@ -7,7 +7,7 @@ import { Markdown } from "../components/Markdown";
 import { ProductAction } from "../components/ProductAction";
 import { StatusBadge } from "../components/ProductCard";
 import { bridge } from "../lib/bridge";
-import { formatPrice, formatSize, useProduct } from "../lib/catalog";
+import { formatPrice, formatSize, useCatalog, useProduct } from "../lib/catalog";
 
 function Info({ icon, label, children }: { icon: ReactNode; label: string; children: ReactNode }) {
   return (
@@ -23,6 +23,7 @@ export function ProductDetail() {
   const { t, i18n } = useTranslation();
   const nav = useNavigate();
   const { product: p, loading } = useProduct(id);
+  const { data: catalog } = useCatalog();
   const [shot, setShot] = useState(0);
   if (!p) return loading ? <div className="h-[420px] animate-pulse bg-surface" /> : (
     <div className="p-8"><EmptyState icon={<PackageSearch size={34} />} title={t("detail.notFound")} action={<Link to="/store" className="text-primary">{t("detail.back")}</Link>} /></div>
@@ -73,6 +74,22 @@ export function ProductDetail() {
             <Markdown text={p.description} />
             {p.tags.length > 0 && <div className="mt-4 flex flex-wrap gap-2">{p.tags.map((g) => <Badge key={g}>{g}</Badge>)}</div>}
           </section>
+          {(p.related ?? []).length > 0 && (
+            <section>
+              <h2 className="mb-3 font-display text-sm uppercase tracking-[0.18em] text-muted">{t("detail.related")}</h2>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {(p.related ?? []).map((rid) => catalog?.products.find((x) => x.id === rid)).filter((x): x is NonNullable<typeof x> => !!x).map((r) => (
+                  <Link key={r.id} to={`/store/${r.id}`} className="hud-tile group flex items-center gap-3 p-2 pr-4">
+                    <img src={r.media.hero} alt="" className="h-14 w-24 object-cover" />
+                    <div className="min-w-0">
+                      <div className="truncate font-display text-sm font-bold uppercase tracking-[0.05em] group-hover:text-primary">{r.name}</div>
+                      <div className="truncate text-xs text-subtle">{r.tagline}</div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
           {p.systemRequirements && (
             <section>
               <h2 className="mb-3 font-display text-sm uppercase tracking-[0.18em] text-muted">{t("detail.requirements")}</h2>

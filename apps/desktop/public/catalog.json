@@ -61,7 +61,10 @@
           "%LOCALAPPDATA%\\StudioVoxario\\Ashes of Eryon\\Game",
           "%LOCALAPPDATA%\\StudioVoxario\\AshesOfEryon"
         ]
-      }
+      },
+      "related": [
+        "fantasy"
+      ]
     },
     {
       "id": "fantasy",
@@ -95,7 +98,7 @@
       "pricing": {
         "model": "free"
       },
-      "access": "none",
+      "access": "account_permission",
       "status": "early_access",
       "platforms": [
         "windows"
@@ -114,7 +117,10 @@
           "%LOCALAPPDATA%\\StudioVoxario\\Ashes of Eryon\\Game-fantasy",
           "%LOCALAPPDATA%\\StudioVoxario\\AshesOfEryon-fantasy"
         ]
-      }
+      },
+      "related": [
+        "ashes-of-eryon"
+      ]
     },
     {
       "id": "voxario-studio-engine",

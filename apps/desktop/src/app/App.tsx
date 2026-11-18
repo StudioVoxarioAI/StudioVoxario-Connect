@@ -9,6 +9,7 @@ import { Toasts } from "../components/Toasts";
 import { WhatsNew } from "../components/WhatsNew";
 import { useSettings } from "../lib/settings";
 import { Account } from "../pages/Account";
+import { Admin } from "../pages/Admin";
 import { Downloads } from "../pages/Downloads";
 import { Home } from "../pages/Home";
 import { Library } from "../pages/Library";
@@ -45,6 +46,7 @@ export function App() {
                   <Route path="/downloads" element={<Downloads />} />
                   <Route path="/account" element={<Account />} />
                   <Route path="/settings" element={<Settings />} />
+                  <Route path="/admin" element={<Admin />} />
                   <Route path="*" element={<Home />} />
                 </Routes>
               </main>

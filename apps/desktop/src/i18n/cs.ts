@@ -1,5 +1,5 @@
 export const cs = {
-  nav: { home: "Domů", store: "Obchod", library: "Knihovna", downloads: "Stahování", settings: "Nastavení", account: "Účet" },
+  nav: { home: "Domů", store: "Obchod", library: "Knihovna", downloads: "Stahování", settings: "Nastavení", account: "Účet", admin: "Správa" },
   top: { search: "Hledat hry a software…", signIn: "Přihlásit se", guest: "Host", noDownloads: "Nic se nestahuje" },
   window: { minimize: "Minimalizovat", maximize: "Maximalizovat", close: "Zavřít" },
   common: { retry: "Zkusit znovu", soon: "Připravujeme", openWeb: "Otevřít na webu", phase: "Fáze {{n}}" },
@@ -72,7 +72,7 @@ export const cs = {
     none: "Máte nejnovější verzi.", error: "Aktualizaci se nepodařilo zkontrolovat: {{e}}",
   },
   dock: { online: "Online", offline: "Offline – zobrazena uložená data", free: "Volno {{v}}" },
-  eyebrow: { store: "02 · Katalog", downloads: "04 · Fronta", settings: "Systém", account: "Účet StudioVoxario" },
+  eyebrow: { store: "Katalog", downloads: "Fronta", admin: "Platforma", settings: "Systém", account: "Účet StudioVoxario" },
   whatsNew: { title: "Co je nového", hint: "Poznámky k aktuální verzi Connectu (stejné jako v Novinkách na webu).", open: "Zobrazit", all: "Všechny novinky na webu", ok: "Rozumím", feature: "Novinka", improvement: "Vylepšení", fix: "Oprava", security: "Bezpečnost" },
   setup: {
     title: "Instalace platformy", reinstallTitle: "Přeinstalace / aktualizace", installingTitle: "Instaluji", doneTitle: "Připraveno", uninstallTitle: "Odinstalace",
@@ -90,6 +90,15 @@ export const cs = {
     button: "Přihlásit se přes studiovoxario.com", register: "Založit účet zdarma",
     secure: "Heslo zadáváte jen na webu StudioVoxario, Connect ho nikdy nevidí. Přihlášení se ukládá šifrovaně ve Windows.",
     p1: "Jeden účet pro web, aplikace i hry", p2: "Přístupy, klíče a licence se ověří samy", p3: "Bezpečné přihlášení přes prohlížeč",
+  },
+  role: { admin: "Správce", editor: "Editor", player: "Hráč" },
+  admin: {
+    title: "Správa přístupů", lead: "Kdo smí stáhnout a hrát hry s omezeným přístupem. Stejné nastavení je na webu v Administraci → Přístupy ke hrám. Správci a editoři mají přístup vždy.",
+    noRights: "Tuto stránku vidí jen správci", noRightsText: "Váš účet nemá oprávnění spravovat přístupy.",
+    grantTitle: "Povolit přístup – {{game}}", who: "E-mail nebo přezdívka", note: "Poznámka (nepovinné)", notePh: "např. tester", grant: "Povolit přístup",
+    list_one: "{{count}} hráč s přístupem", list_few: "{{count}} hráči s přístupem", list_other: "{{count}} hráčů s přístupem",
+    empty: "Zatím nikdo (kromě správců a editorů).", revoke: "Odebrat", granted: "{{who}} má přístup k {{game}}.", revoked: "{{who}}: přístup k {{game}} odebrán.",
+    note2: "Ashes of Eryon spravuje jen správce, Fantasy i editor. Hráč uvidí změnu po obnovení knihovny (při návratu do Connectu).",
   },
   account: {
     title: "Účet", guestTitle: "Nejste přihlášeni", pendingShort: "Přihlašování…", pendingTitle: "Dokončete přihlášení v prohlížeči",
@@ -116,7 +125,7 @@ export const cs = {
   },
   catalog: { offline: "Zobrazena offline data – katalog se nepodařilo obnovit z webu.", refresh: "Obnovit katalog" },
   detail: {
-    back: "Zpět", signInToGet: "Přihlásit se a získat", inLibrary: "V knihovně", addToLibrary: "Přidat do knihovny", enterKey: "Zadat přístupový klíč", noAccess: "Bez přístupu", notFound: "Produkt nebyl nalezen", about: "O produktu", requirements: "Systémové požadavky",
+    back: "Zpět", signInToGet: "Přihlásit se a získat", inLibrary: "V knihovně", addToLibrary: "Přidat do knihovny", enterKey: "Zadat přístupový klíč", noAccess: "Bez přístupu", notFound: "Produkt nebyl nalezen", about: "O produktu", related: "Související", requirements: "Systémové požadavky",
     minimum: "Minimální", recommended: "Doporučené", changelog: "Změny ve verzích", get: "Získat", buy: "Koupit",
     follow: "Sledovat", developer: "Vývojář", version: "Verze", size: "Velikost", platforms: "Platformy",
     prev: "Předchozí obrázek", next: "Další obrázek", phaseHint: "Získání a instalace po přihlášení (Fáze 2–3).",

@@ -247,7 +247,11 @@ export async function rest<T>(pathAndQuery: string, init: { method?: string; bod
     headers: { apikey: api().publishableKey, authorization: `Bearer ${token}`, "content-type": "application/json", accept: "application/json" },
     body: init.body === undefined ? undefined : JSON.stringify(init.body),
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) {
+    let msg = "";
+    try { msg = String(((await res.json()) as { message?: string }).message ?? ""); } catch { /* bez těla */ }
+    throw new Error(`HTTP ${res.status}${msg ? `: ${msg}` : ""}`);
+  }
   return (await res.json()) as T;
 }
 

@@ -20,13 +20,19 @@ export interface LibraryItem {
   favorite: boolean;
   license?: { type: "perpetual" | "subscription" | "trial"; validUntil?: string; updatesActive?: boolean; buyUrl?: string; passUrl?: string; latestAllowed?: boolean };
 }
-export interface LibraryState { signedIn: boolean; items: LibraryItem[]; checkedAt?: string; offline: boolean; error?: string }
+export type PlatformRole = "admin" | "editor" | "player";
+export interface LibraryState {
+  signedIn: boolean; items: LibraryItem[]; checkedAt?: string; offline: boolean; error?: string;
+  role?: PlatformRole;            // správce / editor / hráč (web: my_platform_role)
+  manages?: string[];             // hry, u kterých smí spravovat přístupy (stránka Správa)
+}
 
 interface UserData {
   claims: Record<string, string>;        // productId -> kdy získáno
   unlocks: Record<string, string>;       // skupina klíče (voxar-app) -> kdy odemčeno
   favorites: string[];
   remote: Record<string, { owned: boolean; license?: LibraryItem["license"]; at: string }>;   // poslední stav z webu
+  role?: { role: PlatformRole; manages: string[] };                                           // poslední známá role
 }
 const store = new JsonStore<Record<string, UserData>>("library", {});
 const blank = (): UserData => ({ claims: {}, unlocks: {}, favorites: [], remote: {} });
@@ -49,6 +55,37 @@ function emit(s: LibraryState) {
 
 export function libraryNow(): LibraryState { return last; }
 
+const notFound = (e: unknown) => /HTTP 404/.test(String((e as Error)?.message ?? e));
+
+/** Smí uživatel hrát hru? Web: game_can_play(hra); dokud web funkci nemá, Ashes přes ashes_can_play. */
+async function canPlay(game: string): Promise<boolean> {
+  try {
+    return (await rest<boolean>("/rest/v1/rpc/game_can_play", { method: "POST", body: { p_game: game } })) === true;
+  } catch (e) {
+    if (!notFound(e)) throw e;
+    if (game === "ashes-of-eryon") return (await rest<boolean>("/rest/v1/rpc/ashes_can_play", { method: "POST", body: {} })) === true;
+    // ostatní hry: do nasazení game_access jen správce a editor (jako na webu)
+    const uid = authStatus().user?.id;
+    if (!uid) return false;
+    const rows = await rest<Array<{ role: string }>>(`/rest/v1/user_roles?select=role&user_id=eq.${encodeURIComponent(uid)}`);
+    return rows.some((r) => r.role === "admin" || r.role === "editor");
+  }
+}
+
+/** Role na platformě: web my_platform_role(); záložně z user_roles (vlastní řádky smí číst každý). */
+async function platformRole(uid: string): Promise<{ role: PlatformRole; manages: string[] }> {
+  try {
+    const r = await rest<{ role?: PlatformRole; manages?: string[] }>("/rest/v1/rpc/my_platform_role", { method: "POST", body: {} });
+    return { role: r.role ?? "player", manages: Array.isArray(r.manages) ? r.manages : [] };
+  } catch (e) {
+    if (!notFound(e)) throw e;
+    const rows = await rest<Array<{ role: string }>>(`/rest/v1/user_roles?select=role&user_id=eq.${encodeURIComponent(uid)}`);
+    const roles = rows.map((x) => x.role);
+    const role: PlatformRole = roles.includes("admin") ? "admin" : roles.includes("editor") ? "editor" : "player";
+    return { role, manages: role === "admin" ? ["ashes-of-eryon"] : [] };
+  }
+}
+
 export async function refreshLibrary(): Promise<LibraryState> {
   const products = currentCatalog()?.products ?? [];
   const a = authStatus();
@@ -60,23 +97,25 @@ export async function refreshLibrary(): Promise<LibraryState> {
       const st = demoStates[p.id] ?? "claimable";
       return { productId: p.id, owned: st === "owned", state: st, favorite: p.id === "fantasy", acquiredAt: "2026-11-01T12:00:00Z" } as LibraryItem;
     });
-    return (emit({ signedIn: true, items, checkedAt: new Date().toISOString(), offline: false }), last);
+    return (emit({ signedIn: true, items, checkedAt: new Date().toISOString(), offline: false, role: "admin", manages: ["ashes-of-eryon", "fantasy"] }), last);
   }
   const uid = a.user.id;
   let offline = false;
   // dotazy na web (paralelně, každý samostatně – výpadek jednoho nevadí)
-  const needsAshes = products.some((p) => p.access === "account_permission");
+  const gated = products.filter((p) => p.access === "account_permission");
   const licensed = products.filter((p) => p.access === "license" && p.shopKey);
   const keyed = products.filter((p) => p.access === "access_key");
-  const [ashes, licenses, keyCheck] = await Promise.allSettled([
-    needsAshes ? rest<boolean>("/rest/v1/rpc/ashes_can_play", { method: "POST", body: {} }) : Promise.resolve(false),
+  const [access, licenses, keyCheck, role] = await Promise.allSettled([
+    Promise.all(gated.map(async (p) => [p.id, await canPlay(p.id)] as const)),
     Promise.all(licensed.map(async (p) => [p.id, await rest<Record<string, unknown>>("/rest/v1/rpc/shop_license_status", { method: "POST", body: { p_product: p.shopKey } })] as const)),
     keyed.length ? edge<{ allowed?: boolean }>("app-access", { action: "check" }) : Promise.resolve(null),
+    platformRole(uid),
   ]);
   const now = new Date().toISOString();
   save(uid, (d) => {
-    if (ashes.status === "fulfilled") for (const p of products.filter((x) => x.access === "account_permission")) d.remote[p.id] = { owned: ashes.value === true, at: now };
+    if (access.status === "fulfilled") for (const [id, ok] of access.value) d.remote[id] = { owned: ok, at: now };
     else offline = true;
+    if (role.status === "fulfilled") d.role = role.value;
     if (licenses.status === "fulfilled") {
       for (const [id, s] of licenses.value) {
         d.remote[id] = {
@@ -110,7 +149,7 @@ export async function refreshLibrary(): Promise<LibraryState> {
       }
     }
   });
-  emit({ signedIn: true, items, checkedAt: now, offline });
+  emit({ signedIn: true, items, checkedAt: now, offline, role: d.role?.role ?? "player", manages: d.role?.manages ?? [] });
   return last;
 }
 

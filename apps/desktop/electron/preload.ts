@@ -6,12 +6,13 @@ import type { AuthStatus } from "./auth";
 import type { InstallsState } from "./installer";
 import type { LibraryState } from "./library";
 import type { Settings } from "./settings";
+import type { AccessRow } from "./admin";
 import type { LibraryFolder } from "./system";
 import type { InstallOptions, SetupInfo } from "./setup";
 import type { UpdaterStatus } from "./updater";
 
 export type CatalogState = Catalog & { offline: boolean };
-export type { InstallOptions, SetupInfo };
+export type { AccessRow, InstallOptions, SetupInfo };
 export type { AuthStatus, InstallsState, LibraryFolder, LibraryState, Settings, UpdaterStatus };
 type Result<T> = { ok: true; value: T } | { ok: false; error: string };
 type Unsub = () => void;
@@ -88,6 +89,11 @@ const api = {
     install: (): Promise<void> => ipcRenderer.invoke("connect:updater-install"),
     postpone: (): Promise<void> => ipcRenderer.invoke("connect:updater-postpone"),
     onChange: (cb: (s: UpdaterStatus) => void): Unsub => on("connect:updater", cb),
+  },
+  admin: {
+    list: (game: string): Promise<Result<AccessRow[]>> => ipcRenderer.invoke("connect:admin-access-list", game),
+    grant: (game: string, who: string, note: string): Promise<Result<AccessRow[]>> => ipcRenderer.invoke("connect:admin-access-grant", game, who, note),
+    revoke: (game: string, user: string): Promise<Result<AccessRow[]>> => ipcRenderer.invoke("connect:admin-access-revoke", game, user),
   },
   setup: {
     info: (): Promise<SetupInfo> => ipcRenderer.invoke("connect:setup-info"),

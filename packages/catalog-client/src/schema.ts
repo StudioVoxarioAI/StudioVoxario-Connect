@@ -70,6 +70,8 @@ export const Product = z.object({
   storeUrl: z.string().optional(),
   featured: z.number().optional(),          // pořadí v doporučených (menší = výš), bez hodnoty = nedoporučeno
   developer: z.string().optional(),
+  /** související produkty (Fantasy ↔ Ashes of Eryon) – zobrazí se v detailu */
+  related: z.array(z.string()).optional(),
   /** Odkud se bere cena: záznam obchodu webu (shop_items.product_key) – cena z obchodu má přednost. */
   shopKey: z.string().optional(),
   /** Odkud se stahuje (Fáze 3 a 6): manifest hry, instalátor aplikace, soubor z obchodu, nebo modul jiné aplikace. */

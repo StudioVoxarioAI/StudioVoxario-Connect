@@ -2,16 +2,16 @@ import { Loader2, LogIn, Minus, RefreshCw, Search, Settings, Square, X } from "l
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink } from "react-router-dom";
-import { useAuth } from "../lib/account";
+import { useAuth, useLibrary } from "../lib/account";
 import { bridge } from "../lib/bridge";
 import { useInstalls, useUpdater } from "../lib/installs";
 import { Avatar } from "./Avatar";
 
 const tabs = [
-  { to: "/", key: "home", code: "01" },
-  { to: "/store", key: "store", code: "02" },
-  { to: "/library", key: "library", code: "03" },
-  { to: "/downloads", key: "downloads", code: "04" },
+  { to: "/", key: "home" },
+  { to: "/store", key: "store" },
+  { to: "/library", key: "library" },
+  { to: "/downloads", key: "downloads" },
 ] as const;
 
 /** Stažená aktualizace Connectu: odpočet automatického restartu (s „Později“), jinak tlačítko restartu. */
@@ -36,6 +36,7 @@ function UpdateChip({ version, restartAt }: { version?: string; restartAt?: numb
 export function CommandBar({ onSearch }: { onSearch: () => void }) {
   const { t } = useTranslation();
   const { data: auth } = useAuth();
+  const { data: lib } = useLibrary();
   const { data: upd } = useUpdater();
   const { data: inst } = useInstalls();
   const jobs = inst?.jobs.length ?? 0;
@@ -51,11 +52,10 @@ export function CommandBar({ onSearch }: { onSearch: () => void }) {
         </div>
       </Link>
       <nav aria-label="Hlavní navigace" className="no-drag flex items-stretch">
-        {tabs.map((x) => (
+        {[...tabs, ...(lib?.manages?.length ? [{ to: "/admin", key: "admin" } as const] : [])].map((x) => (
           <NavLink key={x.to} to={x.to} end={x.to === "/"}
             className={({ isActive }) => `group relative flex items-center gap-2 px-5 font-display text-[13px] font-semibold uppercase tracking-[0.2em] transition ${isActive ? "text-foreground" : "text-muted hover:text-foreground"}`}>
             {({ isActive }) => (<>
-              <span className={`font-mono text-[10px] ${isActive ? "text-primary" : "text-subtle"}`}>{x.code}</span>
               {t(`nav.${x.key}`)}
               {x.key === "downloads" && jobs > 0 && <span className="hud-btn [--ch:4px] bg-primary px-1.5 text-[10px] text-primary-foreground">{jobs}</span>}
               <span aria-hidden className={`absolute inset-x-3 bottom-0 h-[2px] bg-primary shadow-[0_0_10px_hsl(var(--primary))] transition ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-40"}`} />
@@ -74,6 +74,9 @@ export function CommandBar({ onSearch }: { onSearch: () => void }) {
           <Link to="/account" className="no-drag hud-btn flex h-9 items-center gap-2 border border-border bg-surface-2/80 pl-1 pr-3 text-sm hover:border-primary/50">
             <Avatar src={auth.user.avatar} name={auth.user.name} />
             <span className="max-w-[140px] truncate font-ui font-semibold">{auth.user.name}</span>
+            {lib?.role && lib.role !== "player" && (
+              <span className={`hud-btn [--ch:4px] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${lib.role === "admin" ? "bg-accent/20 text-accent" : "bg-primary/15 text-primary"}`}>{t(`role.${lib.role}`)}</span>
+            )}
           </Link>
         ) : (
           <button onClick={() => bridge.auth.signIn()} disabled={auth?.pending}

@@ -8,6 +8,7 @@ import { catalogNow, refresh as refreshCatalog } from "./catalog";
 import { applyLimits, cancel, enqueue, hooks, kick, syncApps, launch, move, openFolder, pause, resume, state as installsState, uninstall } from "./installer";
 import { claim, libraryNow, licenses, redeemKey, refreshLibrary, setFavorite } from "./library";
 import { settings, updateSettings, type Settings } from "./settings";
+import { accessGrant, accessList, accessRevoke } from "./admin";
 import { adoptFolder, adoptLegacy } from "./migrate";
 import { isSetupMode, isUninstallMode, maintainInstall, runSetup } from "./setup";
 import { checkNow, installNow, onWindowFocus, postpone, setupUpdater, updaterStatus } from "./updater";
@@ -166,6 +167,14 @@ if (setupMode) {
       }
       return found.length;
     };
+    // správa přístupů ke hrám (jen správce / editor – oprávnění ověřuje web)
+    ipcMain.handle("connect:admin-access-list", (_e, game: string) => wrapA(() => accessList(String(game))));
+    ipcMain.handle("connect:admin-access-grant", (_e, game: string, who: string, note: string) => wrapA(async () => {
+      const rows = await accessGrant(String(game), String(who).trim(), String(note ?? "").trim());
+      void refreshLibrary();
+      return rows;
+    }));
+    ipcMain.handle("connect:admin-access-revoke", (_e, game: string, user: string) => wrapA(() => accessRevoke(String(game), String(user))));
     ipcMain.handle("connect:legacy-adopt", async () => announce(await adoptLegacy()));
     ipcMain.handle("connect:adopt-folder", (_e, id: string) => adoptFolder(win, String(id)));
     ipcMain.handle("connect:updater-status", () => updaterStatus());

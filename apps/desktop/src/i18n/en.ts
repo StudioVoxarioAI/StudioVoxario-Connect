@@ -1,7 +1,7 @@
 import type { Dict } from "./cs";
 
 export const en: Dict = {
-  nav: { home: "Home", store: "Store", library: "Library", downloads: "Downloads", settings: "Settings", account: "Account" },
+  nav: { home: "Home", store: "Store", library: "Library", downloads: "Downloads", settings: "Settings", account: "Account", admin: "Admin" },
   top: { search: "Search games and software…", signIn: "Sign in", guest: "Guest", noDownloads: "No active downloads" },
   window: { minimize: "Minimize", maximize: "Maximize", close: "Close" },
   common: { retry: "Try again", soon: "Coming soon", openWeb: "Open on the web", phase: "Phase {{n}}" },
@@ -74,7 +74,7 @@ export const en: Dict = {
     none: "You are up to date.", error: "Could not check for updates: {{e}}",
   },
   dock: { online: "Online", offline: "Offline – showing saved data", free: "{{v}} free" },
-  eyebrow: { store: "02 · Catalog", downloads: "04 · Queue", settings: "System", account: "StudioVoxario account" },
+  eyebrow: { store: "Catalog", downloads: "Queue", admin: "Platform", settings: "System", account: "StudioVoxario account" },
   whatsNew: { title: "What's new", hint: "Notes for the current Connect version (same as News on the website).", open: "Show", all: "All news on the website", ok: "Got it", feature: "Feature", improvement: "Improvement", fix: "Fix", security: "Security" },
   setup: {
     title: "Platform setup", reinstallTitle: "Reinstall / update", installingTitle: "Installing", doneTitle: "Ready", uninstallTitle: "Uninstall",
@@ -92,6 +92,15 @@ export const en: Dict = {
     button: "Sign in via studiovoxario.com", register: "Create a free account",
     secure: "You enter your password only on the StudioVoxario website; Connect never sees it. The session is stored encrypted by Windows.",
     p1: "One account for the website, apps and games", p2: "Access, keys and licenses are verified automatically", p3: "Secure sign-in through your browser",
+  },
+  role: { admin: "Admin", editor: "Editor", player: "Player" },
+  admin: {
+    title: "Access management", lead: "Who may download and play games with restricted access. The same settings are on the website under Administration → Game access. Admins and editors always have access.",
+    noRights: "Only administrators can see this page", noRightsText: "Your account cannot manage access.",
+    grantTitle: "Grant access – {{game}}", who: "E-mail or nickname", note: "Note (optional)", notePh: "e.g. tester", grant: "Grant access",
+    list_one: "{{count}} player with access", list_few: "{{count}} players with access", list_other: "{{count}} players with access",
+    empty: "Nobody yet (besides admins and editors).", revoke: "Remove", granted: "{{who}} now has access to {{game}}.", revoked: "{{who}}: access to {{game}} removed.",
+    note2: "Ashes of Eryon is managed by admins only, Fantasy also by editors. Players see the change after their library refreshes.",
   },
   account: {
     title: "Account", guestTitle: "You are not signed in", pendingShort: "Signing in…", pendingTitle: "Finish signing in in your browser",
@@ -118,7 +127,7 @@ export const en: Dict = {
   },
   catalog: { offline: "Showing offline data – the catalog could not be refreshed from the website.", refresh: "Refresh catalog" },
   detail: {
-    back: "Back", signInToGet: "Sign in to get", inLibrary: "In library", addToLibrary: "Add to library", enterKey: "Enter access key", noAccess: "No access", notFound: "Product not found", about: "About", requirements: "System requirements",
+    back: "Back", signInToGet: "Sign in to get", inLibrary: "In library", addToLibrary: "Add to library", enterKey: "Enter access key", noAccess: "No access", notFound: "Product not found", about: "About", related: "Related", requirements: "System requirements",
     minimum: "Minimum", recommended: "Recommended", changelog: "Changelog", get: "Get", buy: "Buy",
     follow: "Follow", developer: "Developer", version: "Version", size: "Size", platforms: "Platforms",
     prev: "Previous image", next: "Next image", phaseHint: "Getting and installing after sign-in (Phases 2–3).",

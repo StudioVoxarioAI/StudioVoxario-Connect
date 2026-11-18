@@ -27,9 +27,6 @@ function Deck({ items }: { items: Product[] }) {
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/55 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent" />
         <div className="hud-scan" />
-        <div className="absolute right-12 top-4 font-mono text-[11px] tracking-[0.3em] text-primary/80">
-          {String(i + 1).padStart(2, "0")} / {String(items.length).padStart(2, "0")}
-        </div>
         <div className="relative flex h-full max-w-xl flex-col justify-end gap-3 p-9">
           <div className="hud-label">{t("home.featured")}</div>
           <div className="flex items-center gap-4">
@@ -50,7 +47,6 @@ function Deck({ items }: { items: Product[] }) {
             <button onClick={() => setI(k)} aria-current={k === i}
               className={`group relative flex h-full w-full items-center gap-3 px-3 py-2 text-left transition ${k === i ? "bg-primary/10" : "hover:bg-surface-2"}`}>
               <span aria-hidden className={`absolute inset-y-2 left-0 w-[3px] ${k === i ? "bg-primary shadow-[0_0_10px_hsl(var(--primary))]" : "bg-transparent"}`} />
-              <span className={`font-mono text-xs ${k === i ? "text-primary" : "text-subtle"}`}>{String(k + 1).padStart(2, "0")}</span>
               <img src={x.media.icon} alt="" className="h-10 w-10 border border-border object-cover" />
               <span className="min-w-0 flex-1">
                 <span className={`block truncate font-display text-sm font-bold uppercase tracking-[0.06em] ${k === i ? "text-foreground" : "text-muted group-hover:text-foreground"}`}>{x.name}</span>

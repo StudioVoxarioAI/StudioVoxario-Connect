@@ -1,5 +1,33 @@
 [
   {
+    "version": "0.4.0",
+    "date": "2026-11-18",
+    "title": "Fantasy jako samostatná hra, přístupy a role",
+    "titleEn": "Fantasy as a standalone game, access and roles",
+    "changes": [
+      {
+        "type": "feature",
+        "text": "Fantasy je samostatná hra (související s Ashes of Eryon) a stejně jako Ashes vyžaduje přístup udělený k účtu.",
+        "textEn": "Fantasy is a standalone game (related to Ashes of Eryon) and, like Ashes, requires access granted to your account."
+      },
+      {
+        "type": "feature",
+        "text": "Nová stránka Správa pro správce: udělování a odebírání přístupu k Ashes of Eryon a Fantasy podle e-mailu nebo přezdívky (totéž jde na webu v Administraci → Přístupy ke hrám).",
+        "textEn": "New Admin page for administrators: grant and remove access to Ashes of Eryon and Fantasy by e-mail or nickname (also on the website under Administration → Game access)."
+      },
+      {
+        "type": "feature",
+        "text": "Connect rozezná správce, editora a hráče – u jména je odznak role a správa se zobrazí jen oprávněným.",
+        "textEn": "Connect recognises admins, editors and players – a role badge next to your name, and management only for those allowed."
+      },
+      {
+        "type": "improvement",
+        "text": "Detail produktu ukazuje související hry; navigace a výběr na Domů jsou bez číslování.",
+        "textEn": "Product details show related games; navigation and the Home selector no longer use numbering."
+      }
+    ]
+  },
+  {
     "version": "0.3.2",
     "date": "2026-11-18",
     "title": "Connect se aktualizuje sám",

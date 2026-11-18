@@ -175,3 +175,12 @@ a jednou za 6 h. Ověřeno, že aktualizátor vydání vidí (0.3.0 → 0.3.1, `
 Nově: kontrola při startu, každých 15 min a při návratu do okna; po stažení se verze **sama nainstaluje, když je klid**
 (nic neběží ani se nestahuje) – v pozadí hned, s otevřeným oknem po 30 s odpočtu s „Později“ (odklad 2 h).
 `generateUpdatesFilesForAllChannels` přidává `beta.yml` pro kanál Beta.
+
+## D24 – Fantasy samostatně, přístupy ke hrám a role (0.4.0)
+Fantasy byla ve starém launcheru kanálem Ashes of Eryon; v Connectu je samostatná hra (`related: ashes-of-eryon`)
+s přístupem `account_permission` jako Ashes. Web: tabulka `game_access(user_id, game)`, `game_can_play(p_game)`
+(Ashes dál přes `ashes_access`/`ashes_can_play`), správa `game_admin_access_list/grant/revoke` (Ashes jen správce,
+Fantasy i editor) a `my_platform_role()` (správce / editor / hráč + hry, které spravuje). Přístupy jdou udělit na
+webu (Administrace → Přístupy ke hrám) i v Connectu (Správa – jen pro oprávněné). Do nasazení migrace Connect
+používá `ashes_can_play` a role z `user_roles` (Fantasy pak jen správce a editor). Pozn.: soubory her jsou ve
+veřejném úložišti `game-updates` – přístup hlídá Connect (stejně jako u Ashes ve starém launcheru).

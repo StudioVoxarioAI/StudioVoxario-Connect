@@ -74,6 +74,11 @@ const browserFallback: ConnectApi = {
     postpone: async () => undefined,
     onChange: () => () => undefined,
   },
+  admin: {
+    list: async () => ({ ok: true as const, value: [] }),
+    grant: async () => ({ ok: false as const, error: "web" }),
+    revoke: async () => ({ ok: false as const, error: "web" }),
+  },
   setup: {
     info: async () => ({ mode: "install" as const, version: "0.0.0", defaultDir: "C:\\Users\\hrac\\AppData\\Local\\Programs\\StudioVoxario Connect", installedDir: null, installedVersion: null, requiredBytes: 290_000_000, freeBytes: 120_000_000_000, platform: "web" }),
     pick: async () => null,
