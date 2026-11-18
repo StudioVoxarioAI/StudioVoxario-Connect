@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useAuth, useLibraryItem } from "../lib/account";
 import { bridge } from "../lib/bridge";
+import { InstallPanel } from "./InstallPanel";
 import { KeyDialog } from "./KeyDialog";
 
 // Hlavní tlačítko produktu podle stavu účtu a přístupu (Fáze 2); instalace se doplní ve Fázi 3
@@ -26,6 +27,7 @@ export function ProductAction({ p, size = "lg" }: { p: Product; size?: "md" | "l
     );
   }
   const state = item?.state;
+  if (state === "owned" && p.build?.kind === "voxario-manifest") return <div className="flex"><InstallPanel p={p} /></div>;
   if (state === "owned") return <Button size={size} className={cls} variant="secondary" onClick={() => nav(`/library?select=${p.id}`)}><Check size={17} />{t("detail.inLibrary")}</Button>;
   if (state === "claimable") {
     return (

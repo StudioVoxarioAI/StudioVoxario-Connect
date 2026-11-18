@@ -5,9 +5,13 @@ import { app, BrowserWindow, ipcMain, shell } from "electron";
 import path from "node:path";
 import { cancelSignIn, restore, signIn, signOut, status as authStatus } from "./auth";
 import { catalogNow, refresh as refreshCatalog } from "./catalog";
+import { cancel, enqueue, launch, move, openFolder, pause, resume, state as installsState, uninstall } from "./installer";
 import { claim, libraryNow, licenses, redeemKey, refreshLibrary, setFavorite } from "./library";
+import { settings, updateSettings, type Settings } from "./settings";
 
 const PROTOCOL = "studiovoxario";
+// testy a náhledy: oddělená data aplikace (nikdy nesahá na skutečný profil uživatele)
+if (process.env.CONNECT_USER_DATA) app.setPath("userData", process.env.CONNECT_USER_DATA);
 const isDev = !app.isPackaged && !!process.env.CONNECT_DEV_URL;
 let win: BrowserWindow | null = null;
 let pendingDeepLink: string | null = null;
@@ -93,6 +97,19 @@ if (!app.requestSingleInstanceLock()) {
     ipcMain.handle("connect:library-redeem", (_e, id: string, code: string) => redeemKey(String(id), String(code)));
     ipcMain.handle("connect:library-favorite", (_e, id: string, on: boolean) => setFavorite(String(id), !!on));
     ipcMain.handle("connect:library-licenses", () => licenses());
+    // instalace a stahování
+    const wrap = <T>(fn: () => T) => { try { return { ok: true as const, value: fn() }; } catch (e) { return { ok: false as const, error: (e as Error).message }; } };
+    ipcMain.handle("connect:installs-get", () => installsState());
+    ipcMain.handle("connect:install", (_e, id: string, mode: "install" | "update" | "repair", dir?: string) => wrap(() => enqueue(String(id), mode, dir)));
+    ipcMain.handle("connect:download-pause", (_e, id: string) => pause(String(id)));
+    ipcMain.handle("connect:download-resume", (_e, id: string) => resume(String(id)));
+    ipcMain.handle("connect:download-cancel", (_e, id: string) => cancel(String(id)));
+    ipcMain.handle("connect:download-move", (_e, id: string, i: number) => move(String(id), Number(i)));
+    ipcMain.handle("connect:uninstall", (_e, id: string, keep: boolean) => wrap(() => uninstall(String(id), !!keep)));
+    ipcMain.handle("connect:launch", (_e, id: string, after: "minimize" | "close" | "keep") => launch(String(id), after));
+    ipcMain.handle("connect:open-folder", (_e, id: string) => openFolder(String(id)));
+    ipcMain.handle("connect:settings-get", () => settings());
+    ipcMain.handle("connect:settings-set", (_e, patch: Partial<Settings>) => updateSettings(patch ?? {}));
     ipcMain.handle("connect:open-external", (_e, url: string) => {
       if (typeof url === "string" && /^https:\/\//.test(url)) return shell.openExternal(url);
       return undefined;

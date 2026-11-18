@@ -64,3 +64,13 @@ Obnovovací token šifrovaně přes `safeStorage` (DPAPI / Keychain / libsecret)
 odemčení platí pro skupinu (VoxarioProtect = modul Voxar.app); `account_permission` -> `ashes_can_play()`;
 `license` -> `shop_license_status(product_key)` (vlastnictví, aktualizace, odkaz na koupi). Poslední stav z webu se
 pamatuje (offline knihovna). `CONNECT_DEMO=1` = ukázkový účet jen pro vývoj a náhledy.
+
+## D14 – Instalace, stahování a lokální data (Fáze 3)
+Jádro stahování a instalace je v `installer-core/node` (čistý Node, `fetch` předávaný – Electron `net.fetch`,
+v testech `fetch` z Node proti lokálnímu serveru s HTTP Range). Převzatá logika launcheru Ashes: části `<url>.partN`,
+`.staging` -> `.rollback`, `install.json` (kompatibilní se starým launcherem – migrace ve Fázi 7), návrat verze při
+pádu do 20 s. Navíc: navazování přes HTTP Range (`.partial`), paralelní spojení, omezovač rychlosti, oprava
+přehashováním, bezpečné cesty. Místo SQLite (D8) **JSON úložiště s atomickým zápisem** (`electron/store.ts`,
+líné načtení): data jsou malá (desítky záznamů), odpadá nativní modul (`better-sqlite3` by se musel sestavovat pro
+každou verzi Electronu a platformu). Ověřeno E2E (`scripts/e2e-install.mjs`, `e2e-resume.mjs`): skutečný build
+Ashes of Eryon (102,8 MB, 107 souborů) se stáhne, ověří, opraví i odinstaluje; stahování přežije zavření aplikace.

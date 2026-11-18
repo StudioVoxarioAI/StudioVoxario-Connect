@@ -4,6 +4,7 @@ import { HashRouter, Route, Routes } from "react-router-dom";
 import { SearchPalette } from "../components/SearchPalette";
 import { Sidebar } from "../components/Sidebar";
 import { TitleBar } from "../components/TitleBar";
+import { Toasts } from "../components/Toasts";
 import { TopBar } from "../components/TopBar";
 import { useSettings } from "../lib/settings";
 import { Account } from "../pages/Account";
@@ -52,6 +53,7 @@ export function App() {
           </div>
         </div>
         <SearchPalette open={search} onClose={() => setSearch(false)} />
+        <Toasts />
       </HashRouter>
     </QueryClientProvider>
   );

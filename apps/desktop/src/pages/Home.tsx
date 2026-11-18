@@ -8,6 +8,8 @@ import { OfflineNotice } from "../components/OfflineNotice";
 import { Page } from "../components/Page";
 import { ProductCard, ProductCardSkeleton, StatusBadge } from "../components/ProductCard";
 import { formatPrice, useCatalog } from "../lib/catalog";
+import { useInstalls } from "../lib/installs";
+import { InstallPanel } from "../components/InstallPanel";
 
 function Hero({ items }: { items: Product[] }) {
   const { t, i18n } = useTranslation();
@@ -51,13 +53,31 @@ export function Home() {
   const featured = useMemo(() => products.filter((p) => p.featured).sort((a, b) => a.featured! - b.featured!), [products]);
   const updates = useMemo(() => products.filter((p) => p.latestVersion).slice(0, 3), [products]);
   const sales = products.filter((p) => p.pricing.discountPercent);
+  const { data: inst } = useInstalls();
+  const recent = useMemo(() => products.filter((p) => inst?.installs[p.id])
+    .sort((a, b) => (inst!.installs[b.id]!.lastPlayedAt ?? inst!.installs[b.id]!.installedAt).localeCompare(inst!.installs[a.id]!.lastPlayedAt ?? inst!.installs[a.id]!.installedAt)).slice(0, 3), [products, inst]);
   return (
     <Page>
       <OfflineNotice />
       <Hero items={featured.slice(0, 5)} />
 
       <SectionTitle>{t("home.continue")}</SectionTitle>
-      <div className="mb-9"><EmptyState icon={<Gamepad2 size={34} />} title={t("home.emptyContinue")} text={t("home.emptyContinueText")} /></div>
+      <div className="mb-9">
+        {recent.length ? (
+          <div className="grid gap-5 lg:grid-cols-3">
+            {recent.map((p) => (
+              <div key={p.id} className="overflow-hidden rounded-[calc(var(--radius)*1.2)] border border-border bg-surface">
+                <Link to={`/library?select=${p.id}`} className="block aspect-[21/9] overflow-hidden"><img src={p.media.hero} alt="" className="h-full w-full object-cover" /></Link>
+                <div className="flex items-center gap-3 p-3">
+                  <div className="min-w-0 flex-1"><div className="truncate font-display font-bold">{p.name}</div>
+                    <div className="text-xs text-subtle">{t("home.playtime", { h: Math.floor((inst!.installs[p.id]!.playtimeSeconds ?? 0) / 3600), m: Math.floor(((inst!.installs[p.id]!.playtimeSeconds ?? 0) % 3600) / 60) })}</div></div>
+                  <div className="w-36"><InstallPanel p={p} /></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : <EmptyState icon={<Gamepad2 size={34} />} title={t("home.emptyContinue")} text={t("home.emptyContinueText")} />}
+      </div>
 
       <SectionTitle action={<Link to="/store" className="text-sm text-primary hover:underline">{t("home.all")}</Link>}>{t("home.recommended")}</SectionTitle>
       <div className="mb-9 grid grid-cols-2 gap-5 md:grid-cols-3 xl:grid-cols-6">

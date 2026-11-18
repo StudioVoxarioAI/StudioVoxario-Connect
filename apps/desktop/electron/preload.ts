@@ -3,10 +3,13 @@ import type { Catalog } from "@connect/catalog-client";
 import { contextBridge, ipcRenderer } from "electron";
 
 import type { AuthStatus } from "./auth";
+import type { InstallsState } from "./installer";
 import type { LibraryState } from "./library";
+import type { Settings } from "./settings";
 
 export type CatalogState = Catalog & { offline: boolean };
-export type { AuthStatus, LibraryState };
+export type { AuthStatus, InstallsState, LibraryState, Settings };
+type Result<T> = { ok: true; value: T } | { ok: false; error: string };
 type Unsub = () => void;
 function on<T>(channel: string, cb: (v: T) => void): Unsub {
   const fn = (_e: unknown, v: T) => cb(v);
@@ -42,6 +45,24 @@ const api = {
     favorite: (id: string, on: boolean): Promise<LibraryState> => ipcRenderer.invoke("connect:library-favorite", id, on),
     licenses: (): Promise<Array<{ productId: string; title: string; purchasedAt?: string; updatesUntil?: string; updatesActive: boolean }>> => ipcRenderer.invoke("connect:library-licenses"),
     onChange: (cb: (s: LibraryState) => void): Unsub => on("connect:library", cb),
+  },
+  installs: {
+    get: (): Promise<InstallsState> => ipcRenderer.invoke("connect:installs-get"),
+    install: (id: string, mode: "install" | "update" | "repair" = "install", dir?: string): Promise<Result<InstallsState>> => ipcRenderer.invoke("connect:install", id, mode, dir),
+    pause: (id: string): Promise<InstallsState> => ipcRenderer.invoke("connect:download-pause", id),
+    resume: (id: string): Promise<InstallsState> => ipcRenderer.invoke("connect:download-resume", id),
+    cancel: (id: string): Promise<InstallsState> => ipcRenderer.invoke("connect:download-cancel", id),
+    move: (id: string, index: number): Promise<InstallsState> => ipcRenderer.invoke("connect:download-move", id, index),
+    uninstall: (id: string, keepUserData: boolean): Promise<Result<InstallsState>> => ipcRenderer.invoke("connect:uninstall", id, keepUserData),
+    launch: (id: string, after: "minimize" | "close" | "keep"): Promise<{ ok: boolean; error?: string }> => ipcRenderer.invoke("connect:launch", id, after),
+    openFolder: (id: string): Promise<void> => ipcRenderer.invoke("connect:open-folder", id),
+    onChange: (cb: (s: InstallsState) => void): Unsub => on("connect:installs", cb),
+    onNotify: (cb: (n: { kind: "done" | "rollback" | "crash"; name: string }) => void): Unsub => on("connect:notify", cb),
+  },
+  settings: {
+    get: (): Promise<Settings> => ipcRenderer.invoke("connect:settings-get"),
+    set: (patch: Partial<Settings>): Promise<Settings> => ipcRenderer.invoke("connect:settings-set", patch),
+    onChange: (cb: (s: Settings) => void): Unsub => on("connect:settings", cb),
   },
   onDeepLink: (cb: (url: string) => void) => {
     const fn = (_e: unknown, url: string) => cb(url);

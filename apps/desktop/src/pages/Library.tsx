@@ -8,6 +8,7 @@ import { InstallPanel } from "../components/InstallPanel";
 import { useAuth, useLibrary } from "../lib/account";
 import { bridge } from "../lib/bridge";
 import { formatSize, useCatalog } from "../lib/catalog";
+import { useInstalls } from "../lib/installs";
 
 const cats = ["all", "games", "software", "installed", "favorites"] as const;
 type Cat = (typeof cats)[number];
@@ -20,14 +21,16 @@ export function Library() {
   const { data: auth } = useAuth();
   const { data: lib } = useLibrary();
   const { data: catalog } = useCatalog();
+  const { data: inst } = useInstalls();
+  const isInstalled = (id: string) => !!inst?.installs[id];
   const owned = useMemo(() => {
     const items = new Map((lib?.items ?? []).filter((i) => i.owned).map((i) => [i.productId, i]));
     return (catalog?.products ?? []).filter((p) => items.has(p.id)).map((p) => ({ p, item: items.get(p.id)! }));
   }, [lib, catalog]);
   const filtered = owned.filter(({ p, item }) =>
-    cat === "all" || (cat === "games" ? p.type === "game" : cat === "software" ? p.type === "software" : cat === "favorites" ? item.favorite : false));
+    cat === "all" || (cat === "games" ? p.type === "game" : cat === "software" ? p.type === "software" : cat === "favorites" ? item.favorite : isInstalled(p.id)));
   const count = (c: Cat) => owned.filter(({ p, item }) =>
-    c === "all" || (c === "games" ? p.type === "game" : c === "software" ? p.type === "software" : c === "favorites" ? item.favorite : false)).length;
+    c === "all" || (c === "games" ? p.type === "game" : c === "software" ? p.type === "software" : c === "favorites" ? item.favorite : isInstalled(p.id))).length;
   const selId = params.get("select") ?? filtered[0]?.p.id;
   const sel = owned.find((o) => o.p.id === selId);
   const select = (p: Product) => setParams({ select: p.id });
@@ -61,9 +64,11 @@ export function Library() {
       </aside>
       <div className="min-w-0 flex-1 overflow-auto">
         {sel ? (
-          <section className="relative h-[300px] overflow-hidden border-b border-border/60">
-            <img src={sel.p.media.hero} alt="" className="absolute inset-0 h-full w-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+          <section className="relative z-10 h-[300px] border-b border-border/60">
+            <div className="absolute inset-0 overflow-hidden">
+              <img src={sel.p.media.hero} alt="" className="absolute inset-0 h-full w-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+            </div>
             <div className="absolute bottom-6 left-8 right-8 flex items-end justify-between gap-6">
               <div className="flex items-end gap-4">
                 <img src={sel.p.media.icon} alt="" className="h-16 w-16 rounded-[var(--radius)] border border-white/15" />
@@ -76,7 +81,7 @@ export function Library() {
                   </div>
                 </div>
               </div>
-              <div className="flex w-[300px] items-center gap-2">
+              <div className="flex w-[440px] shrink-0 items-center gap-2">
                 <InstallPanel p={sel.p} />
                 <button aria-label={t("library.favorite")} aria-pressed={sel.item.favorite} onClick={() => bridge.library.favorite(sel.p.id, !sel.item.favorite)}
                   className={`grid h-12 w-12 shrink-0 place-items-center rounded-[var(--radius)] border border-border bg-surface/80 ${sel.item.favorite ? "text-warning" : "text-subtle hover:text-foreground"}`}>

@@ -8,5 +8,12 @@
   "scripts": {
     "typecheck": "tsc --noEmit -p .",
     "build": "tsc --noEmit -p ."
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./node": "./src/node.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2"
   }
 }
