@@ -1,3 +1,4 @@
+import { UpdatesBar } from "../components/UpdatesBar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { HashRouter, Route, Routes } from "react-router-dom";
@@ -37,6 +38,7 @@ export function App() {
       <HashRouter>
         <div className="hud-bg flex h-full flex-col">
           <CommandBar onSearch={() => setSearch(true)} />
+          <UpdatesBar />
           <div className="flex min-h-0 flex-1">
             <div className="flex min-w-0 flex-1 flex-col">
               <main className="min-h-0 flex-1 overflow-auto">

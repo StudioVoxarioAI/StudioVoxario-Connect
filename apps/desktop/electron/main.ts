@@ -6,7 +6,7 @@ import path from "node:path";
 import { cancelSignIn, restore, signIn, signOut, status as authStatus } from "./auth";
 import { catalogNow, refresh as refreshCatalog } from "./catalog";
 import { applyLimits, cancel, enqueue, hooks, kick, syncApps, launch, move, openFolder, pause, resume, state as installsState, uninstall } from "./installer";
-import { claim, libraryNow, licenses, redeemKey, refreshLibrary, setFavorite } from "./library";
+import { claim, libraryNow, licenses, primeLibrary, redeemKey, refreshLibrary, setFavorite } from "./library";
 import { settings, updateSettings, type Settings } from "./settings";
 import { accessGrant, accessList, accessRevoke } from "./admin";
 import { liveNow, onLive, popoutChat, refreshLive, remind, setLiveFocus, setupYouTubeEmbeds, youtubeSignIn, youtubeSignOut } from "./live";
@@ -19,6 +19,14 @@ import {
 } from "./system";
 
 const PROTOCOL = "studiovoxario";
+let lastUpdateCheck = 0;
+/** Nové verze: katalog z webu (verze z obchodu / manifestů), nainstalované aplikace, nabídnout aktualizace. */
+async function checkUpdates() {
+  lastUpdateCheck = Date.now();
+  await refreshCatalog().catch(() => undefined);
+  await syncApps().catch(() => undefined);
+  autoUpdate();
+}
 // testy a náhledy: oddělená data aplikace (nikdy nesahá na skutečný profil uživatele)
 if (process.env.CONNECT_USER_DATA) app.setPath("userData", process.env.CONNECT_USER_DATA);
 // E2E na Linuxu bez klíčenky: šifrování uloženého přihlášení pevným testovacím heslem (jen s CONNECT_USER_DATA)
@@ -77,6 +85,7 @@ function createWindow() {
     lastFocusRefresh = Date.now();
     void refreshLibrary().catch(() => undefined);
     void syncApps();
+    if (Date.now() - lastUpdateCheck > 3 * 60_000) void checkUpdates();
   });
   win.on("maximize", () => win?.webContents.send("connect:window-state", { maximized: true }));
   win.on("unmaximize", () => win?.webContents.send("connect:window-state", { maximized: false }));
@@ -221,12 +230,17 @@ if (setupMode) {
     });
     // plánovač: každou minutu zkusit frontu; každých 30 min obnovit katalog a hledat aktualizace
     setInterval(() => kick(), 60_000).unref();
-    setInterval(() => { void refreshCatalog().then(() => autoUpdate()).catch(() => undefined); }, 30 * 60_000).unref();
+    // kontrola aktualizací (engine, aplikace, hry): každých 10 min a při návratu do okna (nejvýš jednou za 3 min)
+    setInterval(() => { void checkUpdates(); }, 10 * 60_000).unref();
     // po startu: obnovit přihlášení, katalog a knihovnu (nic z toho neblokuje okno)
     void (async () => {
-      await restore();                                   // nejdřív přihlášení (katalog čte manifesty her jménem uživatele)
-      await refreshCatalog().catch(() => undefined);
-      await refreshLibrary().catch(() => undefined);
+      catalogNow();                                      // katalog hned (uložený / přibalený)
+      const restoring = restore();                       // účet z uložených údajů se ukáže hned, relace se obnoví na pozadí
+      primeLibrary();                                    // knihovna z poslední synchronizace – bez čekání na web
+      await restoring;
+      // katalog (verze, ceny) a knihovna (vlastnictví) souběžně – dřív knihovna čekala na celý katalog
+      await Promise.all([refreshCatalog().then(() => { lastUpdateCheck = Date.now(); }).catch(() => undefined),
+                         refreshLibrary().catch(() => undefined)]);
       await syncApps();
       // hry ze starého launcheru Ashes of Eryon převzít bez stahování (jen poprvé – pak už je Connect má)
       const adopted = await adoptLegacy().catch(() => []);

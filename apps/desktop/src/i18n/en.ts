@@ -67,6 +67,7 @@ export const en: Dict = {
     exportLogsText: "For support: version, system, libraries and install history (no passwords or tokens).", openLogs: "Open folder", export: "Export", exported: "Log saved.",
     telemetry: "Anonymous diagnostics", telemetryText: "Off by default. Connect does not send anything yet.",
   },
+  updates: { available: "Update available: {{name}}", started: "{{name}}: update started (see Downloads).", later: "Later" },
   updater: {
     title: "StudioVoxario Connect {{v}}", check: "Check now", restart: "Restart and update", restartIn: "Updating in {{s}} s", later: "Later", readyText: "Connect {{v}} is downloaded – restarting takes a few seconds.",
     idle: "Updates are checked automatically.", disabled: "Development build – updates are off.", checking: "Checking for updates…",

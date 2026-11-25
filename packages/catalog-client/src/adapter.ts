@@ -128,11 +128,18 @@ export async function loadCatalog(o: LoadOptions): Promise<Catalog> {
   if (o.remoteUrl) {
     try { cat = parseCatalog(await fetchJson(o.fetcher, o.remoteUrl, o.timeoutMs ?? 8000), "web", o.remoteUrl); } catch { cat = null; }
   }
-  if (!cat && o.cached) {
+  if (!cat) {
+    // bez webu: přibalený katalog nové verze aplikace má přednost před starší uloženou kopií (opravy produktů,
+    // adres instalátorů…); uložená kopie jen když je novější (dřív stažená z webu)
+    let bundled: Catalog | null = null;
+    try { bundled = parseCatalog(o.bundled, "bundled", o.bundledBase); } catch { bundled = null; }
+    let cached: Catalog | null = null;
     try {
-      const c = o.cached as Catalog;
-      if (Array.isArray(c.products) && c.products.length) cat = { ...c, source: "cache" };
-    } catch { cat = null; }
+      const c = o.cached as Catalog | undefined;
+      if (c && Array.isArray(c.products) && c.products.length) cached = { ...c, source: "cache" };
+    } catch { cached = null; }
+    const newer = (a?: string, b?: string) => !!a && (!b || Date.parse(a) > Date.parse(b));
+    cat = cached && (!bundled || newer(cached.updatedAt, bundled.updatedAt)) ? cached : bundled;
   }
   if (!cat) cat = parseCatalog(o.bundled, "bundled", o.bundledBase);
   return enrichCatalog(cat, o.fetcher, o.timeoutMs);

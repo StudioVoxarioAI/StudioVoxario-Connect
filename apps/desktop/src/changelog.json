@@ -1,5 +1,33 @@
 [
   {
+    "version": "0.6.5",
+    "date": "2026-11-25",
+    "title": "Aktualizace enginu nabídnuté rovnou, rychlejší účet",
+    "titleEn": "Engine updates offered right away, faster account",
+    "changes": [
+      {
+        "type": "fix",
+        "text": "Nová verze Voxario Studio Engine (a dalšího softwaru) se nabídne rovnou: lišta „Je dostupná aktualizace“ s tlačítkem Aktualizovat a tlačítko v knihovně. Dřív se po načtení nových verzí okno neaktualizovalo a zůstalo „Spustit“ – bylo nutné reinstalovat.",
+        "textEn": "A new Voxario Studio Engine (and other software) version is offered right away: an “Update available” bar with an Update button, and in the library. Previously the window was not refreshed after new versions loaded and kept showing “Launch”, requiring a reinstall."
+      },
+      {
+        "type": "improvement",
+        "text": "Aktualizace se kontrolují každých 10 minut a při návratu do okna; oznámení jednou na verzi. Verze nainstalovaného softwaru se pozná i ze souboru programu.",
+        "textEn": "Updates are checked every 10 minutes and when you return to the window; one notification per version. The installed version is also read from the program file."
+      },
+      {
+        "type": "improvement",
+        "text": "Účet a knihovna se po spuštění ukážou hned z poslední synchronizace; obnovení z webu běží souběžně s katalogem (dřív čekalo na celý katalog).",
+        "textEn": "Account and library show immediately from the last sync on startup; the web refresh runs alongside the catalog (previously it waited for the whole catalog)."
+      },
+      {
+        "type": "fix",
+        "text": "Starší uložená kopie katalogu už nepřebije katalog nové verze Connectu.",
+        "textEn": "An older cached catalog no longer overrides the catalog of a newer Connect version."
+      }
+    ]
+  },
+  {
     "version": "0.6.4",
     "date": "2026-11-25",
     "title": "Přihlášení vydrží restart, instalace z detailu",

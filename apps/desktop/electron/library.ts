@@ -130,8 +130,30 @@ export async function refreshLibrary(): Promise<LibraryState> {
     // klíč: web pozná odemčení podle IP (app_access_ips) – při shodě se odemkne i lokálně
     if (keyCheck.status === "fulfilled" && keyCheck.value?.data?.allowed) for (const p of keyed) d.unlocks[keyGroup(p)] ??= now;
   });
+  const items = buildItems(uid, products);
   const d = userData(uid);
-  const items: LibraryItem[] = products.map((p) => {
+  emit({ signedIn: true, items, checkedAt: now, offline, role: d.role?.role ?? "player", manages: d.role?.manages ?? [] });
+  // verze a velikosti her jsou v soukromém úložišti – po přihlášení je katalog načte znovu (jménem uživatele)
+  if (!currentCatalog()?.live?.versions && Date.now() - lastCatalogRetry > 5 * 60_000) {
+    lastCatalogRetry = Date.now();
+    void refreshCatalog().catch(() => undefined);
+  }
+  return last;
+}
+
+/** Hned po startu: knihovna z poslední synchronizace (bez čekání na web), web ji pak potvrdí. */
+export function primeLibrary(): LibraryState {
+  const a = authStatus();
+  if (!a.signedIn || !a.user || isDemo || last.items.length) return last;
+  const d = userData(a.user.id);
+  if (!Object.keys(d.remote).length && !Object.keys(d.claims).length) return last;
+  return (emit({ signedIn: true, items: buildItems(a.user.id, currentCatalog()?.products ?? []), offline: false,
+                 role: d.role?.role ?? "player", manages: d.role?.manages ?? [] }), last);
+}
+
+function buildItems(uid: string, products: Product[]): LibraryItem[] {
+  const d = userData(uid);
+  return products.map((p) => {
     const favorite = d.favorites.includes(p.id);
     const r = d.remote[p.id];
     switch (p.access) {
@@ -151,13 +173,6 @@ export async function refreshLibrary(): Promise<LibraryState> {
       }
     }
   });
-  emit({ signedIn: true, items, checkedAt: now, offline, role: d.role?.role ?? "player", manages: d.role?.manages ?? [] });
-  // verze a velikosti her jsou v soukromém úložišti – po přihlášení je katalog načte znovu (jménem uživatele)
-  if (!currentCatalog()?.live?.versions && Date.now() - lastCatalogRetry > 5 * 60_000) {
-    lastCatalogRetry = Date.now();
-    void refreshCatalog().catch(() => undefined);
-  }
-  return last;
 }
 
 export async function claim(productId: string): Promise<LibraryState> {

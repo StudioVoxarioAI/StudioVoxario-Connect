@@ -29,8 +29,26 @@ function regQuery(key: string): Promise<Record<string, string> | null> {
   });
 }
 
+/** Verze ze spustitelného souboru (ProductVersion), když ji registr nemá – „1.32.1.0“ -> „1.32.1“. */
+function exeVersion(file: string): Promise<string | undefined> {
+  if (!isWin) return Promise.resolve(undefined);
+  const ps = `(Get-Item -LiteralPath '${file.replace(/'/g, "''")}').VersionInfo.ProductVersion`;
+  return new Promise((resolve) => execFile("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", ps], { windowsHide: true, timeout: 8000 },
+    (err, out) => {
+      const v = err ? "" : String(out).trim().replace(/,\s*/g, ".");
+      const m = /^(\d+\.\d+\.\d+)(?:\.0)?$/.exec(v) ?? /^(\d+\.\d+(?:\.\d+)*)/.exec(v);
+      resolve(m ? m[1] : undefined);
+    }));
+}
+
 /** Je aplikace nainstalovaná? Registr (všechny klíče z katalogu), jinak známá složka + spustitelný soubor. */
 export async function detectApp(p: Product): Promise<Detected | null> {
+  const d = await detectAppRaw(p);
+  if (d && !d.version) d.version = await exeVersion(path.join(d.dir, d.exe)).catch(() => undefined);
+  return d;
+}
+
+async function detectAppRaw(p: Product): Promise<Detected | null> {
   const b = p.build;
   if (!b?.executable) return null;
   for (const key of b.registryKeys ?? []) {

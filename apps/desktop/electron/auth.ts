@@ -159,6 +159,7 @@ export function restore(): Promise<AuthStatus> {
     const stored = readStored();
     if (stored?.refresh_token && !fresh()) {
       user = stored.user ?? null;
+      emit();   // účet hned z uložených údajů – obnovení relace běží na pozadí
       await refreshOnce();
     }
     loaded = true;

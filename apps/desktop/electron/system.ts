@@ -145,15 +145,24 @@ export function clearDownloadCache(): number {
 /** Je teď povolené stahovat? (plánovač: jen v okně od–do, i přes půlnoc) */
 export function downloadAllowedNow(d = new Date()): boolean { return inSchedule(settings().schedule, d); }
 
-/** Po obnovení katalogu: dostupné aktualizace nainstalovaných her zařadit (pokud je to povolené). */
+/** Po obnovení katalogu: dostupné aktualizace nabídnout (oznámení jednou na verzi) a hry zařadit (pokud je to povolené).
+ *  Software s vlastním instalátorem pro celý počítač (engine – práva správce) se nespouští na pozadí sám: Connect ukáže
+ *  nabídku „Aktualizovat“ (lišta nahoře, knihovna) a instalátor spustí až uživatel (UAC). */
+const offered = new Set<string>();
 export function autoUpdate() {
   const s = settings();
   const st = installsState();
   for (const [id, r] of Object.entries(st.installs)) {
     if (!r.updateAvailable || r.running || st.jobs.some((j) => j.productId === id)) continue;
-    const name = currentCatalog()?.products.find((p) => p.id === id)?.name ?? id;
-    if (s.notifications.update) notify("Aktualizace k dispozici", `${name} – nová verze je připravená.`);
-    if (!s.autoUpdate) continue;
+    const p = currentCatalog()?.products.find((x) => x.id === id);
+    const name = p?.name ?? id;
+    const key = `${id}@${p?.latestVersion ?? "?"}`;
+    if (!offered.has(key)) {
+      offered.add(key);
+      if (s.notifications.update) notify("Aktualizace k dispozici", `${name} ${p?.latestVersion ?? ""} – otevřete Connect a klikněte na Aktualizovat.`);
+      log(`Aktualizace k dispozici: ${id} ${r.version} -> ${p?.latestVersion}`);
+    }
+    if (!s.autoUpdate || (r.external && (r.machine || p?.build?.requiresElevation))) continue;
     if (s.autoUpdateOnlyIdle && Object.values(st.installs).some((x) => x.running)) continue;
     try { enqueue(id, "update"); log(`Automatická aktualizace: ${id}`); } catch { /* nevlastní / běží */ }
   }

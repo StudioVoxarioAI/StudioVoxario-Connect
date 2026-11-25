@@ -34,6 +34,10 @@ function writeCache(c: Catalog) {
 
 export function currentCatalog(): Catalog | null { return current; }
 
+// Kdo potřebuje vědět o nové verzi katalogu (instalace: „Aktualizovat“ závisí na nejnovější verzi z katalogu)
+const listeners: Array<() => void> = [];
+export function onCatalogChange(fn: () => void) { listeners.push(fn); }
+
 /** Okamžitá odpověď bez sítě (cache -> snapshot). */
 export function catalogNow(): Catalog & { offline: boolean } {
   if (!current) {
@@ -70,6 +74,7 @@ export function refresh(): Promise<Catalog> {
     if (online) writeCache(cat);
     current = cat;
     for (const w of BrowserWindow.getAllWindows()) w.webContents.send("connect:catalog", { ...cat, offline: !online });
+    for (const fn of listeners) { try { fn(); } catch { /* nic */ } }
     return cat;
   })().finally(() => { refreshing = null; });
   return refreshing;

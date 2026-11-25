@@ -41,6 +41,18 @@ describe("loadCatalog", () => {
     expect(cat.products).toHaveLength(6);
     expect(cat.live).toEqual({ prices: false, versions: false });
   });
+  it("bez webu: starší uložená kopie nepřebije přibalený katalog nové verze aplikace, novější ano", async () => {
+    const products = bundled.products.map((p) => ({ ...p, name: p.name + " (stará kopie)" }));
+    const old = { ...bundled, updatedAt: "2026-01-01T00:00:00Z", source: "web", fetchedAt: "2026-01-01T00:00:00Z", products };
+    const a = await loadCatalog({ fetcher: fakeFetch({ "connect/catalog.json": null }), remoteUrl: "https://studiovoxario.com/connect/catalog.json",
+                                  cached: old, bundled, bundledBase: "file:///x/" });
+    expect(a.source).toBe("bundled");
+    expect(a.products[0]!.name).not.toContain("stará kopie");
+    const newer = { ...old, updatedAt: "2099-01-01T00:00:00Z" };
+    const b = await loadCatalog({ fetcher: fakeFetch({ "connect/catalog.json": null }), remoteUrl: "https://studiovoxario.com/connect/catalog.json",
+                                  cached: newer, bundled, bundledBase: "file:///x/" });
+    expect(b.source).toBe("cache");
+  });
   it("katalog z webu má přednost a skryté produkty se nezobrazí", async () => {
     const web = { ...bundled, products: [...bundled.products, { ...bundled.products[0], id: "tajna-hra", status: "hidden" }] };
     const cat = await loadCatalog({ fetcher: fakeFetch({ "connect/catalog.json": web }), remoteUrl: "https://studiovoxario.com/connect/catalog.json", bundled, bundledBase: "file:///x/" });

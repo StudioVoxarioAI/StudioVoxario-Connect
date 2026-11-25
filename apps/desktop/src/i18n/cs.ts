@@ -65,6 +65,7 @@ export const cs = {
     exportLogsText: "Pro podporu: verze, systém, knihovny a průběh instalací (bez hesel a tokenů).", openLogs: "Otevřít složku", export: "Exportovat", exported: "Log uložen.",
     telemetry: "Anonymní diagnostika", telemetryText: "Ve výchozím stavu vypnuto. Connect zatím nic neodesílá.",
   },
+  updates: { available: "Je dostupná aktualizace {{name}}", started: "{{name}}: aktualizace začala (sledujte Stahování).", later: "Později" },
   updater: {
     title: "StudioVoxario Connect {{v}}", check: "Zkontrolovat", restart: "Restartovat a aktualizovat", restartIn: "Aktualizace za {{s}} s", later: "Později", readyText: "Connect {{v}} je stažený – restart trvá pár sekund.",
     idle: "Aktualizace se kontrolují automaticky.", disabled: "Vývojová verze – aktualizace jsou vypnuté.", checking: "Kontroluji aktualizace…",

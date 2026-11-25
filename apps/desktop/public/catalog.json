@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-18T01:00:00Z",
+  "updatedAt": "2026-11-25T12:00:00Z",
   "_comment": "Katalog StudioVoxario Connect. Cílově ho servíruje web (https://studiovoxario.com/connect/catalog.json, docs/WEB_PROPOSAL.md); tahle kopie je výchozí snapshot pro první spuštění bez sítě. Cena se bere živě z obchodu webu (shopKey), verze a velikost z manifestu buildu. Média relativně k mediaBase.",
   "api": {
     "supabaseUrl": "https://rioexuvgvmdwvidfakxy.supabase.co",

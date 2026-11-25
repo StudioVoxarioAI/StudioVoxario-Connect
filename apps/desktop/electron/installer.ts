@@ -12,7 +12,7 @@ import { compareVersions } from "@connect/installer-core";
 import { detectApp, downloadSetup, runSetup, uninstallApp } from "./apps";
 import { gameTicket } from "./auth";
 import { storageFetch } from "./storage";
-import { currentCatalog } from "./catalog";
+import { currentCatalog, onCatalogChange } from "./catalog";
 import { libraryNow } from "./library";
 import { settings } from "./settings";
 import { JsonStore } from "./store";
@@ -88,6 +88,8 @@ export function state(): InstallsState {
 }
 
 let emitTimer: NodeJS.Timeout | null = null;
+// nová verze katalogu -> okno musí dostat znovu spočítané „updateAvailable“ (dřív zůstalo „Spustit“)
+onCatalogChange(() => emit(true));
 function emit(now = false) {
   const send = () => { emitTimer = null; const s = state(); for (const w of BrowserWindow.getAllWindows()) w.webContents.send("connect:installs", s); };
   if (now) { if (emitTimer) clearTimeout(emitTimer); send(); return; }
