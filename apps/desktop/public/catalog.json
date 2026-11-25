@@ -210,7 +210,7 @@
       "storeUrl": "https://studiovoxario.com/app",
       "build": {
         "kind": "installer",
-        "installerUrl": "https://github.com/Sokolcz97-rgb/Voxar.app/releases/latest/download/StudioVoxarioSetup.exe",
+        "installerUrl": "https://github.com/StudioVoxarioAI/Voxar.app/releases/latest/download/StudioVoxarioSetup.exe",
         "versionUrl": "https://studiovoxario.com/desktop-version.json",
         "installDir": "%LOCALAPPDATA%\\Voxar.app",
         "executable": "Voxar.app.exe",
@@ -288,7 +288,7 @@
       "storeUrl": "https://studiovoxario.com/browser",
       "build": {
         "kind": "installer",
-        "installerUrl": "https://github.com/Sokolcz97-rgb/Voxar.app/releases/latest/download/VoxarioBrowserSetup.exe",
+        "installerUrl": "https://github.com/StudioVoxarioAI/Voxar.app/releases/latest/download/VoxarioBrowserSetup.exe",
         "versionUrl": "https://studiovoxario.com/desktop-version.json",
         "installDir": "%LOCALAPPDATA%\\VoxarioBrowser",
         "executable": "VoxarioBrowser.exe",

@@ -1,5 +1,33 @@
 [
   {
+    "version": "0.6.4",
+    "date": "2026-11-25",
+    "title": "Přihlášení vydrží restart, instalace z detailu",
+    "titleEn": "Sign-in survives restart, install from detail page",
+    "changes": [
+      {
+        "type": "fix",
+        "text": "Connect zůstane přihlášený i po restartu. Přihlášení se dřív při startu obnovovalo několikrát zároveň a server to vyhodnotil jako zneužití a relaci zrušil – teď se obnovuje vždy jen jednou (i během stahování).",
+        "textEn": "Connect stays signed in after a restart. Sign-in used to be refreshed several times at once on startup, which the server treated as abuse and revoked the session – it is now refreshed only once at a time (also during downloads)."
+      },
+      {
+        "type": "fix",
+        "text": "Hry a aplikace jdou znovu instalovat – bez platného přihlášení knihovna nic nepovolila a stahování her končilo chybou HTTP 400.",
+        "textEn": "Games and apps can be installed again – without a valid sign-in the library allowed nothing and game downloads failed with HTTP 400."
+      },
+      {
+        "type": "fix",
+        "text": "Tlačítko Instalovat a zadání klíče na stránce hry / aplikace v Obchodě: okno se otevře (dřív ho rámeček panelu schoval). Upozornění „Vyžaduje přístup“ se už neukazuje, když přístup máte.",
+        "textEn": "Install and key entry on the game / app page in the Store now open their window (previously hidden by the panel frame). The “Requires access” note is hidden once you have access."
+      },
+      {
+        "type": "fix",
+        "text": "Voxar.app a VoxarioBrowser se ověřují podle údajů vydání na GitHubu (velikost, SHA-256) místo zastaralých metadat webu, která správný instalátor odmítala.",
+        "textEn": "Voxar.app and VoxarioBrowser are verified against GitHub release data (size, SHA-256) instead of stale website metadata that rejected the correct installer."
+      }
+    ]
+  },
+  {
     "version": "0.6.3",
     "date": "2026-11-25",
     "title": "Oprava instalace – zamčený soubor Cookies",

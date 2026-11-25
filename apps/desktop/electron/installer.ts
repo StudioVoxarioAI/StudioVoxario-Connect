@@ -113,6 +113,7 @@ function setJob(id: string, fn: (j: Job) => void) {
 
 async function fetchManifest(url: string): Promise<VoxManifest> {
   const res = await storageFetch(url, { headers: { "cache-control": "no-cache" } });
+  if (res.status === 401) throw new Error("Pro stažení se přihlaste ke svému účtu StudioVoxario (vpravo nahoře).");
   if (res.status === 403) throw new Error("Ke stažení této hry nemáte přístup (nebo vypršelo přihlášení).");
   if (!res.ok) throw new Error(`Manifest nedostupný (HTTP ${res.status})`);
   const m = (await res.json()) as VoxManifest;

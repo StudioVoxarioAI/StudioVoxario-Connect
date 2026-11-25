@@ -2,6 +2,7 @@ import type { Product } from "@connect/catalog-client";
 import { Button } from "@connect/ui";
 import { Download, FolderOpen, Loader2, MoreHorizontal, Pause, Play, RefreshCw, ShieldCheck, Trash2, X } from "lucide-react";
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { useLibraryItem } from "../lib/account";
 import { useCatalog } from "../lib/catalog";
@@ -87,11 +88,13 @@ export function InstallPanel({ p }: { p: Product }) {
 }
 
 function Modal({ children, onClose, label }: { children: React.ReactNode; onClose: () => void; label: string }) {
-  return (
+  // portál do <body>: panel s tlačítkem může být uvnitř rámečku .hud (clip-path), který by okno ořízl a schoval
+  return createPortal(
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm" onMouseDown={onClose}>
       <div role="dialog" aria-modal="true" aria-label={label} onMouseDown={(e) => e.stopPropagation()} onKeyDown={(e) => e.key === "Escape" && onClose()}
         className="w-full max-w-lg hud p-6 text-left shadow-glow">{children}</div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

@@ -2,6 +2,7 @@ import type { Product } from "@connect/catalog-client";
 import { Button } from "@connect/ui";
 import { KeyRound, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { bridge } from "../lib/bridge";
 
@@ -22,7 +23,8 @@ export function KeyDialog({ product, onClose, onDone }: { product: Product; onCl
       else setError(t(`key.err_${r.reason === "empty" ? "empty" : r.reason === "invalid" ? "invalid" : "error"}`));
     } catch { setError(t("key.err_error")); } finally { setBusy(false); }
   };
-  return (
+  // portál do <body>: tlačítko bývá v rámečku .hud (clip-path), který by okno ořízl
+  return createPortal(
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm" onMouseDown={onClose}>
       <form role="dialog" aria-modal="true" aria-labelledby="key-title" onMouseDown={(e) => e.stopPropagation()}
         onSubmit={(e) => { e.preventDefault(); void submit(); }} onKeyDown={(e) => e.key === "Escape" && onClose()}
@@ -40,6 +42,7 @@ export function KeyDialog({ product, onClose, onDone }: { product: Product; onCl
           <Button type="submit" disabled={busy || !code.trim()}>{busy && <Loader2 size={16} className="animate-spin" />}{t("key.unlock")}</Button>
         </div>
       </form>
-    </div>
+    </div>,
+    document.body,
   );
 }

@@ -110,35 +110,62 @@ async function refresh(refreshToken: string) {
   await adoptSession(r.data!);
 }
 
+/**
+ * Obnovení relace – vždy jen JEDNO najednou. Supabase obnovovací token při každém použití vymění (rotace) a souběžné
+ * použití stejného tokenu vyhodnotí jako zneužití: zruší celou relaci. Dřív se při startu obnovovalo několikrát
+ * zároveň (katalog s manifesty her, restore, knihovna) a během stahování každé souběžné stahování zvlášť – výsledkem
+ * bylo odhlášení po každém restartu a hry/aplikace nešlo instalovat (knihovna bez přihlášení nic nepovolí).
+ */
+let inflight: Promise<void> | null = null;
+function refreshOnce(): Promise<void> {
+  if (inflight) return inflight;
+  inflight = (async () => {
+    const rt = session?.refresh_token ?? readStored()?.refresh_token;
+    if (!rt) return;
+    try {
+      await refresh(rt);
+    } catch (e) {
+      let err = e as Error & { invalid?: boolean };
+      // token mezitím vyměnil někdo jiný (uložený je novější) -> zkusit ten
+      const stored = readStored()?.refresh_token;
+      if (err.invalid && stored && stored !== rt) {
+        try { await refresh(stored); return; } catch (e2) { err = e2 as Error & { invalid?: boolean }; }
+      }
+      if (err.invalid) { forget(); lastError = "Přihlášení vypršelo – přihlaste se prosím znovu."; }
+      else offline = true;     // bez sítě: uložené přihlášení zůstává, zkusí se znovu
+      emit();
+    }
+  })().finally(() => { inflight = null; });
+  return inflight;
+}
+
+const fresh = () => !!session && session.expires_at - 60 > Date.now() / 1000;
+
 /** Platný přístupový token (obnoví se 60 s před vypršením). Bez sítě vrátí null a ponechá uložené přihlášení. */
 export async function accessToken(): Promise<string | null> {
-  if (session && session.expires_at - 60 > Date.now() / 1000) return session.access_token;
-  const rt = session?.refresh_token ?? readStored()?.refresh_token;
-  if (!rt) return null;
-  try {
-    await refresh(rt);
-    return session!.access_token;
-  } catch (e) {
-    if ((e as { invalid?: boolean }).invalid) { forget(); lastError = "Přihlášení vypršelo – přihlaste se prosím znovu."; emit(); }
-    else { offline = true; emit(); }
-    return null;
-  }
+  if (fresh()) return session!.access_token;
+  if (!loaded) await restore();          // první volání před dokončením startu: počkat na obnovení uloženého přihlášení
+  if (fresh()) return session!.access_token;
+  await refreshOnce();
+  return fresh() ? session!.access_token : null;
 }
 
 /** Při startu: obnoví uložené přihlášení (offline zůstane uživatel zobrazený z uložených údajů). */
-export async function restore(): Promise<AuthStatus> {
-  if (loaded) return status();
-  loaded = true;
-  const stored = readStored();
-  if (stored?.refresh_token) {
-    user = stored.user ?? null;
-    try { await refresh(stored.refresh_token); } catch (e) {
-      if ((e as { invalid?: boolean }).invalid) { forget(); lastError = "Přihlášení vypršelo – přihlaste se prosím znovu."; }
-      else offline = true;
+let restoring: Promise<AuthStatus> | null = null;
+export function restore(): Promise<AuthStatus> {
+  if (loaded) return Promise.resolve(status());
+  if (restoring) return restoring;
+  restoring = (async () => {
+    const stored = readStored();
+    if (stored?.refresh_token && !fresh()) {
+      user = stored.user ?? null;
+      await refreshOnce();
     }
-  }
-  emit();
-  return status();
+    loaded = true;
+    emit();
+    return status();
+  })().finally(() => { restoring = null; });
+  return restoring;
 }
 
 function page(title: string, text: string, ok: boolean) {

@@ -1,7 +1,7 @@
 // StudioVoxario Connect – hlavní proces Electronu.
 // Bezpečnost: contextIsolation, sandbox, bez nodeIntegration; renderer komunikuje jen přes preload (IPC).
 // Jedna instance; deep link studiovoxario:// (nákup na webu, otevření produktu) se předá do okna.
-import { app, BrowserWindow, ipcMain, shell } from "electron";
+import { app, BrowserWindow, ipcMain, shell, safeStorage } from "electron";
 import path from "node:path";
 import { cancelSignIn, restore, signIn, signOut, status as authStatus } from "./auth";
 import { catalogNow, refresh as refreshCatalog } from "./catalog";
@@ -21,6 +21,8 @@ import {
 const PROTOCOL = "studiovoxario";
 // testy a náhledy: oddělená data aplikace (nikdy nesahá na skutečný profil uživatele)
 if (process.env.CONNECT_USER_DATA) app.setPath("userData", process.env.CONNECT_USER_DATA);
+// E2E na Linuxu bez klíčenky: šifrování uloženého přihlášení pevným testovacím heslem (jen s CONNECT_USER_DATA)
+if (process.env.CONNECT_USER_DATA && process.env.CONNECT_TEST_PLAIN_STORAGE === "1") safeStorage.setUsePlainTextEncryption(true);
 // vlastní instalátor / odinstalátor (setup.ts): oddělená data a zámek instance, aby šel spustit i při běžícím Connectu
 const setupMode = isSetupMode() || isUninstallMode();
 const realUserData = app.getPath("userData");
@@ -222,8 +224,8 @@ if (setupMode) {
     setInterval(() => { void refreshCatalog().then(() => autoUpdate()).catch(() => undefined); }, 30 * 60_000).unref();
     // po startu: obnovit přihlášení, katalog a knihovnu (nic z toho neblokuje okno)
     void (async () => {
+      await restore();                                   // nejdřív přihlášení (katalog čte manifesty her jménem uživatele)
       await refreshCatalog().catch(() => undefined);
-      await restore();
       await refreshLibrary().catch(() => undefined);
       await syncApps();
       // hry ze starého launcheru Ashes of Eryon převzít bez stahování (jen poprvé – pak už je Connect má)

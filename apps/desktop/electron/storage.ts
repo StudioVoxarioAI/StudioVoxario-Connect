@@ -19,7 +19,13 @@ export async function storageFetch(url: string, init?: RequestInit): Promise<Res
   if (!isStorageUrl(url)) return net.fetch(url, init);
   if (Date.now() >= publicUntil) {
     const token = await accessToken();
-    if (token) {
+    if (!token) {
+      // nepřihlášený: soukromé úložiště veřejnou adresu odmítne (HTTP 400) – zkusit ji (bucket může být ještě veřejný)
+      const pub = await net.fetch(url, init);
+      if (pub.ok || pub.status === 206) { publicUntil = Date.now() + 10 * 60_000; return pub; }
+      return new Response(null, { status: 401, statusText: "Nepřihlášen" });
+    }
+    {
       const res = await net.fetch(toAuth(url), merge(init, { apikey: api().publishableKey, authorization: `Bearer ${token}` }));
       if (res.ok || res.status === 206 || res.status === 416) return res;
       if (res.status !== 400 && res.status !== 403 && res.status !== 404) return res;   // 429/5xx: řeší opakování výše

@@ -57,15 +57,28 @@ async function json<T>(url: string, headers: Record<string, string> = {}): Promi
 }
 
 /** Kde vzít instalátor a jak ho ověřit. */
+/** Nejnovější soubor vydání na GitHubu podle adresy https://github.com/<owner>/<repo>/releases/latest/download/<soubor>. */
+async function githubLatestAsset(url: string): Promise<{ url: string; size?: number; sha256?: string; version?: string } | null> {
+  const m = /^https:\/\/github\.com\/([^/]+)\/([^/]+)\/releases\/latest\/download\/([^/?#]+)$/.exec(url);
+  if (!m) return null;
+  const rel = await json<{ tag_name?: string; assets?: Array<{ name: string; size: number; digest?: string | null; browser_download_url: string }> }>(
+    `https://api.github.com/repos/${m[1]}/${m[2]}/releases/latest`, { accept: "application/vnd.github+json" });
+  const a = rel.assets?.find((x) => x.name === decodeURIComponent(m[3]!));
+  if (!a) return null;
+  const sha = /^sha256:([0-9a-f]{64})$/i.exec(a.digest ?? "")?.[1];
+  return { url: a.browser_download_url, size: a.size, sha256: sha?.toLowerCase(), version: rel.tag_name?.replace(/^v/, "") };
+}
+
 async function resolveSource(p: Product): Promise<SetupSource> {
   const b = p.build!;
   if (b.kind === "installer") {
     if (!b.installerUrl) throw new Error("Katalog neuvádí instalátor.");
     const file = b.installerUrl.split("/").pop() || `${p.id}-setup.exe`;
-    let meta: { version?: string; size?: number; sha256?: string; filename?: string } = {};
-    if (b.versionUrl) { try { meta = await json(b.versionUrl); } catch { /* bez metadat: jen velikost ze serveru */ } }
-    const same = !meta.filename || meta.filename === file;
-    return { file, urls: [b.installerUrl], headers: {}, size: same ? meta.size : undefined, sha256: same ? meta.sha256 : undefined, version: same ? meta.version : undefined };
+    // Přesná velikost, SHA-256 a verze z GitHub Releases (adresa …/releases/latest/download/<soubor>). Metadata
+    // z versionUrl (desktop-version.json na webu) se k ověření nepoužívají: web je neaktualizuje s každým vydáním
+    // a starý kontrolní součet by správně stažený instalátor odmítl („poškozený“).
+    const gh = await githubLatestAsset(b.installerUrl).catch(() => null);
+    return { file, urls: [gh?.url ?? b.installerUrl], headers: {}, size: gh?.size, sha256: gh?.sha256, version: gh?.version };
   }
   if (b.kind === "shop-file") {
     const token = await accessToken();

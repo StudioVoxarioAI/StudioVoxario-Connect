@@ -6,6 +6,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { Markdown } from "../components/Markdown";
 import { ProductAction } from "../components/ProductAction";
 import { StatusBadge } from "../components/ProductCard";
+import { useLibraryItem } from "../lib/account";
 import { bridge } from "../lib/bridge";
 import { formatPrice, formatSize, useCatalog, useProduct } from "../lib/catalog";
 
@@ -25,6 +26,7 @@ export function ProductDetail() {
   const { product: p, loading } = useProduct(id);
   const { data: catalog } = useCatalog();
   const [shot, setShot] = useState(0);
+  const item = useLibraryItem(id ?? "");
   if (!p) return loading ? <div className="h-[420px] animate-pulse bg-surface" /> : (
     <div className="p-8"><EmptyState icon={<PackageSearch size={34} />} title={t("detail.notFound")} action={<Link to="/store" className="text-primary">{t("detail.back")}</Link>} /></div>
   );
@@ -115,7 +117,7 @@ export function ProductDetail() {
               <span className="font-display text-2xl font-extrabold">{formatPrice(p, t, i18n.language)}</span>
               {p.pricing.discountPercent ? <Badge tone="success">-{p.pricing.discountPercent} %</Badge> : null}
             </div>
-            {p.access !== "none" && (
+            {p.access !== "none" && !item?.owned && (   /* s přístupem / klíčem / licencí už upozornění nemá smysl */
               <div className={`mb-4 flex gap-3 rounded-[var(--radius)] border p-3 text-sm ${p.access === "access_key" ? "border-primary/30 bg-primary/5" : "border-warning/30 bg-warning/5"}`}>
                 {p.access === "access_key" ? <KeyRound size={18} className="mt-0.5 shrink-0 text-primary" /> : p.access === "license" ? <ShieldCheck size={18} className="mt-0.5 shrink-0 text-primary" /> : <Lock size={18} className="mt-0.5 shrink-0 text-warning" />}
                 <div><div className="font-semibold">{t(`access.${p.access}`)}</div><div className="text-muted">{t(`access.${p.access}_text`)}</div></div>
