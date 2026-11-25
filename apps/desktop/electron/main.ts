@@ -24,7 +24,9 @@ if (process.env.CONNECT_USER_DATA) app.setPath("userData", process.env.CONNECT_U
 // vlastní instalátor / odinstalátor (setup.ts): oddělená data a zámek instance, aby šel spustit i při běžícím Connectu
 const setupMode = isSetupMode() || isUninstallMode();
 const realUserData = app.getPath("userData");
-if (setupMode) app.setPath("userData", path.join(app.getPath("temp"), "StudioVoxarioConnectSetup"));
+// data instalátoru (Cookies, cache…) MIMO složku, do které se portable balík rozbaluje (%TEMP%\StudioVoxarioConnectSetup) –
+// jinak by je instalátor kopíroval do instalace a narazil na vlastní zamčené soubory (EBUSY Cookies)
+if (setupMode) app.setPath("userData", path.join(app.getPath("temp"), "StudioVoxarioConnectSetup-data"));
 const isDev = !app.isPackaged && !!process.env.CONNECT_DEV_URL;
 let win: BrowserWindow | null = null;
 let pendingDeepLink: string | null = null;

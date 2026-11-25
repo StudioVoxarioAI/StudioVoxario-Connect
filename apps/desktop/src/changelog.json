@@ -1,5 +1,18 @@
 [
   {
+    "version": "0.6.3",
+    "date": "2026-11-25",
+    "title": "Oprava instalace – zamčený soubor Cookies",
+    "titleEn": "Install fix – locked Cookies file",
+    "changes": [
+      {
+        "type": "fix",
+        "text": "Instalace už neskončí hláškou „Soubor Cookies je zamčený jiným programem“: instalátor si ukládal vlastní data prohlížeče (Cookies, cache) do složky, kterou kopíroval do instalace, a narážel na vlastní otevřené soubory. Data instalátoru jsou teď ve zvláštní složce a do instalace se kopírují jen soubory aplikace.",
+        "textEn": "Installation no longer fails with “The Cookies file is locked by another program”: the installer stored its own browser data (Cookies, cache) in the folder it copied into the installation and hit its own open files. Installer data now lives in a separate folder and only application files are copied."
+      }
+    ]
+  },
+  {
     "version": "0.6.2",
     "date": "2026-11-25",
     "title": "Oprava instalace – EBUSY",

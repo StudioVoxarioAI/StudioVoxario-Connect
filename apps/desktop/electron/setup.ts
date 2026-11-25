@@ -59,8 +59,31 @@ async function rawFsAsync<T>(fn: () => Promise<T>): Promise<T> {
   try { return await fn(); } finally { proc.noAsar = prev; }
 }
 
-function dirSize(dir: string): number { return rawFs(() => dirSizeRaw(dir)); }
-function dirSizeRaw(dir: string): number {
+/**
+ * Data Chromia / Electronu (profil prohlížeče), která nejsou součástí aplikace. Starší instalátory (do 0.6.2) si je
+ * ukládaly přímo do složky rozbaleného balíku – nesmí se kopírovat do instalace (drží je otevřené běžící instalátor).
+ */
+const PROFILE_ENTRIES = new Set([
+  "cookies", "cookies-journal", "network", "local storage", "session storage", "cache", "code cache", "gpucache",
+  "dawncache", "dawngraphitecache", "dawnwebgpucache", "shared dictionary", "sharedstorage", "sharedstorage-wal",
+  "preferences", "local state", "blob_storage", "crashpad", "indexeddb", "webstorage", "service worker", "trust tokens",
+  "trust tokens-journal", "transportsecurity", "partitions", "logs", "lockfile", "databases", "file system",
+  "shared proto db", "videodecodestats", "network persistent state", "quotamanager", "quotamanager-journal",
+  "origin bound certs", "web data", "web data-journal", "history", "history-journal", "visited links",
+  // data samotného Connectu (store.ts, auth.ts, catalog.ts, apps.ts)
+  "settings.json", "downloads.json", "installs.json", "library.json", "account.bin", "catalog-cache.json", "setups",
+]);
+/** Patří položka nejvyšší úrovně rozbaleného balíku k aplikaci (ne k profilu / datům instalátoru)? */
+function isAppEntry(root: string, full: string): boolean {
+  if (path.dirname(full) !== root) return true;
+  const name = path.basename(full).toLowerCase();
+  if (PROFILE_ENTRIES.has(name)) return false;
+  const userData = path.resolve(app.getPath("userData")).toLowerCase();
+  return path.resolve(full).toLowerCase() !== userData;
+}
+
+function dirSize(dir: string, appOnly = false): number { return rawFs(() => dirSizeRaw(dir, appOnly)); }
+function dirSizeRaw(dir: string, appOnly = false): number {
   let total = 0;
   const stack = [dir];
   while (stack.length) {
@@ -69,6 +92,7 @@ function dirSizeRaw(dir: string): number {
     try { entries = fs.readdirSync(d, { withFileTypes: true }); } catch { continue; }
     for (const e of entries) {
       const p = path.join(d, e.name);
+      if (appOnly && !isAppEntry(dir, p)) continue;
       if (e.isDirectory()) stack.push(p); else { try { total += fs.statSync(p).size; } catch { /* nic */ } }
     }
   }
@@ -99,7 +123,7 @@ async function info(): Promise<SetupInfo> {
   if (!installedVersion && inst) { try { installedVersion = JSON.parse(fs.readFileSync(path.join(inst, "installer.json"), "utf8")).version; } catch { /* nic */ } }
   return {
     mode: isUninstallMode() ? "uninstall" : "install", version: app.getVersion(), defaultDir: inst ?? defaultDir(),
-    installedDir: inst, installedVersion, requiredBytes: dirSize(sourceDir()), freeBytes: freeBytes(inst ?? defaultDir()), platform: process.platform,
+    installedDir: inst, installedVersion, requiredBytes: dirSize(sourceDir(), true), freeBytes: freeBytes(inst ?? defaultDir()), platform: process.platform,
   };
 }
 
@@ -122,6 +146,7 @@ async function copyTree(from: string, to: string, total: number, onBytes: (done:
     await fs.promises.mkdir(b, { recursive: true });
     for (const e of await fs.promises.readdir(a, { withFileTypes: true })) {
       const x = path.join(a, e.name), y = path.join(b, e.name);
+      if (!isAppEntry(from, x)) continue;                 // profil prohlížeče / data instalátoru
       if (e.isDirectory() && !e.name.endsWith(".asar")) await walk(x, y);
       else if (e.isFile()) {
         await copyFileRobust(x, y);
@@ -147,7 +172,7 @@ async function install(o: InstallOptions, send: (p: { phase: string; pct: number
   assertSafe(dir);
   const src = sourceDir();
   if (!fs.existsSync(path.join(src, exeName()))) throw new Error("Instalační balík je poškozený (chybí aplikace).");
-  const total = dirSize(src);
+  const total = dirSize(src, true);
   const free = freeBytes(dir);
   if (free !== null && free < total * 1.1) throw new Error("Na disku není dost místa.");
   send({ phase: "prepare", pct: 0.02, line: `Cíl: ${dir}` });
