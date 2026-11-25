@@ -3,8 +3,8 @@ import fs from "node:fs";
 import http from "node:http";
 import os from "node:os";
 import path from "node:path";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { RateLimiter, commitStaging, markVerified, readState, rollbackInstall, runInstall, uninstall, type Fetcher, type VoxManifest } from "./node";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { ASIDE_MARK, RateLimiter, cleanupAside, commitStaging, copyFileRobust, moveFileRobust, markVerified, readState, rollbackInstall, runInstall, uninstall, type Fetcher, type VoxManifest } from "./node";
 
 // lokální „CDN“: soubory v paměti, podpora HTTP Range, počítání požadavků
 const files = new Map<string, Buffer>();
@@ -176,5 +176,57 @@ describe("RateLimiter", () => {
     setTimeout(() => { l.bytesPerSecond = 0; }, 100);
     await p;
     expect(Date.now() - t0).toBeLessThan(1500);
+  });
+});
+
+describe("zamčené soubory (EBUSY na Windows)", () => {
+  const busy = () => Object.assign(new Error("EBUSY: resource busy or locked, copyfile"), { code: "EBUSY" });
+
+  it("copyFileRobust zopakuje pokus a zamčený cíl odsune stranou", async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "connect-lock-"));
+    const from = path.join(dir, "new.exe"), to = path.join(dir, "Connect.exe");
+    fs.writeFileSync(from, "nova");
+    fs.writeFileSync(to, "stara");
+    const real = fs.promises.copyFile;
+    let n = 0;
+    const spy = vi.spyOn(fs.promises, "copyFile").mockImplementation(async (a, b, m) => { if (n++ < 2) throw busy(); return real(a, b, m); });
+    await copyFileRobust(from, to);
+    spy.mockRestore();
+    expect(n).toBe(3);
+    expect(fs.readFileSync(to, "utf8")).toBe("nova");
+  });
+
+  it("copyFileRobust po vyčerpání pokusů vrátí srozumitelnou chybu", async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "connect-lock-"));
+    fs.writeFileSync(path.join(dir, "a"), "x");
+    const spy = vi.spyOn(fs.promises, "copyFile").mockRejectedValue(busy());
+    await expect(copyFileRobust(path.join(dir, "a"), path.join(dir, "b"), 2)).rejects.toThrow(/zamčený jiným programem.*EBUSY/);
+    spy.mockRestore();
+  });
+
+  it("moveFileRobust: rename i kopie selžou kvůli zámku, napodruhé projde", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "connect-lock-"));
+    const from = path.join(dir, ".staging", "Game.exe"), to = path.join(dir, "Game.exe");
+    fs.mkdirSync(path.dirname(from));
+    fs.writeFileSync(from, "v2");
+    const realRename = fs.renameSync, realCopy = fs.copyFileSync;
+    let n = 0;
+    const r = vi.spyOn(fs, "renameSync").mockImplementation((a, b) => { if (String(a) === from && n < 1) throw busy(); return realRename(a, b); });
+    const c = vi.spyOn(fs, "copyFileSync").mockImplementation((a, b, m) => { if (n++ < 1) throw busy(); return realCopy(a, b, m); });
+    moveFileRobust(from, to);
+    r.mockRestore(); c.mockRestore();
+    expect(fs.readFileSync(to, "utf8")).toBe("v2");
+    expect(fs.existsSync(from)).toBe(false);
+  });
+
+  it("cleanupAside smaže odsunuté zbytky, ostatní nechá", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "connect-lock-"));
+    fs.mkdirSync(path.join(dir, "resources"));
+    fs.writeFileSync(path.join(dir, "Connect.exe"), "x");
+    fs.writeFileSync(path.join(dir, `Connect.exe${ASIDE_MARK}123-0`), "old");
+    fs.writeFileSync(path.join(dir, "resources", `app.asar${ASIDE_MARK}456-1`), "old");
+    expect(cleanupAside(dir)).toBe(2);
+    expect(fs.readdirSync(dir).sort()).toEqual(["Connect.exe", "resources"]);
+    expect(fs.readdirSync(path.join(dir, "resources"))).toEqual([]);
   });
 });

@@ -25,6 +25,74 @@ export interface InstallState {
 export const STATE_FILE = "install.json";
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+// ---- Zamčené soubory (Windows) ---------------------------------------------------------------------------
+// Antivirus (Defender) čerstvě zapsaný soubor chvíli drží otevřený, dobíhající proces ještě nepustil .exe/.dll
+// a smazaný soubor, který má někdo otevřený, zůstává „čeká na smazání“ – zápis na jeho místo pak skončí
+// EBUSY / EPERM / EACCES. Pokusy se opakují a překážející cíl se odsune stranou (přejmenovat jde i otevřený soubor).
+const LOCK_CODES = new Set(["EBUSY", "EPERM", "EACCES", "ENOTEMPTY", "UNKNOWN"]);
+export const isLockError = (e: unknown) => LOCK_CODES.has((e as NodeJS.ErrnoException)?.code ?? "");
+/** Přípona odsunutých souborů – smažou se později (cleanupAside). */
+export const ASIDE_MARK = ".connect-old-";
+const ASIDE_RE = /\.connect-old-\d+(-\d+)?$/;
+let asideSeq = 0;
+function sleepSync(ms: number) { Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms); }
+
+/** Odsune existující cíl stranou (soubor.connect-old-<čas>). Vrací true, pokud cíl už nepřekáží. */
+export function moveAside(target: string): boolean {
+  if (!fs.existsSync(target)) return true;
+  try { fs.rmSync(target, { force: true }); if (!fs.existsSync(target)) return true; } catch { /* zamčený */ }
+  try { fs.renameSync(target, `${target}${ASIDE_MARK}${Date.now()}-${asideSeq++}`); return true; } catch { return false; }
+}
+
+const lockedMessage = (file: string, e: unknown) =>
+  `Soubor ${path.basename(file)} je zamčený jiným programem (běžící StudioVoxario Connect, hra nebo antivirus). ` +
+  `Zavřete je (i ikonu v oznamovací oblasti) a zkuste to znovu. [${(e as NodeJS.ErrnoException)?.code ?? "?"}]`;
+
+/** copyFile s opakováním a odsunutím zamčeného cíle (asynchronní). */
+export async function copyFileRobust(from: string, to: string, attempts = 12): Promise<void> {
+  let delay = 150;
+  for (let i = 1; ; i++) {
+    try { await fs.promises.copyFile(from, to); return; } catch (e) {
+      if (!isLockError(e)) throw e;
+      if (i >= attempts) throw new Error(lockedMessage(to, e));
+      moveAside(to);
+      await sleep(delay); delay = Math.min(delay * 2, 2000);
+    }
+  }
+}
+
+/** Přesun souboru (rename, jinak kopie) s opakováním a odsunutím zamčeného cíle (synchronní). */
+export function moveFileRobust(from: string, to: string, attempts = 12): void {
+  fs.mkdirSync(path.dirname(to), { recursive: true });
+  let delay = 150;
+  for (let i = 1; ; i++) {
+    try { fs.renameSync(from, to); return; } catch { /* zkusit kopii */ }
+    try {
+      fs.copyFileSync(from, to);
+      try { fs.rmSync(from, { force: true }); } catch { moveAside(from); }
+      return;
+    } catch (e) {
+      if (!isLockError(e)) throw e;
+      if (i >= attempts) throw new Error(lockedMessage(to, e));
+      moveAside(to);
+      sleepSync(delay); delay = Math.min(delay * 2, 2000);
+    }
+  }
+}
+
+/** Smaže dřív odsunuté soubory (které už nikdo nedrží); nevadí, když něco zůstane. Vrací počet smazaných. */
+export function cleanupAside(dir: string, depth = 6): number {
+  let n = 0;
+  let entries: fs.Dirent[] = [];
+  try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return 0; }
+  for (const e of entries) {
+    const p = path.join(dir, e.name);
+    if (ASIDE_RE.test(e.name)) { try { fs.rmSync(p, { recursive: true, force: true }); n++; } catch { /* stále zamčený */ } }
+    else if (e.isDirectory() && depth > 0 && !e.isSymbolicLink()) n += cleanupAside(p, depth - 1);
+  }
+  return n;
+}
+
 export function hashFile(file: string): Promise<string | null> {
   return new Promise((resolve) => {
     const h = crypto.createHash("sha256");
@@ -174,11 +242,8 @@ export async function fetchManifestFile(file: ManifestFile, baseUrl: string, sta
 export function commitStaging(dir: string, productId: string, m: VoxManifest, plan: { download: ManifestFile[]; remove: string[] }, prev: InstallState | null): InstallState {
   const staging = path.join(dir, ".staging");
   const rollback = path.join(dir, ".rollback");
-  fs.rmSync(rollback, { recursive: true, force: true });
-  const move = (from: string, to: string) => {
-    fs.mkdirSync(path.dirname(to), { recursive: true });
-    try { fs.renameSync(from, to); } catch { fs.copyFileSync(from, to); fs.rmSync(from, { force: true }); }
-  };
+  try { fs.rmSync(rollback, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 }); } catch { moveAside(rollback); }
+  const move = moveFileRobust;
   for (const f of plan.download) {
     const rel = f.path.split("/");
     const target = path.join(dir, ...rel);
@@ -190,7 +255,8 @@ export function commitStaging(dir: string, productId: string, m: VoxManifest, pl
     const p = path.join(dir, ...rel.split("/"));
     if (fs.existsSync(p)) move(p, path.join(rollback, ...rel.split("/")));
   }
-  fs.rmSync(staging, { recursive: true, force: true });
+  try { fs.rmSync(staging, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 }); } catch { /* uklidí se příště */ }
+  cleanupAside(dir);
   const state: InstallState = {
     productId, version: m.version, exe: m.exe, engine: m.engine, installedAt: new Date().toISOString(),
     files: m.files.map((f) => ({ path: f.path, size: f.size, sha256: f.sha256 })),
@@ -216,8 +282,8 @@ export function rollbackInstall(dir: string): InstallState | null {
       if (e.isDirectory()) walk(path.join(d, e.name), [...rel, e.name]);
       else {
         const to = path.join(dir, ...rel, e.name);
-        fs.mkdirSync(path.dirname(to), { recursive: true });
-        fs.renameSync(path.join(d, e.name), to);
+        if (fs.existsSync(to)) moveAside(to);
+        moveFileRobust(path.join(d, e.name), to);
       }
     }
   };

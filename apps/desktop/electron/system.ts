@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { app, BrowserWindow, dialog, Menu, Notification, Tray, nativeImage } from "electron";
 import { inSchedule } from "@connect/installer-core";
-import { dirSize, readState } from "@connect/installer-core/node";
+import { copyFileRobust, dirSize, readState } from "@connect/installer-core/node";
 import { currentCatalog } from "./catalog";
 import { defaultLibraryDir, enqueue, installsRaw, isRunning, setInstallRecord, state as installsState } from "./installer";
 import { settings, updateSettings } from "./settings";
@@ -103,7 +103,7 @@ export async function moveInstall(id: string, toLibrary: string, onProgress: (do
       for (const e of fs.readdirSync(from, { withFileTypes: true })) {
         const a = path.join(from, e.name), b = path.join(to, e.name);
         if (e.isDirectory()) await copy(a, b);
-        else { await fs.promises.copyFile(a, b); done += fs.statSync(b).size; onProgress(done, total); }
+        else { await copyFileRobust(a, b); done += fs.statSync(b).size; onProgress(done, total); }
       }
     };
     try {

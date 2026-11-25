@@ -1,5 +1,23 @@
 [
   {
+    "version": "0.6.2",
+    "date": "2026-11-25",
+    "title": "Oprava instalace – EBUSY",
+    "titleEn": "Install fix – EBUSY",
+    "changes": [
+      {
+        "type": "fix",
+        "text": "Instalace Connectu už neskončí chybou „EBUSY: resource busy or locked, copyfile“: instalátor počká, až běžící Connect (i z oznamovací oblasti) opravdu skončí, a soubor zamčený antivirem nebo dobíhajícím procesem zkusí znovu nebo odsune stranou (smaže se při příštím spuštění).",
+        "textEn": "Installing Connect no longer fails with “EBUSY: resource busy or locked, copyfile”: the installer waits for a running Connect (including the tray icon) to exit, and retries or moves aside files locked by antivirus or a closing process (removed on next start)."
+      },
+      {
+        "type": "fix",
+        "text": "Stejná ochrana platí pro instalaci, aktualizaci a opravu her a pro přesun hry do jiné knihovny.",
+        "textEn": "The same protection applies to installing, updating and repairing games and to moving a game to another library."
+      }
+    ]
+  },
+  {
     "version": "0.6.1",
     "date": "2026-11-19",
     "title": "Křížek okna vždy viditelný",

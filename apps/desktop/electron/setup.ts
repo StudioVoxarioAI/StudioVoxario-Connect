@@ -12,6 +12,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { app, BrowserWindow, dialog, ipcMain, shell } from "electron";
+import { cleanupAside, copyFileRobust, moveAside } from "@connect/installer-core/node";
 
 const isWin = process.platform === "win32";
 const APP_ID = "com.studiovoxario.connect";
@@ -102,12 +103,17 @@ async function info(): Promise<SetupInfo> {
   };
 }
 
-/** Ukončí běžící Connect z cílové složky (ne tento instalátor – ten běží z dočasné složky). */
+/** Ukončí běžící Connect z cílové složky (ne tento instalátor – ten běží z dočasné složky) a počká, až skončí. */
 async function stopRunning(dir: string) {
   if (!isWin) return;
-  const ps = `Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.ToLower().StartsWith('${dir.toLowerCase().replace(/'/g, "''")}') } | Stop-Process -Force`;
-  await new Promise((r) => execFile("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", ps], { windowsHide: true }, () => r(null)));
-  await new Promise((r) => setTimeout(r, 800));
+  const q = (v: string) => v.toLowerCase().replace(/'/g, "''");
+  const self = q(sourceDir());
+  // procesy z cílové složky + běžící Connect odjinud (lišta, starší instalace), kromě tohoto instalátoru
+  const filter = `Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.Id -ne ${process.pid} -and $_.Path -and `
+    + `-not $_.Path.ToLower().StartsWith('${self}') -and ($_.Path.ToLower().StartsWith('${q(dir)}') -or $_.ProcessName -eq '${q(path.parse(exeName()).name)}') }`;
+  const ps = `${filter} | Stop-Process -Force; for ($i = 0; $i -lt 40; $i++) { if (-not (${filter})) { break }; Start-Sleep -Milliseconds 250 }`;
+  await new Promise((r) => execFile("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", ps], { windowsHide: true, timeout: 20000 }, () => r(null)));
+  await new Promise((r) => setTimeout(r, 500));   // systém ještě uvolní soubory ukončených procesů
 }
 
 async function copyTree(from: string, to: string, total: number, onBytes: (done: number) => void) {
@@ -118,7 +124,7 @@ async function copyTree(from: string, to: string, total: number, onBytes: (done:
       const x = path.join(a, e.name), y = path.join(b, e.name);
       if (e.isDirectory() && !e.name.endsWith(".asar")) await walk(x, y);
       else if (e.isFile()) {
-        await fs.promises.copyFile(x, y);
+        await copyFileRobust(x, y);
         done += (await fs.promises.stat(y)).size;
         onBytes(done);
       }
@@ -148,7 +154,13 @@ async function install(o: InstallOptions, send: (p: { phase: string; pct: number
   await stopRunning(dir);
   // čistá instalace: stará verze aplikace pryč (data uživatele jsou jinde – %APPDATA%)
   if (fs.existsSync(dir)) {
-    rawFs(() => { for (const e of fs.readdirSync(dir)) fs.rmSync(path.join(dir, e), { recursive: true, force: true, maxRetries: 5, retryDelay: 300 }); });
+    // co nejde smazat (drží to antivirus / dobíhající proces), se odsune stranou a smaže později
+    rawFs(() => {
+      for (const e of fs.readdirSync(dir)) {
+        const p = path.join(dir, e);
+        try { fs.rmSync(p, { recursive: true, force: true, maxRetries: 5, retryDelay: 300 }); } catch { moveAside(p); }
+      }
+    });
   }
   send({ phase: "copy", pct: 0.05, line: "Kopíruji jádro platformy…" });
   let last = 0;
@@ -159,6 +171,7 @@ async function install(o: InstallOptions, send: (p: { phase: string; pct: number
   const exe = path.join(dir, exeName());
   const res = path.join(dir, "resources");
   if (fs.existsSync(res) && !fs.existsSync(path.join(res, "app-update.yml"))) fs.writeFileSync(path.join(res, "app-update.yml"), UPDATE_YML);
+  rawFs(() => cleanupAside(dir));
   fs.writeFileSync(path.join(dir, "installer.json"), JSON.stringify({ version: app.getVersion(), installedAt: new Date().toISOString(), custom: true }, null, 2));
 
   send({ phase: "register", pct: 0.9, line: "Zapisuji do systému…" });
@@ -212,6 +225,7 @@ async function uninstall(keepData: boolean, realUserData: string) {
 export async function maintainInstall() {
   if (!isWin || !app.isPackaged) return;
   const dir = path.dirname(process.execPath);
+  rawFs(() => cleanupAside(dir));                                   // zbytky odsunuté instalátorem / aktualizací
   if (!fs.existsSync(path.join(dir, "installer.json"))) return;   // instalace přes NSIS – nechat NSIS
   await regSet(KEY_UNINSTALL, "DisplayVersion", app.getVersion());
   await regSet(KEY_INSTALL, "InstallLocation", dir);
